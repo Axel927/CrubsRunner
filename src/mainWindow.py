@@ -4,6 +4,7 @@
 
 from PySide6 import QtWidgets, QtGui, QtCore
 import numpy as np
+from platform import system
 import pyqtgraph.opengl as gl
 
 import stl_copie.mesh as mesh
@@ -82,7 +83,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_connections()
         self.test()
 
-        self.showFullScreen()
+        if system() == 'Darwin':
+            self.showFullScreen()
 
     def create_dock_widget(self):
         self.component_dock.setAllowedAreas(self.init_data.get_window('component_dock_allowed_areas'))
@@ -170,21 +172,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.edit_gcrubs_action.setIcon(self.init_data.get_gcrubs('edit_action_icon'))
 
     def create_menubar(self):
-        self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu1'))
-        self.menuBar.addAction(self.new_project_action)
-        self.menuBar.addAction(self.open_project_action)
-        self.menuBar.addAction(self.save_action)
-        self.menuBar.addAction(self.save_as_action)
-        self.menuBar.addAction(self.import_action)
-        self.menuBar.addAction(self.export_action)
+        file_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu1'))
+        file_menu.addAction(self.new_project_action)
+        file_menu.addAction(self.open_project_action)
+        file_menu.addAction(self.save_action)
+        file_menu.addAction(self.save_as_action)
+        file_menu.addAction(self.import_action)
+        file_menu.addAction(self.export_action)
 
-        self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu2'))
-        self.menuBar.addAction(self.undo_action)
-        self.menuBar.addAction(self.redo_action)
-        self.menuBar.addAction(self.top_view_action)
-        self.menuBar.addAction(self.bottom_view_action)
-        self.menuBar.addAction(self.start_view_action)
-        self.menuBar.addAction(self.edit_gcrubs_action)
+        edit_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu2'))
+        edit_menu.addAction(self.undo_action)
+        edit_menu.addAction(self.redo_action)
+        edit_menu.addAction(self.top_view_action)
+        edit_menu.addAction(self.bottom_view_action)
+        edit_menu.addAction(self.start_view_action)
+        edit_menu.addAction(self.edit_gcrubs_action)
         self.setMenuBar(self.menuBar)
 
     def init_3d(self):

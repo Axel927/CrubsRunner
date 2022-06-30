@@ -11,7 +11,7 @@ class InitData:
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
 
-            'new_projet_name': "Nouveau",
+            'new_project_name': "Nouveau",
             'new_project_status_tip': "Creer un nouveau projet",
             'new_project_shortcut': QtGui.QKeySequence.New,  # Ctrl + N
             'new_project_icon': QtGui.QIcon("icon/icon_new.png"),
