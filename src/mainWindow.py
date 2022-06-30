@@ -1,4 +1,4 @@
-# !/usr/bin/python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 07/06/2022
 
@@ -6,8 +6,8 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import numpy as np
 from platform import system
 import pyqtgraph.opengl as gl
+from stl import mesh
 
-import stl_copie.mesh as mesh
 import glGrid
 import element
 import data
@@ -81,7 +81,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.init_3d()
         self.create_connections()
-        self.test()
+        # self.test()
 
         if system() == 'Darwin':
             self.showFullScreen()
