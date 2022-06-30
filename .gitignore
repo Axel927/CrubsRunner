@@ -1,3 +1,5 @@
 # Default ignored files
 
 *.pyc
+**/.DS_Store
+.DS_Store
