@@ -30,6 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot = element.Robot(self.save_data, self, False)
         self.gcrubs = gcrubs.GCrubs(self.save_data, self)
+        self.dropped_filename = ""
 
         self.layout = QtWidgets.QVBoxLayout()
         self.center_widget = QtWidgets.QWidget()
@@ -63,6 +64,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.start_view_action = QtGui.QAction(self.init_data.get_window('start_view_action_name'), self)
         self.bottom_view_action = QtGui.QAction(self.init_data.get_window('bottom_view_action_name'), self)
 
+        self.speed_sb = QtWidgets.QSpinBox(self)
+
         # Initialisation de la fenetre
         self.init_window()
 
@@ -81,10 +84,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.init_3d()
         self.create_connections()
-        # self.test()
 
+        self.setAcceptDrops(self.init_data.get_window('accept_drops'))
         if system() == 'Darwin':
             self.showFullScreen()
+            pass
 
     def create_dock_widget(self):
         self.component_dock.setAllowedAreas(self.init_data.get_window('component_dock_allowed_areas'))
@@ -121,6 +125,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.edit_gcrubs_action)
+        self.toolBar.addWidget(self.speed_sb)
+
+        self.speed_sb.setValue(self.save_data.get_grid('moving_speed'))
+        self.speed_sb.setStatusTip(self.init_data.get_window('speed_tip'))
+
         self.toolBar.setMovable(self.init_data.get_window('tool_bar_movable'))
 
     def create_actions(self):
@@ -215,6 +224,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.top_view_action.connect(QtCore.SIGNAL('triggered()'), self.top_view)
         self.bottom_view_action.connect(QtCore.SIGNAL('triggered()'), self.bottom_view)
         self.edit_gcrubs_action.connect(QtCore.SIGNAL('triggered()'), self.edit_gcrubs)
+        self.speed_sb.valueChanged.connect(self.speed)
 
     def create_coord_sys(self):
         self.x_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
@@ -263,20 +273,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_main_robot()
         self.new_second_robot()
 
-    def new_board(self, message=True):
+    def new_board(self, message=True, file=""):
         # Plateau
         if message:
             QtWidgets.QMessageBox(self.init_data.get_board('new_message_box_type'),
                                   self.init_data.get_board('new_message_box_title'),
                                   self.init_data.get_board('new_message_box_message')).exec()
 
-        file, extension = QtWidgets.QFileDialog.getOpenFileName(self, self.init_data.get_board('new_message_box_title'),
-                                                                self.save_data.get_window('directory'),
-                                                                self.init_data.get_board('file_dialog_open_extensions'))
+        if file == "":
+            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                    self.init_data.get_board('new_message_box_title'),
+                                                                    self.save_data.get_window('directory'),
+                                                                    self.init_data.get_board(
+                                                                        'file_dialog_open_extensions'))
+            extension.lower()
+        else:
+            extension = file.split('.')[-1]
 
         if file:
             self.board = element.Board(self.save_data, self)
-            if extension[:3] == 'STL':
+            if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
                 self.save_data.set_board('file', file)
                 self.board.setColor(self.init_data.get_board('color'))
@@ -289,7 +305,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.list_widget.add_content(self.board)
                 self.list_widget.addItem(self.board.get_name())
 
-            elif extension[-4:-1] == 'crb':
+            elif extension[-4:-1] == self.init_data.get_extension('board')[1:] or \
+                    extension == self.init_data.get_extension('board')[1:]:
                 self.open_project(file)
                 self.board.set_name(self.init_data.get_board('name'))
                 self.board.translate(self.init_data.get_board('appearance_translation_x'),
@@ -303,22 +320,27 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("file not opened")
 
-    def new_main_robot(self, message=True):
+    def new_main_robot(self, message=True, file=""):
         # Robot principal
         if message:
             QtWidgets.QMessageBox(self.init_data.get_main_robot('new_message_box_type'),
                                   self.init_data.get_main_robot('new_message_box_title'),
                                   self.init_data.get_main_robot('new_message_box_message')).exec()
 
-        file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                self.init_data.get_main_robot('new_message_box_title'),
-                                                                self.save_data.get_window('directory'),
-                                                                self.init_data.get_main_robot(
-                                                                    'file_dialog_open_extensions'))
+        if file == "":
+            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                    self.init_data.get_main_robot(
+                                                                        'new_message_box_title'),
+                                                                    self.save_data.get_window('directory'),
+                                                                    self.init_data.get_main_robot(
+                                                                        'file_dialog_open_extensions'))
+            extension.lower()
+        else:
+            extension = file.split('.')[-1]
 
         if file:
             self.main_robot = element.Robot(self.save_data, self, True)
-            if extension[:3] == 'STL':
+            if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.main_robot.set_file(file)
                 self.save_data.set_main_robot('file', file)
                 self.main_robot.setColor(self.init_data.get_main_robot('color'))
@@ -328,7 +350,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.list_widget.add_content(self.main_robot)
                 self.list_widget.addItem(self.main_robot.get_name())
 
-            elif extension[-4:-1] == 'crr':
+            elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
+                    extension == self.init_data.get_extension('robot')[1:]:
                 self.open_project(file)
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
                 self.main_robot.translate(self.init_data.get_main_robot('appearance_translation_x'),
@@ -340,14 +363,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
 
-            if self.save_data.get_main_robot('invisible'):
+            if self.main_robot.is_invisible():
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.main_robot.scale(coef, coef, coef)
 
         else:
             print("file not opened")
 
-    def new_second_robot(self, message=True):
+    def new_second_robot(self, message=True, file=""):
         # Robot secondaire
         if message:
             ans = QtWidgets.QMessageBox(self.init_data.get_second_robot('new_message_box_type'),
@@ -358,16 +381,20 @@ class MainWindow(QtWidgets.QMainWindow):
             if ans == QtWidgets.QMessageBox.No:
                 return
 
-        file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                self.init_data.get_second_robot(
-                                                                    'new_message_box_title'),
-                                                                self.save_data.get_window('directory'),
-                                                                self.init_data.get_second_robot(
-                                                                    'file_dialog_open_extensions'))
+        if file == "":
+            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                    self.init_data.get_second_robot(
+                                                                        'new_message_box_title'),
+                                                                    self.save_data.get_window('directory'),
+                                                                    self.init_data.get_second_robot(
+                                                                        'file_dialog_open_extensions'))
+            extension.lower()
+        else:
+            extension = file.split('.')[-1]
 
         if file:
             self.second_robot = element.Robot(self.save_data, self, False)
-            if extension[:3] == 'STL':
+            if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.save_data.set_second_robot('file', file)
                 self.second_robot.set_file(file)
                 self.second_robot.setColor(self.init_data.get_second_robot('color'))
@@ -376,7 +403,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.show_stl(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
                 self.list_widget.addItem(self.second_robot.get_name())
-            elif extension[-4:-1] == 'crr':
+            elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
+                    extension == self.init_data.get_extension('robot')[1:]:
                 self.open_project(file)
                 self.second_robot.set_name(self.init_data.second_robot('name'))
                 self.second_robot.translate(self.init_data.get_second_robot('appearance_translation_x'),
@@ -388,7 +416,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
 
-            if self.save_data.get_second_robot('invisible'):
+            if self.second_robot.is_invisible():
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.second_robot.scale(coef, coef, coef)
 
@@ -484,7 +512,7 @@ class MainWindow(QtWidgets.QMainWindow):
             file.write(self.save_data.save('main_robot'))
             file.write(self.save_data.save('second_robot'))
 
-    def import_component(self):
+    def import_component(self, file=""):
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('import_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
@@ -516,11 +544,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         def ok_btn_clicked():
             if radio_board.isChecked() and self.save_data.get_board('file') == '':
-                self.new_board(False)
+                self.new_board(False, file)
             elif radio_main_robot.isChecked() and self.save_data.get_main_robot('file') == '':
-                self.new_main_robot(False)
+                self.new_main_robot(False, file)
             elif radio_second_robot.isChecked() and self.save_data.get_second_robot('file') == '':
-                self.new_second_robot(False)
+                self.new_second_robot(False, file)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
                                       self.init_data.get_window('import_message_box_title'),
@@ -668,6 +696,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def edit_gcrubs(self):
         self.gcrubs.edit()
 
+    def speed(self):
+        self.save_data.set_grid('moving_speed', self.speed_sb.value())
+
     def element_properties(self):
         self.list_widget.get_contents()[self.list_widget.currentRow()].properties_window()
 
@@ -688,6 +719,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elem.setMeshData(meshdata=meshdata)
 
+        min_coord = 0.
+        max_coord = 0.
+        for point in points:
+            min_coord = min(min_coord, point[0])
+            max_coord = max(max_coord, point[0])
+
+        if max_coord - min_coord < 1.:
+            elem.set_invisible(True)
+
         self.viewer.addItem(elem)
 
     def update_(self):
@@ -696,11 +736,47 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main_robot.update_()
         self.second_robot.update_()
 
-    def test(self):
-        # self.new_board(False)
-        self.new_main_robot(False)
-        # self.new_second_robot(False)
-        pass
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
+        mime_data = event.mimeData()
+        mime_list = mime_data.formats()
+        filename = ""
+
+        if "text/uri-list" in mime_list:
+            filename = mime_data.data("text/uri-list")
+            filename = str(filename, encoding="utf-8")
+            if system() == 'Windows' or system() == "win32":
+                filename = filename.replace("file:///", "\\").replace("\r\n", "").replace("%20", " ")
+            else:
+                filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
+
+        if filename != "" and '.' + filename.split('.')[-1] in self.init_data.get_extension('value'):
+            event.accept()
+            self.dropped_filename = filename
+        else:
+            event.ignore()
+            self.dropped_filename = ""
+
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        extension = '.' + self.dropped_filename.split('.')[-1]
+        if extension in self.init_data.get_extension('3d_file'):
+            self.import_component(self.dropped_filename)
+        elif extension == self.init_data.get_extension('project'):
+            self.open_project(self.dropped_filename)
+        elif extension == self.init_data.get_extension('board'):
+            self.new_board(False, self.dropped_filename)
+        elif extension == self.init_data.get_extension('robot'):
+            if self.save_data.get_main_robot('file') == "":
+                self.new_main_robot(False, self.dropped_filename)
+            elif self.save_data.get_second_robot('file') == "":
+                self.new_second_robot(False, self.dropped_filename)
+            else:
+                QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
+                                      self.init_data.get_window('import_message_box_title'),
+                                      self.init_data.get_window('drop_message_box_message')).exec()
+        elif extension == self.init_data.get_extension('sequence'):
+            pass
+
+        self.dropped_filename = ""
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         # Ne pas virer !!! Permet d'eviter de pouvoir virer la barre d'outils

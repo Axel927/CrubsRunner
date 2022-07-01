@@ -56,6 +56,7 @@ class ListWidget(QtWidgets.QListWidget):
         return self.contents
 
     def remove_content(self, position: int):
+        self.takeItem(position)
         self.contents.pop(position)
         self.len -= 1
 

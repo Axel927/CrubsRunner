@@ -146,6 +146,9 @@ class Board(CoordSys):
         self.window.close()
 
     def _remove(self):
+        if self.parent.list_widget.get_len() < 2:
+            return
+
         ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
                                     self.init_data.get_board('remove_message_box_title'),
                                     self.init_data.get_board('remove_message_box_message'),
@@ -154,7 +157,6 @@ class Board(CoordSys):
         if ans == QtWidgets.QMessageBox.No:
             return
         self.parent.list_widget.remove_content(self.parent.list_widget.currentRow())
-        self.parent.list_widget.takeItem(self.parent.list_widget.currentRow())
         self.file = ""
         self.save_data.set_board('file', '')
         self.reset()
@@ -177,11 +179,12 @@ class Robot(Board):
         self.main_robot = main_robot
         self.selected = False
         self.origined = False
-        self.coord = [0, 0]
+        self.coord = [0., 0.]
         self.angle = 0
         self.key = None
-        self.moving = [0, 0, 0]
+        self.moving = [0., 0., 0]
         self.time = 0.
+        self.invisible = False
 
         self.window = QtWidgets.QDialog(self.parent)
         self.color_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('color_name'), self.window)
@@ -204,7 +207,6 @@ class Robot(Board):
         self.angle_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('angle_lbl_name'))
         self.axis_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('axis_lbl_name'))
         self.offset_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('offset_lbl_name'))
-        self.invisible_cb = QtWidgets.QCheckBox(self.init_data.get_main_robot('invisible_cb_name'))
         self.create_sequence_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_btn_name'))
 
         self.sequence_dialog = QtWidgets.QDialog(self.parent)
@@ -213,8 +215,6 @@ class Robot(Board):
         self.sequence_save_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_save_btn_name'))
         self.sequence_cancel_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_cancel_btn_name'))
         self.sequence_list = ListWidget
-        self.sequence_speed_sb = QtWidgets.QSpinBox()
-        self.sequence_speed_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('sequence_speed_lbl_text'))
         self.sequence_origin_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('sequence_origin_lbl_text'))
         self.sequence_origin_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_origin_btn_name'))
 
@@ -249,7 +249,6 @@ class Robot(Board):
         if self.main_robot:
             self.angle_rotation_sb.setValue(self.save_data.get_main_robot('angle_rotation'))
             self.offset_sb.setValue(self.save_data.get_main_robot('offset'))
-            self.invisible_cb.setChecked(self.save_data.get_main_robot('invisible'))
             if self.save_data.get_main_robot('axis_rotation') == 'x':
                 self.axis_rotation_rb_x.setChecked(True)
                 self.axis_rotation_rb_y.setChecked(False)
@@ -265,7 +264,6 @@ class Robot(Board):
         else:
             self.angle_rotation_sb.setValue(self.save_data.get_second_robot('angle_rotation'))
             self.offset_sb.setValue(self.save_data.get_second_robot('offset'))
-            self.invisible_cb.setChecked(self.save_data.get_second_robot('invisible'))
             if self.save_data.get_second_robot('axis_rotation') == 'x':
                 self.axis_rotation_rb_x.setChecked(True)
                 self.axis_rotation_rb_y.setChecked(False)
@@ -283,15 +281,14 @@ class Robot(Board):
         self.create_sequence_btn.setDefault(self.init_data.get_main_robot('sequence_btn_default'))
 
         gb_layout = QtWidgets.QGridLayout()
-        gb_layout.addWidget(self.invisible_cb, 0, 0)
-        gb_layout.addWidget(self.angle_lbl, 1, 0)
-        gb_layout.addWidget(self.angle_rotation_sb, 1, 1)
-        gb_layout.addWidget(self.axis_lbl, 2, 0)
-        gb_layout.addWidget(self.axis_rotation_rb_x, 2, 1)
-        gb_layout.addWidget(self.axis_rotation_rb_y, 3, 1)
-        gb_layout.addWidget(self.axis_rotation_rb_z, 4, 1)
-        gb_layout.addWidget(self.offset_lbl, 5, 0)
-        gb_layout.addWidget(self.offset_sb, 5, 1)
+        gb_layout.addWidget(self.angle_lbl, 0, 0)
+        gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
+        gb_layout.addWidget(self.axis_lbl, 1, 0)
+        gb_layout.addWidget(self.axis_rotation_rb_x, 1, 1)
+        gb_layout.addWidget(self.axis_rotation_rb_y, 2, 1)
+        gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
+        gb_layout.addWidget(self.offset_lbl, 4, 0)
+        gb_layout.addWidget(self.offset_sb, 4, 1)
         group_box = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_name'), self.window)
         group_box.setLayout(gb_layout)
 
@@ -317,12 +314,10 @@ class Robot(Board):
         self.axis_rotation_rb_y.clicked.connect(self._axis_y)
         self.axis_rotation_rb_z.clicked.connect(self._axis_z)
         self.offset_sb.valueChanged.connect(self._offset)
-        self.invisible_cb.stateChanged.connect(self._invisible)
         self.create_sequence_btn.clicked.connect(self._create_sequence)
 
         self.sequence_save_btn.clicked.connect(self.save_sequence)
         self.sequence_cancel_btn.clicked.connect(self._cancel_sequence)
-        self.sequence_speed_sb.valueChanged.connect(self._speed)
         self.sequence_origin_btn.clicked.connect(self._set_origin)
 
     def _color_robot(self):
@@ -513,18 +508,6 @@ class Robot(Board):
         else:
             self.save_data.set_second_robot('offset', self.offset)
 
-    def _invisible(self):
-        if self.main_robot:
-            self.save_data.set_main_robot('invisible', self.invisible_cb.isChecked())
-        else:
-            self.save_data.set_second_robot('invisible', self.invisible_cb.isChecked())
-
-        coef = self.init_data.get_main_robot('invisible_coef')
-        if self.invisible_cb.isChecked():
-            self.scale(coef, coef, coef)
-        else:
-            self.scale(1/coef, 1/coef, 1/coef)
-
     def _create_sequence(self):
         self._close()
 
@@ -550,15 +533,8 @@ class Robot(Board):
         self.sequence_origin_btn.setDefault(self.init_data.get_main_robot('sequence_origin_btn_default'))
         self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text'))
 
-        self.sequence_speed_sb.setValue(self.save_data.get_grid('moving_speed'))
-
-        speed_layout = QtWidgets.QHBoxLayout()
-        speed_layout.addWidget(self.sequence_speed_lbl)
-        speed_layout.addWidget(self.sequence_speed_sb)
-
         self.sequence_layout.addWidget(self.sequence_text)
         self.sequence_layout.addWidget(self.sequence_origin_lbl)
-        self.sequence_layout.addLayout(speed_layout)
         self.sequence_layout.addWidget(self.sequence_list)
         self.sequence_layout.addWidget(self.sequence_save_btn)
         self.sequence_layout.addWidget(self.sequence_cancel_btn)
@@ -635,9 +611,6 @@ class Robot(Board):
                 self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
 
         self.key = None
-
-    def _speed(self):
-        self.save_data.set_grid('moving_speed', self.sequence_speed_sb.value())
 
     def _set_origin(self):
         if self.origined:
@@ -777,3 +750,13 @@ class Robot(Board):
 
         if self.invisible_cb.isChecked():
             self.scale(coef, coef, coef)
+
+    def set_invisible(self, invisible: bool):
+        self.invisible = invisible
+        if self.main_robot:
+            self.save_data.set_main_robot('invisible', invisible)
+        else:
+            self.save_data.set_second_robot('invisible', invisible)
+
+    def is_invisible(self) -> bool:
+        return self.invisible

@@ -10,6 +10,7 @@ class InitData:
         self.window = {
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
+            'speed_tip': "Vitesse de deplacement du robot",
 
             'new_project_name': "Nouveau",
             'new_project_status_tip': "Creer un nouveau projet",
@@ -90,6 +91,7 @@ class InitData:
             'redo_icon': QtGui.QIcon("icon/icon_redo.png"),
 
             'window_title': "CrubsRunner",
+            'accept_drops': True,
             'window_start_width': 1200,
             'window_start_height': 800,
 
@@ -107,6 +109,8 @@ class InitData:
             'import_message_box_type': QtWidgets.QMessageBox.Warning,
             'import_message_box_title': "Erreur d'importation",
             'import_message_box_message': "Vous devez supprimer le composant avant d'en importer un autre.",
+            "drop_message_box_message": "Les deux robots sont deja attribues, veuillez en supprimer un avant "
+                                        "d'en ajouter un autre.",
 
             'status_bar_message': "Position du {element} : ({x}, {y}) mm",
             'color_status_message': "Couleur : r = {r}, v = {v}, b = {b} ",
@@ -369,7 +373,8 @@ class InitData:
             'project': ".crp",
             'board': ".crb",
             'robot': ".crr",
-            'sequence': ".gcrubs"
+            'sequence': ".gcrubs",
+            '3d_file': ".stl"
         }
 
     def get_window(self, key: str):
@@ -391,7 +396,10 @@ class InitData:
         return self.grid.get(key)
 
     def get_extension(self, key: str):
-        return self.extensions.get(key)
+        if key == 'value':
+            return self.extensions.values()
+        else:
+            return self.extensions.get(key)
 
     def get_gcrubs(self, key: str):
         return self.gcrubs.get(key)
@@ -430,7 +438,6 @@ class SaveData:
             'angle_rotation': 0,
             'axis_rotation': 'x',
             'offset': 0,
-            'invisible': True,
             'gcrubs_file': "",
             'sequence': "",
             'start_position': (0, 0, 0)  # x, y, angle
@@ -443,7 +450,6 @@ class SaveData:
             'angle_rotation': 0,
             'axis_rotation': 'x',
             'offset': 0,
-            'invisible': True,
             'gcrubs_file': "",
             'sequence': "",
             'start_position': (0, 0, 0)  # x, y, angle
