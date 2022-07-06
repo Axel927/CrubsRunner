@@ -4,7 +4,10 @@
 
 from PySide6 import QtWidgets, QtGui, QtCore
 import numpy as np
+from sys import float_info
+from time import time
 from platform import system
+import warnings
 import pyqtgraph.opengl as gl
 from stl import mesh
 
@@ -13,6 +16,7 @@ import element
 import data
 import modifiedClasses as mc
 import gcrubs
+import run
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -25,12 +29,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.doing = list()
         self.undoing = list()
+        self.dropped_filename = ""
+        self.time = 0.
 
         self.board = element.Board(self.save_data, self)
         self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot = element.Robot(self.save_data, self, False)
         self.gcrubs = gcrubs.GCrubs(self.save_data, self)
-        self.dropped_filename = ""
 
         self.layout = QtWidgets.QVBoxLayout()
         self.center_widget = QtWidgets.QWidget()
@@ -50,6 +55,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar = self.addToolBar(self.init_data.get_window('name_tool_bar'))
         self.status_bar = QtWidgets.QStatusBar(self)
 
+        self.running = run.Run(self.save_data, self.main_robot, self.second_robot, self)
+
         self.new_project_action = QtGui.QAction(self.init_data.get_window('new_project_name'), self)
         self.open_project_action = QtGui.QAction(self.init_data.get_window('open_project_name'), self)
         self.save_action = QtGui.QAction(self.init_data.get_window('save_project_name'), self)
@@ -59,6 +66,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.edit_gcrubs_action = QtGui.QAction(self.init_data.get_gcrubs('edit_action_name'))
         self.undo_action = QtGui.QAction(self.init_data.get_window('undo_name'), self)
         self.redo_action = QtGui.QAction(self.init_data.get_window('redo_name'), self)
+        self.run_action = QtGui.QAction(self.init_data.get_run('run_action_name'), self)
+        self.stop_run_action = QtGui.QAction(self.init_data.get_run('stop_run_action_name'), self)
 
         self.top_view_action = QtGui.QAction(self.init_data.get_window('top_view_action_name'), self)
         self.start_view_action = QtGui.QAction(self.init_data.get_window('start_view_action_name'), self)
@@ -88,13 +97,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAcceptDrops(self.init_data.get_window('accept_drops'))
         if system() == 'Darwin':
             self.showFullScreen()
-            pass
 
     def create_dock_widget(self):
         self.component_dock.setAllowedAreas(self.init_data.get_window('component_dock_allowed_areas'))
         self.component_dock.setFeatures(self.init_data.get_window('component_dock_features'))
 
-        self.list_widget.addItem(self.init_data.get_grid('element_name'))
+        # self.list_widget.addItem(self.init_data.get_grid('element_name'))
         self.component_dock.setWidget(self.list_widget)
         self.addDockWidget(self.init_data.get_window('add_component_dock_area'), self.component_dock)
 
@@ -126,6 +134,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.edit_gcrubs_action)
         self.toolBar.addWidget(self.speed_sb)
+        self.toolBar.addAction(self.run_action)
+        self.toolBar.addAction(self.stop_run_action)
 
         self.speed_sb.setValue(self.save_data.get_grid('moving_speed'))
         self.speed_sb.setStatusTip(self.init_data.get_window('speed_tip'))
@@ -153,7 +163,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.import_action.setStatusTip(self.init_data.get_window('import_status_tip'))
         self.import_action.setIcon(self.init_data.get_window('import_icon'))
 
-        self.export_action.setShortcuts(self.init_data.get_window('export_shortcut'))
+        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
+            warnings.simplefilter('ignore')
+            self.export_action.setShortcuts(self.init_data.get_window('export_shortcut'))
         self.export_action.setStatusTip(self.init_data.get_window('export_status_tip'))
         self.export_action.setIcon(self.init_data.get_window('export_icon'))
 
@@ -180,6 +192,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.edit_gcrubs_action.setStatusTip(self.init_data.get_gcrubs('edit_action_status_tip'))
         self.edit_gcrubs_action.setIcon(self.init_data.get_gcrubs('edit_action_icon'))
 
+        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
+            warnings.simplefilter('ignore')
+            self.run_action.setShortcuts(self.init_data.get_run('run_action_shortcut'))
+        self.run_action.setStatusTip(self.init_data.get_run('run_action_tip'))
+        self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
+
+        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
+            warnings.simplefilter('ignore')
+            self.stop_run_action.setShortcuts(self.init_data.get_run('stop_run_action_shortcut'))
+        self.stop_run_action.setStatusTip(self.init_data.get_run('stop_run_action_tip'))
+        self.stop_run_action.setIcon(self.init_data.get_run('stop_run_action_icon'))
+        self.stop_run_action.setEnabled(False)
+
     def create_menubar(self):
         file_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu1'))
         file_menu.addAction(self.new_project_action)
@@ -196,6 +221,10 @@ class MainWindow(QtWidgets.QMainWindow):
         edit_menu.addAction(self.bottom_view_action)
         edit_menu.addAction(self.start_view_action)
         edit_menu.addAction(self.edit_gcrubs_action)
+
+        run_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu3'))
+        run_menu.addAction(self.run_action)
+        run_menu.addAction(self.stop_run_action)
         self.setMenuBar(self.menuBar)
 
     def init_3d(self):
@@ -225,6 +254,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottom_view_action.connect(QtCore.SIGNAL('triggered()'), self.bottom_view)
         self.edit_gcrubs_action.connect(QtCore.SIGNAL('triggered()'), self.edit_gcrubs)
         self.speed_sb.valueChanged.connect(self.speed)
+        self.run_action.connect(QtCore.SIGNAL('triggered()'), self.run)
+        self.stop_run_action.connect(QtCore.SIGNAL('triggered()'), self.stop_run)
 
     def create_coord_sys(self):
         self.x_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
@@ -255,23 +286,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.z_coord_sys.rotate(-90, 0, 1, 0)
 
     def new_project(self):
+        if time() - self.time < 0.2:
+            return
         self.grid.reset()
+        self.board.remove(False)
         self.board = element.Board(self.save_data, self)
+        self.main_robot.remove(False)
         self.main_robot = element.Robot(self.save_data, self, True)
+        self.second_robot.remove(False)
         self.second_robot = element.Robot(self.save_data, self, False)
+        del self.list_widget
         self.list_widget = mc.ListWidget()
         self.list_widget.add_content(self.grid)
-        self.list_widget.addItem(self.init_data.get_grid('element_name'))
         self.component_dock.setWidget(self.list_widget)
         self.create_connections()
-
-        self.board.setVisible(False)
-        self.main_robot.setVisible(False)
-        self.second_robot.setVisible(False)
 
         self.new_board()
         self.new_main_robot()
         self.new_second_robot()
+        self.time = time()
 
     def new_board(self, message=True, file=""):
         # Plateau
@@ -286,7 +319,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                     self.save_data.get_window('directory'),
                                                                     self.init_data.get_board(
                                                                         'file_dialog_open_extensions'))
-            extension.lower()
+            extension = extension.lower()
         else:
             extension = file.split('.')[-1]
 
@@ -303,22 +336,15 @@ class MainWindow(QtWidgets.QMainWindow):
                                      self.init_data.get_board('appearance_translation_y'),
                                      self.init_data.get_board('appearance_translation_z'))
                 self.list_widget.add_content(self.board)
-                self.list_widget.addItem(self.board.get_name())
 
             elif extension[-4:-1] == self.init_data.get_extension('board')[1:] or \
                     extension == self.init_data.get_extension('board')[1:]:
+
                 self.open_project(file)
                 self.board.set_name(self.init_data.get_board('name'))
-                self.board.translate(self.init_data.get_board('appearance_translation_x'),
-                                     self.init_data.get_board('appearance_translation_y'),
-                                     self.init_data.get_board('appearance_translation_z'))
-                self.list_widget.add_content(self.board)
-                self.list_widget.addItem(self.board.get_name())
                 self.x_coord_sys.setVisible(True)
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
-        else:
-            print("file not opened")
 
     def new_main_robot(self, message=True, file=""):
         # Robot principal
@@ -334,12 +360,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                     self.save_data.get_window('directory'),
                                                                     self.init_data.get_main_robot(
                                                                         'file_dialog_open_extensions'))
-            extension.lower()
+            extension = extension.lower()
         else:
             extension = file.split('.')[-1]
 
         if file:
             self.main_robot = element.Robot(self.save_data, self, True)
+            self.running.set_main_robot(self.main_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.main_robot.set_file(file)
                 self.save_data.set_main_robot('file', file)
@@ -348,17 +375,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
                 self.show_stl(self.main_robot)
                 self.list_widget.add_content(self.main_robot)
-                self.list_widget.addItem(self.main_robot.get_name())
 
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
                 self.open_project(file)
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                self.main_robot.translate(self.init_data.get_main_robot('appearance_translation_x'),
-                                          self.init_data.get_main_robot('appearance_translation_y'),
-                                          self.init_data.get_main_robot('appearance_translation_z'))
-                self.list_widget.add_content(self.main_robot)
-                self.list_widget.addItem(self.main_robot.get_name())
                 self.x_coord_sys.setVisible(True)
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
@@ -366,9 +387,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.main_robot.is_invisible():
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.main_robot.scale(coef, coef, coef)
-
-        else:
-            print("file not opened")
 
     def new_second_robot(self, message=True, file=""):
         # Robot secondaire
@@ -388,12 +406,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                     self.save_data.get_window('directory'),
                                                                     self.init_data.get_second_robot(
                                                                         'file_dialog_open_extensions'))
-            extension.lower()
+            extension = extension.lower()
         else:
             extension = file.split('.')[-1]
 
         if file:
             self.second_robot = element.Robot(self.save_data, self, False)
+            self.running.set_second_robot(self.second_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.save_data.set_second_robot('file', file)
                 self.second_robot.set_file(file)
@@ -402,16 +421,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
                 self.show_stl(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
-                self.list_widget.addItem(self.second_robot.get_name())
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
                 self.open_project(file)
-                self.second_robot.set_name(self.init_data.second_robot('name'))
-                self.second_robot.translate(self.init_data.get_second_robot('appearance_translation_x'),
-                                            self.init_data.get_second_robot('appearance_translation_y'),
-                                            self.init_data.get_second_robot('appearance_translation_z'))
-                self.list_widget.add_content(self.second_robot)
-                self.list_widget.addItem(self.second_robot.get_name())
+                self.second_robot.set_name(self.init_data.get_second_robot('name'))
                 self.x_coord_sys.setVisible(True)
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
@@ -420,62 +433,96 @@ class MainWindow(QtWidgets.QMainWindow):
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.second_robot.scale(coef, coef, coef)
 
-        else:
-            print("file not opened")
-
     def open_project(self, file=""):
+        if time() - self.time < 0.2:
+            return
         if file == "":
             file = QtWidgets.QFileDialog.getOpenFileName(self, self.init_data.get_window('open_project_dialog_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_window('project_extension'))[0]
+            if file:
+                self.grid.reset()
+                self.board.remove(False)
+                self.board = element.Board(self.save_data, self)
+                self.main_robot.remove(False)
+                self.main_robot = element.Robot(self.save_data, self, True)
+                self.second_robot.remove(False)
+                self.second_robot = element.Robot(self.save_data, self, False)
+                del self.list_widget
+                self.list_widget = mc.ListWidget()
+                self.list_widget.add_content(self.grid)
+                self.component_dock.setWidget(self.list_widget)
+                self.create_connections()
 
         if file:
-            with open(file, 'r') as file:
-                file.readline()
-
-                param = file.readline()
-                while param != "":
-                    if param.find(self.init_data.get_window('window_first_line')[1:-1]) != -1:
-                        for _ in range(self.save_data.get_len('window')):
-                            param = file.readline()
-                            try:
-                                self.save_data.set_window(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
-                            except (IndexError, SyntaxError):
-                                self.save_data.set_window(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
-
-                    elif param.find(self.init_data.get_window('grid_first_line')[1:-1]) != -1:
-                        for _ in range(self.save_data.get_len('grid')):
-                            param = file.readline()
-                            try:
-                                self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
-                            except (IndexError, SyntaxError):
-                                self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
-                    elif param.find(self.init_data.get_window('board_first_line')[1:-1]) != -1:
-                        for _ in range(self.save_data.get_len('board')):
-                            param = file.readline()
-                            try:
-                                self.save_data.set_board(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
-                            except (IndexError, SyntaxError):
-                                self.save_data.set_board(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
-                    elif param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
-                        for _ in range(self.save_data.get_len('main_robot')):
-                            param = file.readline()
-                            try:
-                                self.save_data.set_main_robot(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
-                            except (IndexError, SyntaxError):
-                                self.save_data.set_main_robot(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
-                    elif param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
-                        for _ in range(self.save_data.get_len('second_robot')):
-                            param = file.readline()
-                            try:
-                                self.save_data.set_second_robot(param.split(' = ')[0],
-                                                                eval(param.split(' = ')[1][1:-2]))
-                            except (IndexError, SyntaxError):
-                                self.save_data.set_second_robot(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
+            try:
+                with open(file, 'r') as file:
+                    file.readline()
                     param = file.readline()
-                    self.update_()
-        else:
-            print('file not opened')
+                    while param != "":
+                        if param.find(self.init_data.get_window('window_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('window')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_window(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_window(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
+
+                        elif param.find(self.init_data.get_window('grid_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('grid')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
+                        elif param.find(self.init_data.get_window('board_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('board')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_board(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_board(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
+                            self.list_widget.add_content(self.board)
+                            self.board.translate(self.init_data.get_board('appearance_translation_x'),
+                                                 self.init_data.get_board('appearance_translation_y'),
+                                                 self.init_data.get_board('appearance_translation_z'))
+                        elif param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('main_robot')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_main_robot(param.split(' = ')[0],
+                                                                  eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_main_robot(param.split(' = ')[0],
+                                                                  eval(param.split(' = ')[1][:-1]))
+                            self.list_widget.add_content(self.main_robot)
+                        elif param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('second_robot')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_second_robot(param.split(' = ')[0],
+                                                                    eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_second_robot(param.split(' = ')[0],
+                                                                    eval(param.split(' = ')[1][:-1]))
+                            self.list_widget.add_content(self.second_robot)
+                        elif param.find(self.init_data.get_window('gcrubs_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('gcrubs')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_gcrubs(param.split(' = ')[0],
+                                                              eval(param.split(' = ')[1][1:-2].replace("PySide6.", "")))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_gcrubs(param.split(' = ')[0],
+                                                              eval(param.split(' = ')[1][:-1].replace("PySide6.", "")))
+                        param = file.readline()
+            except FileNotFoundError:
+                QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                      self.init_data.get_window('error_open_file_title'),
+                                      self.init_data.get_window('error_open_file_message').format(
+                                          filename=file)).exec()
+            self.update_()
+        self.time = time()
 
     def save_project(self):
         if self.save_data.get_window('project_file') == "":
@@ -500,17 +547,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.save_data.set_window('project_file', file)
             self.save_data.set_window('directory', file.rpartition('/')[0])
             self.write_file(file)
-        else:
-            print("file not opened")
 
     def write_file(self, file_name: str):
-        with open(file_name, 'w') as file:
-            file.write(self.init_data.get_window('saving_file_first_line'))
-            file.write(self.save_data.save('window'))
-            file.write(self.save_data.save('grid'))
-            file.write(self.save_data.save('board'))
-            file.write(self.save_data.save('main_robot'))
-            file.write(self.save_data.save('second_robot'))
+        try:
+            with open(file_name, 'w') as file:
+                file.write(self.init_data.get_window('saving_file_first_line').format(
+                    date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
+                file.write(self.save_data.save('window'))
+                file.write(self.save_data.save('grid'))
+                file.write(self.save_data.save('board'))
+                file.write(self.save_data.save('main_robot'))
+                file.write(self.save_data.save('second_robot'))
+                file.write(self.save_data.save('gcrubs'))
+        except FileNotFoundError:
+            QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                  self.init_data.get_window('error_open_file_title'),
+                                  self.init_data.get_window('error_open_file_message').format(
+                                      filename=file_name)).exec()
 
     def import_component(self, file=""):
         dialog = QtWidgets.QDialog(self)
@@ -580,13 +633,13 @@ class MainWindow(QtWidgets.QMainWindow):
         ok_btn.setChecked(self.init_data.get_window('import_ok_btn_checked'))
 
         if self.board.get_file() == "":
-            radio_board.setVisible(False)
+            radio_board.setEnabled(False)
 
         if self.main_robot.get_file() == "":
-            radio_main_robot.setVisible(False)
+            radio_main_robot.setEnabled(False)
 
         if self.second_robot.get_file() == "":
-            radio_second_robot.setVisible(False)
+            radio_second_robot.setEnabled(False)
 
         layout = QtWidgets.QGridLayout(dialog)
         layout.addWidget(radio_board, 0, 0)
@@ -610,10 +663,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 if file:
                     file += self.init_data.get_extension('board')
                     self.save_data.set_window('directory', file.rpartition('/')[0])
-                    with open(file, 'w') as file_name:
-                        file_name.write(self.save_data.save('board'))
-                else:
-                    print("file not opened")
+                    try:
+                        with open(file, 'w') as file_name:
+                            file_name.write(self.save_data.save('board'))
+                    except FileNotFoundError:
+                        QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                              self.init_data.get_window('error_open_file_title'),
+                                              self.init_data.get_window('error_open_file_message').format(
+                                                  filename=file_name)).exec()
+                        return
 
             elif radio_main_robot.isChecked() and radio_main_robot.isVisible():
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
@@ -624,12 +682,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 if file:
                     file += self.init_data.get_extension('robot')
-                    self.save_data.set_main_robot('file', file)
                     self.save_data.set_window('directory', file.rpartition('/')[0])
-                    with open(file, 'w') as file_name:
-                        file_name.write(self.save_data.save('main_robot'))
-                else:
-                    print("file not opened")
+                    try:
+                        with open(file, 'w') as file_name:
+                            file_name.write(self.save_data.save('main_robot'))
+                    except FileNotFoundError:
+                        QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                              self.init_data.get_window('error_open_file_title'),
+                                              self.init_data.get_window('error_open_file_message').format(
+                                                  filename=file_name)).exec()
+                        return
+
             elif radio_second_robot.isChecked() and radio_second_robot.isVisible():
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
@@ -639,12 +702,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 if file:
                     file += self.init_data.get_extension('robot')
-                    self.save_data.set_second_robot('file', file)
                     self.save_data.set_window('directory', file.rpartition('/')[0])
-                    with open(file, 'w') as file_name:
-                        file_name.write(self.save_data.save('second_robot'))
-                else:
-                    print("file not opened")
+                    try:
+                        with open(file, 'w') as file_name:
+                            file_name.write(self.save_data.save('second_robot'))
+                    except FileNotFoundError:
+                        QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                              self.init_data.get_window('error_open_file_title'),
+                                              self.init_data.get_window('error_open_file_message').format(
+                                                  filename=file_name)).exec()
+                        return
+
             dialog.close()
 
         cancel_btn.clicked.connect(cancel_btn_clicked)
@@ -699,6 +767,77 @@ class MainWindow(QtWidgets.QMainWindow):
     def speed(self):
         self.save_data.set_grid('moving_speed', self.speed_sb.value())
 
+    def run(self):
+        if self.running.is_ongoing():
+            if self.running.is_running():
+                self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
+                self.running.stop()
+            else:
+                self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
+                self.running.resume()
+        else:
+            dialog = QtWidgets.QDialog(self)
+            main_robot_cb = QtWidgets.QCheckBox(self.init_data.get_run('main_robot_cb_name'))
+            second_robot_cb = QtWidgets.QCheckBox(self.init_data.get_run('second_robot_cb_name'))
+            cancel_btn = QtWidgets.QPushButton(self.init_data.get_run('cancel_btn_name'))
+            ok_btn = QtWidgets.QPushButton(self.init_data.get_run('ok_btn_name'))
+            layout = QtWidgets.QGridLayout()
+
+            dialog.setWindowTitle(self.init_data.get_run('dialog_title'))
+            dialog.setModal(self.init_data.get_run('dialog_modal'))
+
+            main_robot_cb.setChecked(self.init_data.get_run('main_robot_cb_checked'))
+            second_robot_cb.setChecked(self.init_data.get_run('second_robot_cb_checked'))
+
+            ok_btn.setDefault(self.init_data.get_run('ok_btn_default'))
+            cancel_btn.setDefault(self.init_data.get_run('cancel_btn_default'))
+
+            layout.addWidget(main_robot_cb, 0, 0)
+            layout.addWidget(second_robot_cb, 1, 0)
+            layout.addWidget(cancel_btn, 2, 0)
+            layout.addWidget(ok_btn, 2, 1)
+            dialog.setLayout(layout)
+
+            if self.main_robot.get_gcrubs_file() == "":
+                main_robot_cb.setEnabled(False)
+            if self.second_robot.get_gcrubs_file() == "":
+                second_robot_cb.setEnabled(False)
+
+            if self.main_robot.get_gcrubs_file() == "" and self.second_robot.get_gcrubs_file() == "":
+                ok_btn.setEnabled(False)
+
+            def ok():
+                if main_robot_cb.isChecked():
+                    self.main_robot.set_running(True)
+                    if not self.main_robot.is_origined():
+                        self.main_robot.create_sequence()
+                        dialog.close()
+                        return
+                if second_robot_cb.isChecked():
+                    self.second_robot.set_running(True)
+                    if not self.second_robot.is_origined():
+                        self.second_robot.create_sequence()
+                        dialog.close()
+                        return
+
+                dialog.close()
+                self.stop_run_action.setEnabled(True)
+                self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
+                self.running = run.Run(self.save_data, self.main_robot, self.second_robot, self)
+                self.running.run()
+
+            def cancel():
+                dialog.close()
+
+            ok_btn.clicked.connect(ok)
+            cancel_btn.clicked.connect(cancel)
+
+            dialog.show()
+
+    def stop_run(self):
+        self.running.finish()
+        self.stop_run_action.setEnabled(False)
+
     def element_properties(self):
         self.list_widget.get_contents()[self.list_widget.currentRow()].properties_window()
 
@@ -710,17 +849,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     self.list_widget.get_contents()[i].set_selected(False)
             except AttributeError:
-                pass
+                continue
 
     def show_stl(self, elem: element.Board):
-        points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)
+        if elem.get_file() == "":
+            return
+        try:
+            points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)
+        except FileNotFoundError:
+            QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                  self.init_data.get_window('error_open_file_title'),
+                                  self.init_data.get_window('error_open_file_message').format(
+                                      filename=elem.get_file())).exec()
+            return
+
         faces = np.arange(points.shape[0]).reshape(-1, 3)
         meshdata = gl.MeshData(vertexes=points, faces=faces)
 
         elem.setMeshData(meshdata=meshdata)
 
-        min_coord = 0.
-        max_coord = 0.
+        min_coord = float_info.max  # 1.7976931348623157e+308
+        max_coord = float_info.min  # 2.2250738585072014e-308
         for point in points:
             min_coord = min(min_coord, point[0])
             max_coord = max(max_coord, point[0])
@@ -731,10 +880,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewer.addItem(elem)
 
     def update_(self):
-        self.grid.update_(self)
+        self.grid.update_()
         self.board.update_()
         self.main_robot.update_()
         self.second_robot.update_()
+        self.z_coord_sys.update_()
+        self.y_coord_sys.update_()
+        self.x_coord_sys.update_()
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
         mime_data = event.mimeData()
@@ -744,8 +896,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if "text/uri-list" in mime_list:
             filename = mime_data.data("text/uri-list")
             filename = str(filename, encoding="utf-8")
+
             if system() == 'Windows' or system() == "win32":
-                filename = filename.replace("file:///", "\\").replace("\r\n", "").replace("%20", " ")
+                print('on mainWindow.dragEnterEvent: ', filename)
+                filename = filename.replace("file://\\", "\\").replace("\r\n", "").replace("%20", " ")
             else:
                 filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
 
@@ -761,13 +915,49 @@ class MainWindow(QtWidgets.QMainWindow):
         if extension in self.init_data.get_extension('3d_file'):
             self.import_component(self.dropped_filename)
         elif extension == self.init_data.get_extension('project'):
+            self.grid.reset()
+            self.board.remove(False)
+            self.board = element.Board(self.save_data, self)
+            self.main_robot.remove(False)
+            self.main_robot = element.Robot(self.save_data, self, True)
+            self.second_robot.remove(False)
+            self.second_robot = element.Robot(self.save_data, self, False)
+            del self.list_widget
+            self.list_widget = mc.ListWidget()
+            self.list_widget.add_content(self.grid)
+            self.component_dock.setWidget(self.list_widget)
+            self.create_connections()
             self.open_project(self.dropped_filename)
         elif extension == self.init_data.get_extension('board'):
-            self.new_board(False, self.dropped_filename)
+            if self.save_data.get_board('file') == '':
+                self.board.remove(False)
+                self.board = element.Board(self.save_data, self)
+                self.new_board(False, self.dropped_filename)
+            else:
+                QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
+                                      self.init_data.get_window('import_message_box_title'),
+                                      self.init_data.get_window('import_message_box_message')).exec()
         elif extension == self.init_data.get_extension('robot'):
-            if self.save_data.get_main_robot('file') == "":
+            try:
+                with open(self.dropped_filename, 'r') as file:
+                    file.readline()
+                    param = file.readline()
+                    while param[:3] != '## ':
+                        param = file.readline()
+            except FileNotFoundError:
+                QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                      self.init_data.get_window('error_open_file_title'),
+                                      self.init_data.get_window('error_open_file_message').format(
+                                          filename=self.dropped_filename)).exec()
+            if self.save_data.get_main_robot('file') == "" and \
+                    param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
+                self.main_robot.remove(False)
+                self.main_robot = element.Robot(self.save_data, self, True)
                 self.new_main_robot(False, self.dropped_filename)
-            elif self.save_data.get_second_robot('file') == "":
+            elif self.save_data.get_second_robot('file') == "" and \
+                    param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
+                self.second_robot.remove(False)
+                self.second_robot = element.Robot(self.save_data, self, False)
                 self.new_second_robot(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),

@@ -4,6 +4,7 @@
 
 import pyqtgraph.opengl as gl
 from PySide6 import QtGui, QtWidgets
+from time import time
 import data
 
 
@@ -13,6 +14,7 @@ class GlGridItem(gl.GLGridItem):
         self.save_data = save_data
         self.init_data = data.InitData()
         self.parent = parent
+        self.time = 0.
 
         self.window = QtWidgets.QDialog(self.parent)
         self.viewer = gl.GLViewWidget()
@@ -137,6 +139,8 @@ class GlGridItem(gl.GLGridItem):
         self.setSpacing(self.save_data.get_grid('width'), self.save_data.get_grid('height'))
 
     def _color_grid(self):
+        if time() - self.time < 0.2:
+            return
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_grid('color_dialog_name'))
 
@@ -160,6 +164,7 @@ class GlGridItem(gl.GLGridItem):
 
         self.color_dialog.setVisible(False)
         self.color_dialog.close()
+        self.time = time()
 
     def _close_window(self):
         self.window.close()
@@ -198,3 +203,6 @@ class GlGridItem(gl.GLGridItem):
         self.parent.x_coord_sys.setVisible(self.save_data.get_grid('color_sys_visible'))
         self.parent.y_coord_sys.setVisible(self.save_data.get_grid('color_sys_visible'))
         self.parent.z_coord_sys.setVisible(self.save_data.get_grid('color_sys_visible'))
+
+    def get_name(self):
+        return self.init_data.get_grid('element_name')

@@ -51,14 +51,21 @@ class ListWidget(QtWidgets.QListWidget):
     def add_content(self, elem):
         self.contents.append(elem)
         self.len += 1
+        try:
+            self.addItem(elem.get_name())
+        except AttributeError:
+            pass
 
     def get_contents(self) -> list:
         return self.contents
 
     def remove_content(self, position: int):
-        self.takeItem(position)
-        self.contents.pop(position)
-        self.len -= 1
+        try:
+            self.takeItem(position)
+            self.contents.pop(position)
+            self.len -= 1
+        except IndexError:
+            return
 
     def get_len(self) -> int:
         return self.len
@@ -96,12 +103,11 @@ class GlViewWidget(gl.GLViewWidget):
     @staticmethod
     def robot_movement(axis: str, angle: int) -> list:
         """
-        Permet de deplacer le robot avec les memes touches quelle que soit la rotation subie lors de la mise en place.
-
+        Calcule le deplacement par rapport a l'angle de rotation pour rester dans le plan.
         :param axis: Axe de rotation du robot lors de la mise en place
         :param angle: Angle de rotation du robot lors de la mise en place
         :return: La liste des deplacements a effectuer [mvt vertical, mvt horizontal, rotation]
-                 Chacun contient une liste [dx, dy, dy] pour les deplacements ou [rx, ry, rz] pour la rotation
+                 Chacun contient une liste [dx, dy, dz] pour les deplacements ou [rx, ry, rz] pour la rotation
         """
 
         if angle == '0':
@@ -184,78 +190,86 @@ class GlViewWidget(gl.GLViewWidget):
         if event.key() == QtCore.Qt.Key_Right:
             elem.translate(mvt[0][0] * speed, mvt[0][1] * speed, mvt[0][2] * speed, local=True)
             elem.move(speed, 0)
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.dist = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
-                    elem.set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, -self.dist, 0, 0])
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.dist = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
+                        self.dist += speed
+                        elem.set_sequence_text(self.sequence_text)
+                        self.parent.updo([elem, -self.dist, 0, 0])
+                        try:
+                            elem.add_sequence_text(
+                                self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         elif event.key() == QtCore.Qt.Key_Left:
             elem.translate(-mvt[0][0] * speed, -mvt[0][1] * speed, -mvt[0][2] * speed, local=True)
             elem.move(-speed, 0)
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.dist = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
-                    elem.set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, self.dist, 0, 0])
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.dist = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
+                        self.dist += speed
+                        elem.set_sequence_text(self.sequence_text)
+                        self.parent.updo([elem, self.dist, 0, 0])
+                        try:
+                            elem.add_sequence_text(
+                                self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         elif event.key() == QtCore.Qt.Key_Down:
             elem.translate(-mvt[1][0] * speed, -mvt[1][1] * speed, -mvt[1][2] * speed, local=True)
             elem.move(0, -speed)
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.dist = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
-                    elem.set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, 0, self.dist, 0])
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.dist = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
+                        self.dist += speed
+                        elem.set_sequence_text(self.sequence_text)
+                        self.parent.updo([elem, 0, self.dist, 0])
+                        try:
+                            elem.add_sequence_text(
+                                self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         elif event.key() == QtCore.Qt.Key_Up:
             elem.translate(mvt[1][0] * speed, mvt[1][1] * speed, mvt[1][2] * speed, local=True)
             elem.move(0, speed)
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.dist = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
-                    elem.set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, 0, -self.dist, 0])
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.dist = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
+                        self.dist += speed
+                        elem.set_sequence_text(self.sequence_text)
+                        self.parent.updo([elem, 0, -self.dist, 0])
+                        try:
+                            elem.add_sequence_text(
+                                self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         elif event.key() == QtCore.Qt.Key_Q:
             if elem.is_origined():
@@ -267,25 +281,25 @@ class GlViewWidget(gl.GLViewWidget):
                 elem.rotate(speed, mvt[2][0], mvt[2][1], mvt[2][2], local=True)
 
             elem.turn(speed)
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.angle = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
+                        self.angle += speed
+                        self.angle %= 360
+                        self.parent.updo([elem, 0, 0, -self.angle])
 
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.angle = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.angle += speed
-                    self.angle %= 360
-                    self.parent.updo([elem, 0, 0, -self.angle])
-
-                    elem.set_sequence_text(self.sequence_text)
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(
-                            angle=self.angle))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+                        elem.set_sequence_text(self.sequence_text)
+                        try:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(
+                                angle=self.angle))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         elif event.key() == QtCore.Qt.Key_D:
             if elem.is_origined():
@@ -297,25 +311,26 @@ class GlViewWidget(gl.GLViewWidget):
                 elem.rotate(-speed, mvt[2][0], mvt[2][1], mvt[2][2], local=True)
 
             elem.turn(-speed)
+            if elem.is_ready_sequence():
+                for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                    self.save_data.get_gcrubs('cmd_key').values()):
+                    if cmd == event.key():
+                        if elem.get_key() != event.key():
+                            self.angle = 0
+                            self.sequence_text = elem.get_sequence_text()
+                            self.parent.do([elem, 0, 0, 0])
 
-            for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                                self.save_data.get_gcrubs('cmd_key').values()):
-                if cmd == event.key():
-                    if elem.get_key() != event.key():
-                        self.angle = 0
-                        self.sequence_text = elem.get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                    self.angle += speed
-                    self.angle %= 360
-                    self.parent.updo([elem, 0, 0, self.angle])
+                        self.angle += speed
+                        self.angle %= 360
+                        self.parent.updo([elem, 0, 0, self.angle])
 
-                    elem.set_sequence_text(self.sequence_text)
-                    try:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(
-                            angle=self.angle))
-                    except KeyError:
-                        elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    break
+                        elem.set_sequence_text(self.sequence_text)
+                        try:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(
+                                angle=self.angle))
+                        except KeyError:
+                            elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                        break
 
         if invisible:
             elem.scale(coef, coef, coef)
@@ -323,7 +338,7 @@ class GlViewWidget(gl.GLViewWidget):
         self.parent.status_bar.showMessage(
             self.init_data.get_window('position_status_message').format(x=int(elem.get_coord()[0]),
                                                                         y=int(elem.get_coord()[1]),
-                                                                        angle=elem.get_angle()))
+                                                                        angle=round(elem.get_angle())))
 
         elem.set_key(event.key())
 

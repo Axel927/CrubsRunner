@@ -34,15 +34,16 @@ class InitData:
             'save_as_project_icon': QtGui.QIcon("icon/icon_save_as.png"),
             'save_as_project_dialog_title': "Enregistrer le projet",
             'project_extension': "CrubsRunner project (*.crp)",
-            'saving_file_first_line': "## Fichier de sauvegarde de projet CrubsRunner\n",
+            'saving_file_first_line': "## Fichier de sauvegarde de projet CrubsRunner du {date}\n",
             'window_first_line': "\n## Window\n",
             'grid_first_line': "\n## Grid\n",
             'board_first_line': "\n## Board\n",
             'main_robot_first_line': "\n## Main robot\n",
             'second_robot_first_line': "\n## Second robot\n",
+            'gcrubs_first_line': "\n## gcrubs\n",
 
             'import_name': "Importer",
-            'import_shortcut': QtGui.QKeySequence.Italic,
+            'import_shortcut': QtGui.QKeySequence.Italic,  # Ctrl + I
             'import_status_tip': "Importer un composant",
             'import_icon': QtGui.QIcon("icon/icon_import"),
             'import_dialog_title': "Choisir le composant a importer",
@@ -117,7 +118,12 @@ class InitData:
             'position_status_message': "Position : x = {x} mm, y = {y} mm, angle = {angle} degres ",
 
             'menu_bar_menu1': "&Fichier",
-            'menu_bar_menu2': "&Edition"
+            'menu_bar_menu2': "&Edition",
+            'menu_bar_menu3': "&Run",
+
+            'error_open_file_type': QtWidgets.QMessageBox.Critical,
+            'error_open_file_title': "Fichier non trouve",
+            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve.'"
         }
 
         self.board = {
@@ -204,12 +210,25 @@ class InitData:
             'offset_lbl_name': "Hauteur : ",
             'offset_sb_min': -3000,
             'offset_sb_max': 3000,
-            'invisible_cb_name': "Robot invisible ?",
             'invisible_coef': 1000,
+
+            'speed_lbl': "Vitesse (mm/s) : ",
+            'speed_min': 1,
+            'speed_max': 1000,
+            'speed_rotation_lbl': "Vitesse de rotation (degres/s) : ",
+            'rotation_min':  1,
+            'rotation_max': 360,
+            'gb_speed_name': "Vitesses",
 
             'sequence_btn_name': "Creer la sequence du robot",
             'sequence_btn_default': False,
             'sequence_btn_cursor': QtCore.Qt.PointingHandCursor,
+
+            'import_gcrubs_btn_name': "Importer le fichier sequentiel",
+            'import_gcrubs_btn_default': False,
+            'import_gcrubs_btn_cursor': QtCore.Qt.PointingHandCursor,
+            'import_gcrubs_title': "choisir le fichier sequentiel",
+            'import_gcrubs_extension': "Fichier sequentiel (*.gcrubs)",
 
             'sequence_dialog_title': "Sequence du robot principal",
             'sequence_text': "{comment} Sequence gcrubs generee par CrubsRunner le {date} pour le robot principal.\n",
@@ -366,7 +385,40 @@ class InitData:
                             "Touche : ",
             'key_close_name': "Fermer",
             'key_close_cursor': QtCore.Qt.PointingHandCursor,
-            'key_close_default': True
+            'key_close_default': True,
+            'period': 100  # ms
+        }
+
+        self.run = {
+            'run_action_name': "Lancer une simulation",
+            'run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R),
+            'run_action_tip': "Lancer une simulation",
+            'run_action_icon_stopped': QtGui.QIcon("icon/icon_run_stopped.png"),
+            'run_action_icon_running': QtGui.QIcon("icon/icon_run_running.png"),
+
+            'stop_run_action_name': "Arreter la simulation",
+            'stop_run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R | QtCore.Qt.SHIFT),
+            'stop_run_action_tip': "Arreter la simulation",
+            'stop_run_action_icon': QtGui.QIcon("icon/icon_stop_run.png"),
+
+            'dialog_title': "Choix du robot a simuler",
+            'dialog_modal': True,
+            'main_robot_cb_name': "Robot principal",
+            'main_robot_cb_checked': False,
+            'second_robot_cb_name': "Robot secondaire",
+            'second_robot_cb_checked': False,
+            'cancel_btn_name': "Annuler",
+            'cancel_btn_default': False,
+            'ok_btn_name': "Valider",
+            'ok_btn_default': True,
+
+            'window_title': "Simulation",
+            'cmd_lbl_main': "Commande robot principal : {cmd}",
+            'cmd_lbl_second': "Commande robot secondaire : {cmd}",
+            'time_lbl': "Chrono : {time} s",
+            'timer_refresh': 1000,  # ms
+            'accuracy_timer': None,  # None pour ne pas voir les chiffres apres la virgule
+            'time_before_start': 2000  # ms
         }
 
         self.extensions = {
@@ -404,6 +456,9 @@ class InitData:
     def get_gcrubs(self, key: str):
         return self.gcrubs.get(key)
 
+    def get_run(self, key: str):
+        return self.run.get(key)
+
 
 class SaveData:
     def __init__(self):
@@ -438,6 +493,8 @@ class SaveData:
             'angle_rotation': 0,
             'axis_rotation': 'x',
             'offset': 0,
+            'speed': 200,
+            'speed_rotation': 45,
             'gcrubs_file': "",
             'sequence': "",
             'start_position': (0, 0, 0)  # x, y, angle
@@ -450,6 +507,8 @@ class SaveData:
             'angle_rotation': 0,
             'axis_rotation': 'x',
             'offset': 0,
+            'speed': 200,
+            'speed_rotation': 45,
             'gcrubs_file': "",
             'sequence': "",
             'start_position': (0, 0, 0)  # x, y, angle
@@ -543,6 +602,11 @@ class SaveData:
             for key, value in zip(self.grid.keys(), self.grid.values()):
                 ans += str(key) + " = '" + str(value) + "'\n"
 
+        elif to_save == 'gcrubs':
+            ans = self.init_data.get_window('gcrubs_first_line')
+            for key, value in zip(self.gcrubs.keys(), self.gcrubs.values()):
+                ans += str(key) + " = " + str(value) + "\n"
+
         return ans
 
     def get_len_cmd(self) -> int:
@@ -559,5 +623,7 @@ class SaveData:
             return len(self.second_robot)
         elif dictionary == 'grid':
             return len(self.grid)
+        elif dictionary == 'gcrubs':
+            return len(self.gcrubs)
         else:
             return 0

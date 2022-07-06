@@ -51,6 +51,8 @@ class Board(CoordSys):
 
         self.parent = parent
         self.file = self.init_data.get_board('file')
+        self.name = self.init_data.get_board('name')
+        self.time = 0.
 
         self.window = QtWidgets.QDialog(self.parent)
         self.color_btn = QtWidgets.QPushButton(self.init_data.get_board('color_name'), self.window)
@@ -93,9 +95,11 @@ class Board(CoordSys):
         self.edge_color_btn.clicked.connect(self._edge_color_board)
         self.close_btn.clicked.connect(self._close)
         self.reset_btn.clicked.connect(self.reset)
-        self.remove_btn.clicked.connect(self._remove)
+        self.remove_btn.clicked.connect(self.remove)
 
     def _color_board(self):
+        if time() - self.time < 0.2:
+            return
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_board('color_dialog_title'))
 
@@ -115,8 +119,11 @@ class Board(CoordSys):
 
         self.color_dialog.setVisible(False)
         self.color_dialog.close()
+        self.time = time()
 
     def _edge_color_board(self):
+        if time() - self.time < 0.2:
+            return
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_board('edge_color_dialog_title'))
 
@@ -136,6 +143,7 @@ class Board(CoordSys):
 
         self.color_dialog.setVisible(False)
         self.color_dialog.close()
+        self.time = time()
 
     def _close(self):
         self.window.close()
@@ -145,18 +153,22 @@ class Board(CoordSys):
         self.set_edge_color(self.init_data.get_board('edge_color'))
         self.window.close()
 
-    def _remove(self):
+    def remove(self, message=True):
         if self.parent.list_widget.get_len() < 2:
             return
 
-        ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
-                                    self.init_data.get_board('remove_message_box_title'),
-                                    self.init_data.get_board('remove_message_box_message'),
-                                    self.init_data.get_board('remove_message_box_buttons')).exec()
+        if message:
+            ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
+                                        self.init_data.get_board('remove_message_box_title'),
+                                        self.init_data.get_board('remove_message_box_message'),
+                                        self.init_data.get_board('remove_message_box_buttons')).exec()
 
-        if ans == QtWidgets.QMessageBox.No:
-            return
-        self.parent.list_widget.remove_content(self.parent.list_widget.currentRow())
+            if ans == QtWidgets.QMessageBox.No:
+                return
+        for i in range(self.parent.list_widget.get_len()):
+            if self.get_name() == self.parent.list_widget.get_contents()[i].get_name():
+                self.parent.list_widget.remove_content(i)
+                break
         self.file = ""
         self.save_data.set_board('file', '')
         self.reset()
@@ -176,6 +188,7 @@ class Robot(Board):
     def __init__(self, save_data: data.SaveData, parent, main_robot: bool):
         super(Robot, self).__init__(save_data, parent)
         self.element_type = "robot"
+
         self.main_robot = main_robot
         self.selected = False
         self.origined = False
@@ -183,8 +196,22 @@ class Robot(Board):
         self.angle = 0
         self.key = None
         self.moving = [0., 0., 0]
+        self.on_moving = False
         self.time = 0.
         self.invisible = False
+        self.running = False
+        self.gcrubs_file = ""
+        self.is_updated = False
+        self.ready_sequence = False
+
+        if self.main_robot:
+            self.speed = self.save_data.get_main_robot('speed')
+            self.speed_rotation = self.save_data.get_main_robot('speed_rotation')
+            self.name = self.init_data.get_main_robot('name')
+        else:
+            self.speed = self.save_data.get_second_robot('speed')
+            self.speed_rotation = self.save_data.get_second_robot('speed_rotation')
+            self.name = self.init_data.get_second_robot('name')
 
         self.window = QtWidgets.QDialog(self.parent)
         self.color_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('color_name'), self.window)
@@ -208,13 +235,18 @@ class Robot(Board):
         self.axis_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('axis_lbl_name'))
         self.offset_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('offset_lbl_name'))
         self.create_sequence_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_btn_name'))
+        self.import_gcrubs_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('import_gcrubs_btn_name'))
+        self.speed_sb = QtWidgets.QSpinBox()
+        self.speed_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('speed_lbl'))
+        self.speed_rotation_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('speed_rotation_lbl'))
+        self.speed_rotation_sb = QtWidgets.QSpinBox()
 
         self.sequence_dialog = QtWidgets.QDialog(self.parent)
         self.sequence_text = QtWidgets.QTextEdit("", self.sequence_dialog)
         self.sequence_layout = QtWidgets.QVBoxLayout()
         self.sequence_save_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_save_btn_name'))
         self.sequence_cancel_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_cancel_btn_name'))
-        self.sequence_list = ListWidget
+        self.sequence_list = ListWidget()
         self.sequence_origin_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('sequence_origin_lbl_text'))
         self.sequence_origin_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_origin_btn_name'))
 
@@ -239,6 +271,14 @@ class Robot(Board):
         self.reset_btn.setDefault(self.init_data.get_board('reset_default'))
         self.remove_btn.setCursor(self.init_data.get_board('remove_cursor'))
         self.remove_btn.setDefault(self.init_data.get_board('remove_default'))
+
+        self.speed_sb.setMinimum(self.init_data.get_main_robot('speed_min'))
+        self.speed_sb.setMaximum(self.init_data.get_main_robot('speed_max'))
+        self.speed_sb.setValue(self.speed)
+
+        self.speed_rotation_sb.setMaximum(self.init_data.get_main_robot('rotation_max'))
+        self.speed_rotation_sb.setMinimum(self.init_data.get_main_robot('rotation_min'))
+        self.speed_rotation_sb.setValue(self.speed_rotation)
 
         self.angle_rotation_sb.setMinimum(self.init_data.get_main_robot('angle_rotation_min'))
         self.angle_rotation_sb.setMaximum(self.init_data.get_main_robot('angle_rotation_max'))
@@ -280,6 +320,9 @@ class Robot(Board):
         self.create_sequence_btn.setCursor(self.init_data.get_main_robot('sequence_btn_cursor'))
         self.create_sequence_btn.setDefault(self.init_data.get_main_robot('sequence_btn_default'))
 
+        self.import_gcrubs_btn.setCursor(self.init_data.get_main_robot('import_gcrubs_btn_cursor'))
+        self.import_gcrubs_btn.setDefault(self.init_data.get_main_robot('import_gcrubs_btn_default'))
+
         gb_layout = QtWidgets.QGridLayout()
         gb_layout.addWidget(self.angle_lbl, 0, 0)
         gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
@@ -292,13 +335,23 @@ class Robot(Board):
         group_box = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_name'), self.window)
         group_box.setLayout(gb_layout)
 
+        speed_gb = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_speed_name'))
+        speed_layout = QtWidgets.QGridLayout()
+        speed_layout.addWidget(self.speed_lbl, 0, 0)
+        speed_layout.addWidget(self.speed_sb, 0, 1)
+        speed_layout.addWidget(self.speed_rotation_lbl, 1, 0)
+        speed_layout.addWidget(self.speed_rotation_sb, 1, 1)
+        speed_gb.setLayout(speed_layout)
+
         self.layout.addWidget(self.color_btn, 0, 0)
         self.layout.addWidget(self.edge_color_btn, 1, 0)
-        self.layout.addWidget(group_box, 2, 0)
-        self.layout.addWidget(self.close_btn, 3, 0)
-        self.layout.addWidget(self.reset_btn, 4, 0)
-        self.layout.addWidget(self.remove_btn, 5, 0)
-        self.layout.addWidget(self.create_sequence_btn, 6, 0)
+        self.layout.addWidget(speed_gb, 2, 0)
+        self.layout.addWidget(group_box, 3, 0)
+        self.layout.addWidget(self.close_btn, 4, 0)
+        self.layout.addWidget(self.reset_btn, 5, 0)
+        self.layout.addWidget(self.remove_btn, 6, 0)
+        self.layout.addWidget(self.import_gcrubs_btn, 7, 0)
+        self.layout.addWidget(self.create_sequence_btn, 8, 0)
 
         self._connections()
         self.window.show()
@@ -308,19 +361,27 @@ class Robot(Board):
         self.edge_color_btn.clicked.connect(self._edge_color_robot)
         self.close_btn.clicked.connect(self._close)
         self.reset_btn.clicked.connect(self.reset)
-        self.remove_btn.clicked.connect(self._remove)
+        self.remove_btn.clicked.connect(self.remove)
         self.angle_rotation_sb.valueChanged.connect(self._rotate)
         self.axis_rotation_rb_x.clicked.connect(self._axis_x)
         self.axis_rotation_rb_y.clicked.connect(self._axis_y)
         self.axis_rotation_rb_z.clicked.connect(self._axis_z)
         self.offset_sb.valueChanged.connect(self._offset)
-        self.create_sequence_btn.clicked.connect(self._create_sequence)
+        self.create_sequence_btn.clicked.connect(self.create_sequence)
+        self.import_gcrubs_btn.clicked.connect(self.import_gcrubs)
+        self.speed_sb.valueChanged.connect(self._speed)
+        self.speed_rotation_sb.valueChanged.connect(self._speed_rotation)
 
         self.sequence_save_btn.clicked.connect(self.save_sequence)
         self.sequence_cancel_btn.clicked.connect(self._cancel_sequence)
         self.sequence_origin_btn.clicked.connect(self._set_origin)
 
+    def is_ready_sequence(self) -> bool:
+        return self.ready_sequence
+
     def _color_robot(self):
+        if time() - self.time < 0.2:
+            return
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_main_robot('color_dialog_title'))
 
@@ -350,8 +411,11 @@ class Robot(Board):
 
         self.color_dialog.setVisible(False)
         self.color_dialog.close()
+        self.time = time()
 
     def _edge_color_robot(self):
+        if time() - self.time < 0.2:
+            return
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_main_robot('edge_color_dialog_title'))
 
@@ -381,6 +445,7 @@ class Robot(Board):
 
         self.color_dialog.setVisible(False)
         self.color_dialog.close()
+        self.time = time()
 
     def _close(self):
         self.window.close()
@@ -396,22 +461,36 @@ class Robot(Board):
 
         self.window.close()
 
-    def _remove(self):
+    def import_gcrubs(self):
+        file = QtWidgets.QFileDialog.getOpenFileName(self.window,
+                                                     self.init_data.get_main_robot('import_gcrubs_title'),
+                                                     self.save_data.get_window('directory'),
+                                                     self.init_data.get_main_robot('import_gcrubs_extension'))[0]
+        self.gcrubs_file = file
         if self.main_robot:
-            ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
-                                        self.init_data.get_board('remove_message_box_title'),
-                                        self.init_data.get_main_robot('remove_message_box_message'),
-                                        self.init_data.get_board('remove_message_box_buttons')).exec()
+            self.save_data.set_main_robot('gcrubs_file', file)
         else:
-            ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
-                                        self.init_data.get_board('remove_message_box_title'),
-                                        self.init_data.get_second_robot('remove_message_box_message'),
-                                        self.init_data.get_board('remove_message_box_buttons')).exec()
+            self.save_data.set_second_robot('gcrubs_file', file)
 
-        if ans == QtWidgets.QMessageBox.No:
-            return
-        self.parent.list_widget.remove_content(self.parent.list_widget.currentRow())
-        self.parent.list_widget.takeItem(self.parent.list_widget.currentRow())
+    def remove(self, message=True):
+        if message:
+            if self.main_robot:
+                ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
+                                            self.init_data.get_board('remove_message_box_title'),
+                                            self.init_data.get_main_robot('remove_message_box_message'),
+                                            self.init_data.get_board('remove_message_box_buttons')).exec()
+            else:
+                ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
+                                            self.init_data.get_board('remove_message_box_title'),
+                                            self.init_data.get_second_robot('remove_message_box_message'),
+                                            self.init_data.get_board('remove_message_box_buttons')).exec()
+
+            if ans == QtWidgets.QMessageBox.No:
+                return
+        for i in range(self.parent.list_widget.get_len()):
+            if self.get_name() == self.parent.list_widget.get_contents()[i].get_name():
+                self.parent.list_widget.remove_content(i)
+                break
         self.file = ""
         if self.main_robot:
             self.save_data.set_main_robot('file', '')
@@ -420,6 +499,20 @@ class Robot(Board):
         self.reset()
         self.setVisible(False)
         del self
+
+    def _speed(self):
+        self.speed = self.speed_sb.value()
+        if self.main_robot:
+            self.save_data.set_main_robot('speed', self.speed_sb.value())
+        else:
+            self.save_data.set_second_robot('speed', self.speed_sb.value())
+
+    def _speed_rotation(self):
+        self.speed_rotation = self.speed_rotation_sb.value()
+        if self.main_robot:
+            self.save_data.set_main_robot('speed_rotation', self.speed_rotation_sb.value())
+        else:
+            self.save_data.set_second_robot('speed_rotation', self.speed_rotation_sb.value())
 
     def _rotate(self):
         self.rotate(self.angle_rotation_sb.value() - self.axis_angle, int(self.axis_rotation_rb_x.isChecked()),
@@ -508,8 +601,9 @@ class Robot(Board):
         else:
             self.save_data.set_second_robot('offset', self.offset)
 
-    def _create_sequence(self):
+    def create_sequence(self):
         self._close()
+        self.origined = False
 
         if self.main_robot:
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_main_robot('sequence_dialog_title'))
@@ -518,7 +612,6 @@ class Robot(Board):
 
         self.parent.sequence_dock.setWidget(self.sequence_dialog)
 
-        self.sequence_list = ListWidget()
         for key in self.save_data.get_gcrubs('cmd_name').keys():
             self.sequence_list.addItem(key)
             self.sequence_list.add_content(key)
@@ -559,7 +652,8 @@ class Robot(Board):
             self.parent.z_coord_sys.setVisible(True)
 
     def sequence_list_update(self):
-        self.sequence_list.clear()
+        for _ in range(self.sequence_list.get_len()):
+            self.sequence_list.remove_content(0)
         for key in self.save_data.get_gcrubs('cmd_name').keys():
             self.sequence_list.addItem(key)
             self.sequence_list.add_content(key)
@@ -570,8 +664,7 @@ class Robot(Board):
         self.sequence_text.clear()
         self.sequence_dialog.close()
         self.sequence_list.setVisible(False)
-
-        self.origined = False
+        self.ready_sequence = False
 
     def save_sequence(self):
         if self.main_robot:
@@ -597,18 +690,21 @@ class Robot(Board):
             filename += self.init_data.get_extension('sequence')
             with open(filename, 'w') as file:
                 file.write(self.sequence_text.document().toPlainText())
+                file.write('\n')
 
             if self.main_robot:
                 self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
             else:
                 self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
+            self.gcrubs_file = filename
+
         else:
             print("file not opened")
 
     def _set_sequence(self):
         self.sequence_text.append(self.save_data.get_gcrubs("cmd_name").get(
-                self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
+            self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
 
         self.key = None
 
@@ -625,7 +721,6 @@ class Robot(Board):
             self.sequence_text.setVisible(True)
             self.sequence_save_btn.setVisible(True)
             self.sequence_cancel_btn.setVisible(True)
-            self.parent.board.setVisible(True)
 
             if not self.save_data.get_grid('coord_sys_visible'):
                 self.parent.x_coord_sys.setVisible(False)
@@ -633,8 +728,6 @@ class Robot(Board):
                 self.parent.z_coord_sys.setVisible(False)
 
             if self.main_robot:
-                self.save_data.set_main_robot('start_position', (self.get_coord()[0], self.get_coord()[1],
-                                                                 self.get_angle()))
                 if self.save_data.get_main_robot('sequence') == '':
                     self.sequence_text.setText(self.init_data.get_main_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
@@ -642,8 +735,6 @@ class Robot(Board):
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
             else:
-                self.save_data.set_second_robot('start_position', (self.get_coord()[0], self.get_coord()[1],
-                                                                   self.get_angle()))
                 if self.save_data.get_second_robot('sequence') == '':
                     self.sequence_text.setText(self.init_data.get_second_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
@@ -652,26 +743,40 @@ class Robot(Board):
                     self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
 
             self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
-                    comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
-                    x=int(self.get_coord()[0]),
-                    y=int(self.get_coord()[1]),
-                    angle=self.get_angle()))
+                comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
+                x=int(self.get_coord()[0]),
+                y=int(self.get_coord()[1]),
+                angle=self.get_angle()))
+            self.ready_sequence = True
 
         else:
-            self.time = time()
             self.origined = True
             self.coord = [0, 0]
-            self.parent.status_bar.showMessage(
-                self.init_data.get_window('position_status_message').format(x=int(self.get_coord()[0]),
-                                                                            y=int(self.get_coord()[1]),
-                                                                            angle=self.get_angle()))
-            self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text_start'))
+            if self.running:
+                self._cancel_sequence()
+            else:
+                self.parent.status_bar.showMessage(
+                    self.init_data.get_window('position_status_message').format(x=int(self.get_coord()[0]),
+                                                                                y=int(self.get_coord()[1]),
+                                                                                angle=self.get_angle()))
+                self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text_start'))
+                self.parent.board.setVisible(True)
+                self.time = time()
 
     def is_selected(self) -> bool:
         return self.selected
 
     def set_selected(self, selected: bool):
         self.selected = selected
+
+    def is_main_robot(self) -> bool:
+        return self.main_robot
+
+    def set_on_moving(self, moving: bool):
+        self.on_moving = moving
+
+    def is_on_moving(self) -> bool:
+        return self.on_moving
 
     def is_origined(self) -> bool:
         return self.origined
@@ -680,6 +785,13 @@ class Robot(Board):
         return self.coord
 
     def move(self, dx: int, dy: int):
+        """
+        Calcule les coordonnees du robot dans le repere global par rapport au deplacement.
+        :param dx: Deplacement selon x du repere du robot
+        :param dy: Deplacement selon y du repere du robot
+        :return: None
+        """
+
         self.coord[0] += dx * cos(radians(self.angle)) - dy * sin(radians(self.angle))
         self.coord[1] += dx * sin(radians(self.angle)) + dy * cos(radians(self.angle))
 
@@ -717,39 +829,99 @@ class Robot(Board):
             else:
                 self.file = self.save_data.get_second_robot('file')
             self.parent.show_stl(self)
+            if self.is_invisible():
+                coef = self.init_data.get_main_robot('invisible_coef')
+                self.scale(coef, coef, coef)
 
         if self.main_robot:
             self.setColor(self.save_data.get_main_robot('color'))
             self.set_edge_color(self.save_data.get_main_robot('edge_color'))
+            self.axis_angle = self.save_data.get_main_robot('angle_rotation')
+            self.offset = self.save_data.get_main_robot('offset')
+            self.speed = self.save_data.get_main_robot('speed')
+            self.speed_rotation = self.save_data.get_main_robot('speed_rotation')
+            self.gcrubs_file = self.save_data.get_main_robot('gcrubs_file')
+            self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
+
+            if self.save_data.get_main_robot('axis_rotation') == 'x':
+                self.axis_rotation_rb_x.setChecked(True)
+                self.axis_rotation_rb_y.setChecked(False)
+                self.axis_rotation_rb_z.setChecked(False)
+            elif self.save_data.get_main_robot('axis_rotation') == 'y':
+                self.axis_rotation_rb_x.setChecked(False)
+                self.axis_rotation_rb_y.setChecked(True)
+                self.axis_rotation_rb_z.setChecked(False)
+            elif self.save_data.get_main_robot('axis_rotation') == 'z':
+                self.axis_rotation_rb_x.setChecked(False)
+                self.axis_rotation_rb_y.setChecked(False)
+                self.axis_rotation_rb_z.setChecked(True)
         else:
             self.setColor(self.save_data.get_second_robot('color'))
             self.set_edge_color(self.save_data.get_second_robot('edge_color'))
+            self.axis_angle = self.save_data.get_second_robot('angle_rotation')
+            self.offset = self.save_data.get_second_robot('offset')
+            self.speed = self.save_data.get_second_robot('speed')
+            self.speed_rotation = self.save_data.get_second_robot('speed_rotation')
+            self.gcrubs_file = self.save_data.get_second_robot('gcrubs_file')
+            self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
 
-    def move_robot(self, dx, dy, rz):
+            if self.save_data.get_second_robot('axis_rotation') == 'x':
+                self.axis_rotation_rb_x.setChecked(True)
+                self.axis_rotation_rb_y.setChecked(False)
+                self.axis_rotation_rb_z.setChecked(False)
+            elif self.save_data.get_second_robot('axis_rotation') == 'y':
+                self.axis_rotation_rb_x.setChecked(False)
+                self.axis_rotation_rb_y.setChecked(True)
+                self.axis_rotation_rb_z.setChecked(False)
+            elif self.save_data.get_second_robot('axis_rotation') == 'z':
+                self.axis_rotation_rb_x.setChecked(False)
+                self.axis_rotation_rb_y.setChecked(False)
+                self.axis_rotation_rb_z.setChecked(True)
+
+        if not self.is_updated:
+            self.is_updated = True
+            self.rotate(self.axis_angle, int(self.axis_rotation_rb_x.isChecked()),
+                        int(self.axis_rotation_rb_y.isChecked()), int(self.axis_rotation_rb_z.isChecked()), local=True)
+
+            self.translate(0, 0, self.offset)
+
+    def move_robot(self, dx: float, dy: float, rz: float):
+        """
+        Deplace le robot et le fait tourner.
+        :param dx: Deplacement selon x du repere du robot
+        :param dy: Deplacement selon y du repere du robot
+        :param rz: Rotation selon z
+        :return: None
+        """
+
         coef = self.init_data.get_main_robot('invisible_coef')
         # Ne pas chercher mais laisser meme si ca parait inutile, pb lors des deplacements sinon
-        if self.invisible_cb.isChecked():
+        if self.invisible:
             self.scale(1 / coef, 1 / coef, 1 / coef)
 
-        if rz == 0:
-            if self.main_robot:
-                mvt = GlViewWidget.robot_movement(self.save_data.get_main_robot('axis_rotation'),
-                                                  self.save_data.get_main_robot('angle_rotation'))
-            else:
-                mvt = GlViewWidget.robot_movement(self.save_data.get_second_robot('axis_rotation'),
-                                                  self.save_data.get_second_robot('angle_rotation'))
-
-            self.translate(dx * mvt[0][0] + dy * mvt[1][0], dx * mvt[0][1] + dy * mvt[1][1],
-                           dx * mvt[0][2] + dy * mvt[1][2], local=True)
-            self.move(dx, dy)
+        if self.main_robot:
+            mvt = GlViewWidget.robot_movement(self.save_data.get_main_robot('axis_rotation'),
+                                              self.save_data.get_main_robot('angle_rotation'))
         else:
-            self.translate(-self.get_coord()[0], -self.get_coord()[1], 0, local=False)
-            self.rotate(rz, 0, 0, 1, local=False)
-            self.turn(rz)
-            self.translate(self.get_coord()[0], self.get_coord()[1], 0, local=False)
+            mvt = GlViewWidget.robot_movement(self.save_data.get_second_robot('axis_rotation'),
+                                              self.save_data.get_second_robot('angle_rotation'))
 
-        if self.invisible_cb.isChecked():
+        self.translate(dx * mvt[0][0] + dy * mvt[1][0], dx * mvt[0][1] + dy * mvt[1][1],
+                       dx * mvt[0][2] + dy * mvt[1][2], local=True)
+        self.move(dx, dy)
+
+        self.translate(-self.get_coord()[0], -self.get_coord()[1], 0, local=False)
+        self.rotate(rz % 360, 0, 0, 1, local=False)
+        self.turn(rz % 360)
+        self.translate(self.get_coord()[0], self.get_coord()[1], 0, local=False)
+
+        if self.invisible:
             self.scale(coef, coef, coef)
+
+        self.parent.status_bar.showMessage(
+            self.init_data.get_window('position_status_message').format(x=int(self.get_coord()[0]),
+                                                                        y=int(self.get_coord()[1]),
+                                                                        angle=round(self.get_angle())))
 
     def set_invisible(self, invisible: bool):
         self.invisible = invisible
@@ -760,3 +932,18 @@ class Robot(Board):
 
     def is_invisible(self) -> bool:
         return self.invisible
+
+    def is_running(self) -> bool:
+        return self.running
+
+    def set_running(self, run: bool):
+        self.running = run
+
+    def get_gcrubs_file(self) -> str:
+        return self.gcrubs_file
+
+    def get_speed(self) -> int:
+        return self.speed
+
+    def get_speed_rotation(self) -> int:
+        return self.speed_rotation
