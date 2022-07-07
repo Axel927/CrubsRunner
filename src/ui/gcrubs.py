@@ -3,14 +3,16 @@
 # Created by Axel Tremaudant on 20/06/22
 
 from PySide6 import QtWidgets, QtCore
-import data
-from modifiedClasses import Button, LineEdit
+from data.initData import InitData
+from data.saveData import SaveData
+from widget.button import Button
+from widget.lineEdit import LineEdit
 
 
 class GCrubs:
-    def __init__(self, save_data: data.SaveData, parent):
+    def __init__(self, save_data: SaveData, parent):
         self.save_data = save_data
-        self.init_data = data.InitData()
+        self.init_data = InitData()
         self.parent = parent
         self.cmd = list()
         self.cmd_size = 0

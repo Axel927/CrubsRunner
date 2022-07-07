@@ -2,17 +2,19 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 01/07/2022
 
-from PySide6 import QtWidgets, QtCore
-import element
-import data
+from PySide6 import QtCore
+from element import robot
+from data.initData import InitData
+from data.saveData import SaveData
+from ui.runWindow import RunWindow
 
 # Note : mr mean main robot and sr mean second robot
 
 
 class Run:
-    def __init__(self, save_data: data.SaveData, main_robot: element.Robot, second_robot: element.Robot, parent=None):
+    def __init__(self, save_data: SaveData, main_robot: robot.Robot, second_robot: robot.Robot, parent=None):
         self.save_data = save_data
-        self.init_data = data.InitData()
+        self.init_data = InitData()
         self.main_robot = main_robot
         self.second_robot = second_robot
         self.ongoing = False
@@ -59,11 +61,11 @@ class Run:
         self.timing_mr = False
         self.timing_sr = False
 
-    def set_main_robot(self, robot: element.Robot):
-        self.main_robot = robot
+    def set_main_robot(self, rbt: robot.Robot):
+        self.main_robot = rbt
 
-    def set_second_robot(self, robot: element.Robot):
-        self.second_robot = robot
+    def set_second_robot(self, rbt: robot.Robot):
+        self.second_robot = rbt
 
     def is_ongoing(self) -> bool:
         return self.ongoing
@@ -225,7 +227,7 @@ class Run:
     def _stop_sleep_sr(self):
         self.sleep_sr.stop()
 
-    def moving(self, cmd: str, robot: element.Robot):
+    def moving(self, cmd: str, rbt: robot.Robot):
         name = self.save_data.get_gcrubs('cmd_name')
         if cmd == "\n":  # Si ligne vide
             return
@@ -241,7 +243,7 @@ class Run:
                     break
                 end_sep += 1
 
-            if robot.is_main_robot():
+            if rbt.is_main_robot():
                 self._sleep_mr(float(cmd[sep:end_sep]))
                 self.timing_mr = True
             else:
@@ -251,22 +253,22 @@ class Run:
 
         sep = name.get('Se deplacer en avant').find('{')
         if cmd[:sep] == name.get('Se deplacer en avant')[:sep]:
-            self.move(robot, cmd, 'Se deplacer en avant', sep)
+            self.move(rbt, cmd, 'Se deplacer en avant', sep)
             return
 
         sep = name.get('Se deplacer en arriere').find('{')
         if cmd[:sep] == name.get('Se deplacer en arriere')[:sep]:
-            self.move(robot, cmd, 'Se deplacer en arriere', sep)
+            self.move(rbt, cmd, 'Se deplacer en arriere', sep)
             return
 
         sep = name.get('Tourner a droite').find('{')
         if cmd[:sep] == name.get('Tourner a droite')[:sep]:
-            self.move(robot, cmd, 'Tourner a droite', sep)
+            self.move(rbt, cmd, 'Tourner a droite', sep)
             return
 
         sep = name.get('Tourner a gauche').find('{')
         if cmd[:sep] == name.get('Tourner a gauche')[:sep]:
-            self.move(robot, cmd, 'Tourner a gauche', sep)
+            self.move(rbt, cmd, 'Tourner a gauche', sep)
             return
 
         for key, value in zip(self.save_data.get_gcrubs('cmd_key').keys(),
@@ -274,25 +276,25 @@ class Run:
             if value == QtCore.Qt.Key_Up and (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere'):
                 sep = name.get(key).find('{')
                 if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(robot, cmd, key, sep)
+                    self.move(rbt, cmd, key, sep)
                     return
             elif value == QtCore.Qt.Key_Down and (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere'):
                 sep = name.get(key).find('{')
                 if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(robot, cmd, key, sep)
+                    self.move(rbt, cmd, key, sep)
                     return
             elif value == QtCore.Qt.Key_Right and (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere'):
                 sep = name.get(key).find('{')
                 if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(robot, cmd, key, sep)
+                    self.move(rbt, cmd, key, sep)
                     return
             elif value == QtCore.Qt.Key_Left and (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere'):
                 sep = name.get(key).find('{')
                 if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(robot, cmd, key, sep)
+                    self.move(rbt, cmd, key, sep)
                     return
 
-    def move(self, robot: element.Robot, cmd: str, key: str, sep: int):
+    def move(self, rbt: robot.Robot, cmd: str, key: str, sep: int):
         self.timing_mr = True
         self.timing_sr = True
         cmd_key = self.save_data.get_gcrubs('cmd_key')
@@ -319,17 +321,17 @@ class Run:
             move_cmd = ".move_robot(0, 0, {dist_per_time})"
             last_move = ".move_robot(0, 0, {rest})"
         else:
-            if robot.is_main_robot():
+            if rbt.is_main_robot():
                 self.timing_mr = False
             else:
                 self.timing_sr = False
             return
 
-        if robot.is_main_robot():
+        if rbt.is_main_robot():
             if rotation:
-                self.dist_per_time_mr = robot.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_mr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
             else:
-                self.dist_per_time_mr = robot.get_speed() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_mr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000
             end_sep = sep
             for char in cmd[sep:]:
                 if not char.isdigit():
@@ -345,9 +347,9 @@ class Run:
             self.last_move_mr = "self.main_robot" + last_move.format(rest="self.rest_mr")
         else:
             if rotation:
-                self.dist_per_time_sr = robot.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_sr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
             else:
-                self.dist_per_time_sr = robot.get_speed() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_sr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000
             end_sep = sep
             for char in cmd[sep:]:
                 if not char.isdigit():
@@ -363,11 +365,11 @@ class Run:
             self.last_move_sr = "self.second_robot" + last_move.format(rest="self.rest_sr")
 
     @staticmethod
-    def go_to_start(robot: element.Robot):
-        if robot.get_gcrubs_file() == "":
+    def go_to_start(rbt: robot.Robot):
+        if rbt.get_gcrubs_file() == "":
             return
 
-        with open(robot.get_gcrubs_file(), 'r') as file:
+        with open(rbt.get_gcrubs_file(), 'r') as file:
             line = file.readline()
             while line.find(" Position de depart : ") == -1:
                 line = file.readline()
@@ -382,41 +384,5 @@ class Run:
 
         coord[2] = float(line[line.find("angle = ") + 8:line.find(" degres")])  # Obtention de l'angle
 
-        robot.move_robot(0, 0, -robot.get_angle())
-        robot.move_robot(coord[0] - robot.get_coord()[0], coord[1] - robot.get_coord()[1], coord[2] - robot.get_angle())
-
-
-class RunWindow:
-    def __init__(self, save_data: data.SaveData, parent=None):
-        self.init_data = data.InitData()
-        self.save_data = save_data
-        self.parent = parent
-
-        self.window = QtWidgets.QDialog(self.parent)
-        self.cmd_mr_lbl = QtWidgets.QLabel(self.init_data.get_run('cmd_lbl_main').format(cmd=""))
-        self.cmd_sr_lbl = QtWidgets.QLabel(self.init_data.get_run('cmd_lbl_second').format(cmd=""))
-        self.time_lbl = QtWidgets.QLabel(self.init_data.get_run('time_lbl').format(time=-2.))
-        self.layout = QtWidgets.QVBoxLayout()
-
-        self.init_window()
-
-    def init_window(self):
-        self.parent.properties_dock.setWidget(self.window)
-        self.parent.properties_dock.setWindowTitle(self.init_data.get_run('window_title'))
-
-        self.layout.addWidget(self.time_lbl)
-        self.layout.addWidget(self.cmd_mr_lbl)
-        self.layout.addWidget(self.cmd_sr_lbl)
-
-        self.window.setLayout(self.layout)
-        self.window.show()
-
-    def set_time(self, set_time: float):
-        self.time_lbl.setText(self.init_data.get_run('time_lbl').format(
-            time=round(set_time, self.init_data.get_run('accuracy_timer'))))
-
-    def set_mr_command(self, command: str):
-        self.cmd_mr_lbl.setText(self.init_data.get_run('cmd_lbl_main').format(cmd=command))
-
-    def set_sr_command(self, command: str):
-        self.cmd_sr_lbl.setText(self.init_data.get_run('cmd_lbl_second').format(cmd=command))
+        rbt.move_robot(0, 0, -rbt.get_angle())
+        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1], coord[2] - rbt.get_angle())

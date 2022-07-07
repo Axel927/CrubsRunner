@@ -6,8 +6,8 @@ import sys
 import os
 from PySide6.QtWidgets import QApplication
 
-import mainWindow
-from data import InitData
+from ui import mainWindow
+from data.initData import InitData
 
 if os.getcwd().split('/')[-1] == 'src':
     os.chdir('../')  # Set the directory CrubsRunner as the current working directory

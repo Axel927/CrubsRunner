@@ -11,12 +11,14 @@ import warnings
 import pyqtgraph.opengl as gl
 from stl import mesh
 
-import glGrid
-import element
-import data
-import modifiedClasses as mc
-import gcrubs
-import run
+from ui import glGrid
+from element import board, robot, coordSys
+from data.initData import InitData
+from data.saveData import SaveData
+from widget import viewWidget as mc
+from ui import gcrubs
+from simulation import run
+from widget.listWidget import ListWidget
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -24,17 +26,17 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
 
         # Definition des attributs
-        self.save_data = data.SaveData()
-        self.init_data = data.InitData()
+        self.save_data = SaveData()
+        self.init_data = InitData()
 
         self.doing = list()
         self.undoing = list()
         self.dropped_filename = ""
         self.time = 0.
 
-        self.board = element.Board(self.save_data, self)
-        self.main_robot = element.Robot(self.save_data, self, True)
-        self.second_robot = element.Robot(self.save_data, self, False)
+        self.board = board.Board(self.save_data, self)
+        self.main_robot = robot.Robot(self.save_data, self, True)
+        self.second_robot = robot.Robot(self.save_data, self, False)
         self.gcrubs = gcrubs.GCrubs(self.save_data, self)
 
         self.layout = QtWidgets.QVBoxLayout()
@@ -43,13 +45,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.component_dock = QtWidgets.QDockWidget(self.init_data.get_window('name_component_dock'), self)
         self.properties_dock = QtWidgets.QDockWidget(self)
         self.sequence_dock = QtWidgets.QDockWidget(self)
-        self.list_widget = mc.ListWidget()
+        self.list_widget = ListWidget()
 
         self.viewer = mc.GlViewWidget(self, self.save_data)
         self.grid = glGrid.GlGridItem(self.save_data, self)
-        self.x_coord_sys = element.CoordSys(self.save_data)
-        self.y_coord_sys = element.CoordSys(self.save_data)
-        self.z_coord_sys = element.CoordSys(self.save_data)
+        self.x_coord_sys = coordSys.CoordSys(self.save_data)
+        self.y_coord_sys = coordSys.CoordSys(self.save_data)
+        self.z_coord_sys = coordSys.CoordSys(self.save_data)
 
         self.menuBar = QtWidgets.QMenuBar(self)
         self.toolBar = self.addToolBar(self.init_data.get_window('name_tool_bar'))
@@ -290,13 +292,13 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         self.grid.reset()
         self.board.remove(False)
-        self.board = element.Board(self.save_data, self)
+        self.board = board.Board(self.save_data, self)
         self.main_robot.remove(False)
-        self.main_robot = element.Robot(self.save_data, self, True)
+        self.main_robot = robot.Robot(self.save_data, self, True)
         self.second_robot.remove(False)
-        self.second_robot = element.Robot(self.save_data, self, False)
+        self.second_robot = robot.Robot(self.save_data, self, False)
         del self.list_widget
-        self.list_widget = mc.ListWidget()
+        self.list_widget = ListWidget()
         self.list_widget.add_content(self.grid)
         self.component_dock.setWidget(self.list_widget)
         self.create_connections()
@@ -321,7 +323,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.board = element.Board(self.save_data, self)
+            self.board = board.Board(self.save_data, self)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
                 self.save_data.set_board('file', file)
@@ -359,7 +361,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.main_robot = element.Robot(self.save_data, self, True)
+            self.main_robot = robot.Robot(self.save_data, self, True)
             self.running.set_main_robot(self.main_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.main_robot.set_file(file)
@@ -406,7 +408,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.second_robot = element.Robot(self.save_data, self, False)
+            self.second_robot = robot.Robot(self.save_data, self, False)
             self.running.set_second_robot(self.second_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.save_data.set_second_robot('file', file)
@@ -441,13 +443,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if file:
                 self.grid.reset()
                 self.board.remove(False)
-                self.board = element.Board(self.save_data, self)
+                self.board = board.Board(self.save_data, self)
                 self.main_robot.remove(False)
-                self.main_robot = element.Robot(self.save_data, self, True)
+                self.main_robot = robot.Robot(self.save_data, self, True)
                 self.second_robot.remove(False)
-                self.second_robot = element.Robot(self.save_data, self, False)
+                self.second_robot = robot.Robot(self.save_data, self, False)
                 del self.list_widget
-                self.list_widget = mc.ListWidget()
+                self.list_widget = ListWidget()
                 self.list_widget.add_content(self.grid)
                 self.component_dock.setWidget(self.list_widget)
                 self.create_connections()
@@ -849,7 +851,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except AttributeError:
                 continue
 
-    def show_stl(self, elem: element.Board):
+    def show_stl(self, elem: robot.Board):
         if elem.get_file() == "":
             return
         try:
@@ -908,11 +910,7 @@ class MainWindow(QtWidgets.QMainWindow):
             filename = mime_data.data("text/uri-list")
             filename = str(filename, encoding="utf-8")
 
-            if system() == 'Windows' or system() == "win32":
-                print('on mainWindow.dragEnterEvent: ', filename)
-                filename = filename.replace("file://\\", "\\").replace("\r\n", "").replace("%20", " ")
-            else:
-                filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
+            filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
 
         if filename != "" and '.' + filename.split('.')[-1] in self.init_data.get_extension('value'):
             event.accept()
@@ -928,13 +926,13 @@ class MainWindow(QtWidgets.QMainWindow):
         elif extension == self.init_data.get_extension('project'):
             self.grid.reset()
             self.board.remove(False)
-            self.board = element.Board(self.save_data, self)
+            self.board = board.Board(self.save_data, self)
             self.main_robot.remove(False)
-            self.main_robot = element.Robot(self.save_data, self, True)
+            self.main_robot = robot.Robot(self.save_data, self, True)
             self.second_robot.remove(False)
-            self.second_robot = element.Robot(self.save_data, self, False)
+            self.second_robot = robot.Robot(self.save_data, self, False)
             del self.list_widget
-            self.list_widget = mc.ListWidget()
+            self.list_widget = ListWidget()
             self.list_widget.add_content(self.grid)
             self.component_dock.setWidget(self.list_widget)
             self.create_connections()
@@ -942,7 +940,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif extension == self.init_data.get_extension('board'):
             if self.save_data.get_board('file') == '':
                 self.board.remove(False)
-                self.board = element.Board(self.save_data, self)
+                self.board = board.Board(self.save_data, self)
                 self.new_board(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
@@ -963,12 +961,12 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.save_data.get_main_robot('file') == "" and \
                     param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
                 self.main_robot.remove(False)
-                self.main_robot = element.Robot(self.save_data, self, True)
+                self.main_robot = robot.Robot(self.save_data, self, True)
                 self.new_main_robot(False, self.dropped_filename)
             elif self.save_data.get_second_robot('file') == "" and \
                     param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
                 self.second_robot.remove(False)
-                self.second_robot = element.Robot(self.save_data, self, False)
+                self.second_robot = robot.Robot(self.save_data, self, False)
                 self.new_second_robot(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),

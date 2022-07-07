@@ -2,94 +2,18 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 17/06/22
 
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtCore, QtGui
 from math import cos, sin, radians
 import pyqtgraph.opengl as gl
-import data
-
-
-class Button(QtWidgets.QPushButton):
-    def __init__(self, parent, number):
-        super(Button, self).__init__(parent)
-        self.number = number
-        self.clicked_ = False
-
-    def get_number(self):
-        return self.number
-
-    def set_clicked(self):
-        self.clicked_ = True
-
-    def set_unclicked(self):
-        self.clicked_ = False
-
-    def is_clicked(self):
-        return self.clicked_
-
-
-class LineEdit(QtWidgets.QLineEdit):
-    def __init__(self, parent):
-        super(LineEdit, self).__init__(parent)
-        self.key = QtCore.Qt.Key(0)
-
-    def set_key(self, value):
-        if value is None:
-            self.key = QtCore.Qt.Key(0)
-        else:
-            self.key = QtCore.Qt.Key(value)
-
-    def get_key(self):
-        return self.key
-
-
-class ListWidget(QtWidgets.QListWidget):
-    def __init__(self):
-        super(ListWidget, self).__init__()
-        self.contents = list()
-        self.len = 0
-
-    def add_content(self, elem):
-        self.contents.append(elem)
-        self.len += 1
-        try:
-            self.addItem(elem.get_name())
-        except AttributeError:
-            pass
-
-    def get_contents(self) -> list:
-        return self.contents
-
-    def remove_content(self, position: int):
-        try:
-            self.takeItem(position)
-            self.contents.pop(position)
-            self.len -= 1
-        except IndexError:
-            return
-
-    def get_len(self) -> int:
-        return self.len
-
-    def clear(self) -> None:
-        super(ListWidget, self).clear()
-        self.contents = list()
-        self.len = 0
-
-    def sortItems(self, order: QtCore.Qt.SortOrder = ...) -> None:
-        super(ListWidget, self).sortItems(order)
-        if order == QtCore.Qt.DescendingOrder:
-            self.contents.sort(reverse=True)
-        else:
-            self.contents.sort(reverse=False)
+from data.initData import InitData
+from data.saveData import SaveData
 
 
 class GlViewWidget(gl.GLViewWidget):
-    # Redefinition de methodes de pyqtgraph.opengl.GLViewWidget
-
-    def __init__(self, parent, save_data: data.SaveData):
+    def __init__(self, parent, save_data: SaveData):
         super(GlViewWidget, self).__init__()
         self.save_data = save_data
-        self.init_data = data.InitData()
+        self.init_data = InitData()
         self.mousePos = None
         self.parent = parent
         self.getting_key = False
