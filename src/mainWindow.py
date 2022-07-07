@@ -314,14 +314,11 @@ class MainWindow(QtWidgets.QMainWindow):
                                   self.init_data.get_board('new_message_box_message')).exec()
 
         if file == "":
-            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                    self.init_data.get_board('new_message_box_title'),
-                                                                    self.save_data.get_window('directory'),
-                                                                    self.init_data.get_board(
-                                                                        'file_dialog_open_extensions'))
-            extension = extension.lower()
-        else:
-            extension = file.split('.')[-1]
+            file = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                         self.init_data.get_board('new_message_box_title'),
+                                                         self.save_data.get_window('directory'),
+                                                         self.init_data.get_board('file_dialog_open_extensions'))[0]
+        extension = file.split('.')[-1]
 
         if file:
             self.board = element.Board(self.save_data, self)
@@ -354,15 +351,12 @@ class MainWindow(QtWidgets.QMainWindow):
                                   self.init_data.get_main_robot('new_message_box_message')).exec()
 
         if file == "":
-            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                    self.init_data.get_main_robot(
-                                                                        'new_message_box_title'),
-                                                                    self.save_data.get_window('directory'),
-                                                                    self.init_data.get_main_robot(
-                                                                        'file_dialog_open_extensions'))
-            extension = extension.lower()
-        else:
-            extension = file.split('.')[-1]
+            file = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                         self.init_data.get_main_robot('new_message_box_title'),
+                                                         self.save_data.get_window('directory'),
+                                                         self.init_data.get_main_robot('file_dialog_open_extensions'))[
+                0]
+        extension = file.split('.')[-1]
 
         if file:
             self.main_robot = element.Robot(self.save_data, self, True)
@@ -375,6 +369,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
                 self.show_stl(self.main_robot)
                 self.list_widget.add_content(self.main_robot)
+                self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
+                self.main_robot.translate(0, 0, self.main_robot.get_offset())
+                self.save_data.set_main_robot('offset', self.main_robot.get_offset())
 
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
@@ -400,15 +397,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
 
         if file == "":
-            file, extension = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                    self.init_data.get_second_robot(
-                                                                        'new_message_box_title'),
-                                                                    self.save_data.get_window('directory'),
-                                                                    self.init_data.get_second_robot(
-                                                                        'file_dialog_open_extensions'))
-            extension = extension.lower()
-        else:
-            extension = file.split('.')[-1]
+            file = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                         self.init_data.get_second_robot(
+                                                             'new_message_box_title'),
+                                                         self.save_data.get_window('directory'),
+                                                         self.init_data.get_second_robot(
+                                                             'file_dialog_open_extensions'))[0]
+        extension = file.split('.')[-1]
 
         if file:
             self.second_robot = element.Robot(self.save_data, self, False)
@@ -421,6 +416,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
                 self.show_stl(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
+                self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
+                self.second_robot.translate(0, 0, self.second_robot.get_offset())
+                self.save_data.set_second_robot('offset', self.second_robot.get_offset())
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
                 self.open_project(file)
@@ -868,15 +866,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elem.setMeshData(meshdata=meshdata)
 
-        min_coord = float_info.max  # 1.7976931348623157e+308
-        max_coord = float_info.min  # 2.2250738585072014e-308
+        min_coord = [float_info.max] * 3  # 1.7976931348623157e+308
+        max_coord = [float_info.min] * 3  # 2.2250738585072014e-308
         for point in points:
-            min_coord = min(min_coord, point[0])
-            max_coord = max(max_coord, point[0])
+            for i in range(len(point)):
+                min_coord[i] = min(min_coord[i], point[i])
+                max_coord[i] = max(max_coord[i], point[i])
 
-        if max_coord - min_coord < 1.:
+        dim = list()
+        min_max = list()
+        for i in range(len(min_coord)):
+            dim.append(max_coord[i] - min_coord[i])
+            min_max.append([min_coord[i], max_coord[i]])
+
+        if max(dim) < 1.:
             elem.set_invisible(True)
+            for i in range(len(dim)):
+                dim[i] *= self.init_data.get_main_robot('invisible_coef')
+                for j in range(len(min_max[i])):
+                    min_max[i][j] *= self.init_data.get_main_robot('invisible_coef')
 
+        elem.set_dimensions(dim)
+        elem.set_min_max(min_max)
         self.viewer.addItem(elem)
 
     def update_(self):
