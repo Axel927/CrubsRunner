@@ -73,10 +73,19 @@ class SaveData:
             'cmd_key': {
                 'Commentaire': None,
                 'Pause': None,
-                "Se deplacer en avant": QtCore.Qt.Key_Up,
-                "Se deplacer en arriere": QtCore.Qt.Key_Down,
-                "Tourner a droite": QtCore.Qt.Key_D,
-                "Tourner a gauche": QtCore.Qt.Key_Q,
+                "Se deplacer en avant": None,
+                "Se deplacer en arriere": None,
+                "Tourner a droite": None,
+                "Tourner a gauche": None,
+            },
+
+            'keys': {
+                'go_right': QtCore.Qt.Key_Right,
+                'go_left': QtCore.Qt.Key_Left,
+                'go_up': QtCore.Qt.Key_Up,
+                'go_down': QtCore.Qt.Key_Down,
+                'turn_right': QtCore.Qt.Key_D,
+                'turn_left': QtCore.Qt.Key_Q
             }
         }
 

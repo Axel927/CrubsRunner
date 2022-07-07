@@ -91,6 +91,10 @@ class InitData:
             'redo_status_tip': "Remettre le deplacement",
             'redo_icon': QtGui.QIcon("icon/icon_redo.png"),
 
+            'key_action_name': "Choisir les touches",
+            'key_action_status_tip': "Choisir les touches",
+            'key_action_icon': QtGui.QIcon("icon/icon_key.png"),
+
             'window_title': "CrubsRunner",
             'accept_drops': True,
             'window_start_width': 1200,
@@ -123,7 +127,23 @@ class InitData:
 
             'error_open_file_type': QtWidgets.QMessageBox.Critical,
             'error_open_file_title': "Fichier non trouve",
-            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve.'"
+            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve.'",
+
+            'keys_modal': True,
+            'keys_title': "Choix des touches",
+            'keys_lbl_0': "Aller a droite : ",
+            'keys_lbl_1': "Aller a gauche : ",
+            'keys_lbl_2': "Aller en haut : ",
+            'keys_lbl_3': "Aller en bas : ",
+            'keys_lbl_4': "Tourner a droite : ",
+            'keys_lbl_5': "Tourner a gauche : ",
+            'keys_lbl_key': "Touche : {key}",
+            'keys_apply_btn_name': "Appliquer",
+            'keys_apply_default': True,
+            'keys_apply_cursor': QtCore.Qt.PointingHandCursor,
+            'keys_close_btn_name': "Annuler",
+            'keys_close_default': False,
+            'keys_close_cursor': QtCore.Qt.PointingHandCursor,
         }
 
         self.board = {

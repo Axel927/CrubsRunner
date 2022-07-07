@@ -7,6 +7,8 @@ from data.initData import InitData
 from data.saveData import SaveData
 from widget.button import Button
 from widget.lineEdit import LineEdit
+from widget.label import Label
+from widget.keyDialog import KeyDialog
 
 
 class GCrubs:
@@ -129,7 +131,8 @@ class GCrubs:
         self.cmd.append([Button(self.scroll_area, self.cmd_size),
                          QtWidgets.QLineEdit(self.scroll_area),
                          LineEdit(self.scroll_area),
-                         Button(self.scroll_area, self.cmd_size)
+                         Button(self.scroll_area, self.cmd_size),
+                         Label(KeyDialog.ret_key(self.save_data.get_gcrubs('cmd_key').get(key)))
                          ])
         self.cmd[self.cmd_size][0].setCursor(self.init_data.get_gcrubs('btn_cursor'))
         self.cmd[self.cmd_size][3].setCursor(self.init_data.get_gcrubs('btn_cursor'))
@@ -142,10 +145,8 @@ class GCrubs:
         self.cmd[self.cmd_size][2].setText(value)
         self.cmd[self.cmd_size][2].set_key(self.save_data.get_gcrubs('cmd_key').get(key))
 
-        self.grid_layout.addWidget(self.cmd[self.cmd_size][0], self.cmd_size, 0)
-        self.grid_layout.addWidget(self.cmd[self.cmd_size][1], self.cmd_size, 1)
-        self.grid_layout.addWidget(self.cmd[self.cmd_size][2], self.cmd_size, 2)
-        self.grid_layout.addWidget(self.cmd[self.cmd_size][3], self.cmd_size, 3)
+        for i in range(5):
+            self.grid_layout.addWidget(self.cmd[self.cmd_size][i], self.cmd_size, i)
 
         self.cmd_size += 1
 
@@ -174,6 +175,9 @@ class GCrubs:
     def _key_close(self):
         self.parent.viewer.stop_get_key()
         self.key_dialog.close()
+        for i in range(self.cmd_size):
+            self.cmd[i][4].setText(KeyDialog.ret_key(self.cmd[i][2].get_key()))
+
         self.window.show()
 
     def get_cmd(self):

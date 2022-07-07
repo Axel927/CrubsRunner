@@ -295,8 +295,10 @@ class Robot(Board):
         self.gcrubs_file = file
         if self.main_robot:
             self.save_data.set_main_robot('gcrubs_file', file)
+            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
         else:
             self.save_data.set_second_robot('gcrubs_file', file)
+            self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
     def remove(self, message=True):
         if message:
@@ -495,11 +497,7 @@ class Robot(Board):
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_second_robot('sequence_dialog_title'))
 
         self.parent.sequence_dock.setWidget(self.sequence_dialog)
-
-        for key in self.save_data.get_gcrubs('cmd_name').keys():
-            self.sequence_list.addItem(key)
-            self.sequence_list.add_content(key)
-        self.sequence_list.sortItems(self.init_data.get_main_robot('list_sorting_order'))
+        self.sequence_list_update()
 
         self.sequence_save_btn.setCursor(self.init_data.get_main_robot('sequence_save_btn_cursor'))
         self.sequence_save_btn.setDefault(self.init_data.get_main_robot('sequence_save_btn_default'))
@@ -536,15 +534,17 @@ class Robot(Board):
             self.parent.z_coord_sys.setVisible(True)
 
     def sequence_list_update(self):
-        for _ in range(self.sequence_list.get_len()):
-            self.sequence_list.remove_content(0)
+        self.sequence_list.clear()
         for key in self.save_data.get_gcrubs('cmd_name').keys():
-            self.sequence_list.addItem(key)
             self.sequence_list.add_content(key)
 
         self.sequence_list.sortItems(self.init_data.get_main_robot('list_sorting_order'))
 
     def _cancel_sequence(self):
+        if self.main_robot:
+            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
+        else:
+            self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
         self.sequence_text.clear()
         self.sequence_dialog.close()
         self.sequence_list.setVisible(False)
@@ -616,6 +616,11 @@ class Robot(Board):
                     self.sequence_text.setText(self.init_data.get_main_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
+                    self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
+                        comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
+                        x=int(self.get_coord()[0]),
+                        y=int(self.get_coord()[1]),
+                        angle=self.get_angle()))
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
             else:
@@ -623,14 +628,14 @@ class Robot(Board):
                     self.sequence_text.setText(self.init_data.get_second_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
+                    self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
+                        comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
+                        x=int(self.get_coord()[0]),
+                        y=int(self.get_coord()[1]),
+                        angle=self.get_angle()))
                 else:
                     self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
 
-            self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
-                comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
-                x=int(self.get_coord()[0]),
-                y=int(self.get_coord()[1]),
-                angle=self.get_angle()))
             self.ready_sequence = True
 
         else:
@@ -837,3 +842,37 @@ class Robot(Board):
 
     def get_speed_rotation(self) -> int:
         return self.speed_rotation
+
+    @staticmethod
+    def robot_movement(axis: str, angle: int) -> list:
+        """
+        Calcule le deplacement par rapport a l'angle de rotation pour rester dans le plan.
+        :param axis: Axe de rotation du robot lors de la mise en place
+        :param angle: Angle de rotation du robot lors de la mise en place
+        :return: La liste des deplacements a effectuer [mvt vertical, mvt horizontal, rotation]
+                 Chacun contient une liste [dx, dy, dz] pour les deplacements ou [rx, ry, rz] pour la rotation
+        """
+
+        if angle == '0':
+            return [[1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                    ]
+
+        if axis == 'x':
+            return [[1, 0, 0],
+                    [0, cos(radians(angle)), -sin(radians(angle))],
+                    [0, sin(radians(angle)), cos(radians(angle))]
+                    ]
+
+        elif axis == 'y':
+            return [[cos(radians(angle)), 0, sin(radians(angle))],
+                    [0, 1, 0],
+                    [-sin(radians(angle)), 0, cos(radians(angle))]
+                    ]
+
+        elif axis == 'z':
+            return [[cos(radians(angle)), -sin(radians(angle)), 0],
+                    [sin(radians(angle)), cos(radians(angle)), 0],
+                    [0, 0, 1]
+                    ]

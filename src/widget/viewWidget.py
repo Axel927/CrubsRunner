@@ -3,10 +3,10 @@
 # Created by Axel Tremaudant on 17/06/22
 
 from PySide6 import QtCore, QtGui
-from math import cos, sin, radians
 import pyqtgraph.opengl as gl
 from data.initData import InitData
 from data.saveData import SaveData
+from widget.keyDialog import KeyDialog
 
 
 class GlViewWidget(gl.GLViewWidget):
@@ -23,40 +23,6 @@ class GlViewWidget(gl.GLViewWidget):
         self.dist = 0
         self.angle = 0
         self.sequence_text = ""
-
-    @staticmethod
-    def robot_movement(axis: str, angle: int) -> list:
-        """
-        Calcule le deplacement par rapport a l'angle de rotation pour rester dans le plan.
-        :param axis: Axe de rotation du robot lors de la mise en place
-        :param angle: Angle de rotation du robot lors de la mise en place
-        :return: La liste des deplacements a effectuer [mvt vertical, mvt horizontal, rotation]
-                 Chacun contient une liste [dx, dy, dz] pour les deplacements ou [rx, ry, rz] pour la rotation
-        """
-
-        if angle == '0':
-            return [[1, 0, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
-                    ]
-
-        if axis == 'x':
-            return [[1, 0, 0],
-                    [0, cos(radians(angle)), -sin(radians(angle))],
-                    [0, sin(radians(angle)), cos(radians(angle))]
-                    ]
-
-        elif axis == 'y':
-            return [[cos(radians(angle)), 0, sin(radians(angle))],
-                    [0, 1, 0],
-                    [-sin(radians(angle)), 0, cos(radians(angle))]
-                    ]
-
-        elif axis == 'z':
-            return [[cos(radians(angle)), -sin(radians(angle)), 0],
-                    [sin(radians(angle)), cos(radians(angle)), 0],
-                    [0, 0, 1]
-                    ]
 
     def mouseMoveEvent(self, ev):
         self.setCursor(self.init_data.get_view('moving_cursor'))
@@ -79,7 +45,7 @@ class GlViewWidget(gl.GLViewWidget):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if self.getting_key:
-            self.key.setText(self.text + self.ret_key(event))
+            self.key.setText(self.text + KeyDialog.ret_key(event))
             self.write_key.set_key(event.key())
 
         if self.parent.main_robot.is_selected():
@@ -96,13 +62,17 @@ class GlViewWidget(gl.GLViewWidget):
             return
 
         speed = self.save_data.get_grid('moving_speed')
-        mvt = self.robot_movement(axis, angle)
+        mvt = self.parent.main_robot.robot_movement(axis, angle)
 
         for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                             self.save_data.get_gcrubs('cmd_key').values()):
-            if event.key() == cmd and event.key() != QtCore.Qt.Key_Right and event.key() != QtCore.Qt.Key_Left and \
-                    event.key() != QtCore.Qt.Key_Down and event.key() != QtCore.Qt.Key_Up and \
-                    event.key() != QtCore.Qt.Key_D and event.key() != QtCore.Qt.Key_Q:
+            if event.key() == cmd and event.key() != self.save_data.get_gcrubs('keys').get('go_right') and\
+                    event.key() != self.save_data.get_gcrubs('keys').get('go_left') and \
+                    event.key() != self.save_data.get_gcrubs('keys').get('go_down') and \
+                    event.key() != self.save_data.get_gcrubs('keys').get('go_up') and \
+                    event.key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
+                    event.key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+
                 elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                 elem.set_key(None)
                 return
@@ -111,7 +81,7 @@ class GlViewWidget(gl.GLViewWidget):
         if invisible:  # Ne pas chercher mais laisser meme si ca parait inutile, pb lors des deplacements sinon
             elem.scale(1 / coef, 1 / coef, 1 / coef)
 
-        if event.key() == QtCore.Qt.Key_Right:
+        if event.key() == self.save_data.get_gcrubs('keys').get('go_right'):
             elem.translate(mvt[0][0] * speed, mvt[0][1] * speed, mvt[0][2] * speed, local=True)
             elem.move(speed, 0)
             if elem.is_ready_sequence():
@@ -132,7 +102,7 @@ class GlViewWidget(gl.GLViewWidget):
                             elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                         break
 
-        elif event.key() == QtCore.Qt.Key_Left:
+        elif event.key() == self.save_data.get_gcrubs('keys').get('go_left'):
             elem.translate(-mvt[0][0] * speed, -mvt[0][1] * speed, -mvt[0][2] * speed, local=True)
             elem.move(-speed, 0)
             if elem.is_ready_sequence():
@@ -153,7 +123,7 @@ class GlViewWidget(gl.GLViewWidget):
                             elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                         break
 
-        elif event.key() == QtCore.Qt.Key_Down:
+        elif event.key() == self.save_data.get_gcrubs('keys').get('go_down'):
             elem.translate(-mvt[1][0] * speed, -mvt[1][1] * speed, -mvt[1][2] * speed, local=True)
             elem.move(0, -speed)
             if elem.is_ready_sequence():
@@ -174,7 +144,7 @@ class GlViewWidget(gl.GLViewWidget):
                             elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                         break
 
-        elif event.key() == QtCore.Qt.Key_Up:
+        elif event.key() == self.save_data.get_gcrubs('keys').get('go_up'):
             elem.translate(mvt[1][0] * speed, mvt[1][1] * speed, mvt[1][2] * speed, local=True)
             elem.move(0, speed)
             if elem.is_ready_sequence():
@@ -195,7 +165,7 @@ class GlViewWidget(gl.GLViewWidget):
                             elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                         break
 
-        elif event.key() == QtCore.Qt.Key_Q:
+        elif event.key() == self.save_data.get_gcrubs('keys').get('turn_left'):
             if elem.is_origined():
                 elem.translate(-elem.get_coord()[0], -elem.get_coord()[1], 0, local=False)
                 elem.rotate(speed, 0, 0, 1, local=False)
@@ -225,7 +195,7 @@ class GlViewWidget(gl.GLViewWidget):
                             elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                         break
 
-        elif event.key() == QtCore.Qt.Key_D:
+        elif event.key() == self.save_data.get_gcrubs('keys').get('turn_right'):
             if elem.is_origined():
                 elem.translate(-elem.get_coord()[0], -elem.get_coord()[1], 0, local=False)
                 elem.rotate(-speed, 0, 0, 1, local=False)
@@ -265,19 +235,6 @@ class GlViewWidget(gl.GLViewWidget):
                                                                         angle=round(elem.get_angle())))
 
         elem.set_key(event.key())
-
-    @staticmethod
-    def ret_key(event: QtGui.QKeyEvent) -> str:
-        if event.key() == QtCore.Qt.Key_Up:
-            return "Fleche du haut"
-        elif event.key() == QtCore.Qt.Key_Down:
-            return "Fleche du bas"
-        elif event.key() == QtCore.Qt.Key_Right:
-            return "Fleche de droite"
-        elif event.key() == QtCore.Qt.Key_Left:
-            return "Fleche de gauche"
-        else:
-            return str(event.text())
 
     def mouseReleaseEvent(self, ev):
         self.setCursor(QtCore.Qt.ArrowCursor)

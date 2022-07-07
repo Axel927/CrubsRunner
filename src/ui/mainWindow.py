@@ -19,6 +19,9 @@ from widget import viewWidget as mc
 from ui import gcrubs
 from simulation import run
 from widget.listWidget import ListWidget
+from widget.keyDialog import KeyDialog
+from widget.button import Button
+from widget.label import Label
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -70,6 +73,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.redo_action = QtGui.QAction(self.init_data.get_window('redo_name'), self)
         self.run_action = QtGui.QAction(self.init_data.get_run('run_action_name'), self)
         self.stop_run_action = QtGui.QAction(self.init_data.get_run('stop_run_action_name'), self)
+        self.key_action = QtGui.QAction(self.init_data.get_window('key_action_name'), self)
 
         self.top_view_action = QtGui.QAction(self.init_data.get_window('top_view_action_name'), self)
         self.start_view_action = QtGui.QAction(self.init_data.get_window('start_view_action_name'), self)
@@ -132,6 +136,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar.addAction(self.top_view_action)
         self.toolBar.addAction(self.bottom_view_action)
         self.toolBar.addAction(self.start_view_action)
+        self.toolBar.addAction(self.key_action)
 
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.edit_gcrubs_action)
@@ -207,6 +212,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stop_run_action.setIcon(self.init_data.get_run('stop_run_action_icon'))
         self.stop_run_action.setEnabled(False)
 
+        self.key_action.setStatusTip(self.init_data.get_window('key_action_status_tip'))
+        self.key_action.setIcon(self.init_data.get_window('key_action_icon'))
+
     def create_menubar(self):
         file_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu1'))
         file_menu.addAction(self.new_project_action)
@@ -223,6 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
         edit_menu.addAction(self.bottom_view_action)
         edit_menu.addAction(self.start_view_action)
         edit_menu.addAction(self.edit_gcrubs_action)
+        edit_menu.addAction(self.key_action)
 
         run_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu3'))
         run_menu.addAction(self.run_action)
@@ -258,6 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.speed_sb.valueChanged.connect(self.speed)
         self.run_action.connect(QtCore.SIGNAL('triggered()'), self.run)
         self.stop_run_action.connect(QtCore.SIGNAL('triggered()'), self.stop_run)
+        self.key_action.connect(QtCore.SIGNAL('triggered()'), self.keys)
 
     def create_coord_sys(self):
         self.x_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
@@ -891,6 +901,60 @@ class MainWindow(QtWidgets.QMainWindow):
         elem.set_dimensions(dim)
         elem.set_min_max(min_max)
         self.viewer.addItem(elem)
+
+    def keys(self):
+        window = KeyDialog(self.save_data, self)
+        window.setModal(self.init_data.get_window('keys_modal'))
+        window.setWindowTitle(self.init_data.get_window('keys_title'))
+
+        def get_key():
+            k = 0
+            for k in range(6):
+                if keys[k][1].is_clicked():
+                    break
+            window.set_movement(list(self.save_data.get_gcrubs('keys').keys())[k])
+            window.get_key(keys[k][2])
+            keys[k][1].set_unclicked()
+
+        def close_():
+            window.close()
+
+        def apply():
+            data = dict()
+            for k, val in zip(self.save_data.get_gcrubs('keys').keys(), keys):
+                data[k] = val[2].get_key()
+
+            self.save_data.set_gcrubs('keys', data)
+            close_()
+
+        keys = list()
+        layout = QtWidgets.QGridLayout(window)
+        for i, key in zip(range(6), self.save_data.get_gcrubs('keys').values()):
+            keys.append(list())
+            keys[i].append(QtWidgets.QLabel(self.init_data.get_window('keys_lbl_{num}'.format(num=i))))
+            keys[i].append(Button(self, i))
+            keys[i].append(Label(self.init_data.get_window('keys_lbl_key').format(
+                key=window.ret_key(key))))
+            keys[i][2].set_key(key)
+            for j in range(3):
+                layout.addWidget(keys[i][j], i, j)
+
+            keys[i][1].clicked.connect(keys[i][1].set_clicked)
+            keys[i][1].clicked.connect(get_key)
+
+        close_btn = QtWidgets.QPushButton(self.init_data.get_window('keys_close_btn_name'))
+        close_btn.setCursor(self.init_data.get_window('keys_close_cursor'))
+        close_btn.setDefault(self.init_data.get_window('keys_close_default'))
+        close_btn.clicked.connect(close_)
+        apply_btn = QtWidgets.QPushButton(self.init_data.get_window('keys_apply_btn_name'))
+        apply_btn.setCursor(self.init_data.get_window('keys_apply_cursor'))
+        apply_btn.setDefault(self.init_data.get_window('keys_apply_default'))
+        apply_btn.clicked.connect(apply)
+
+        layout.addWidget(close_btn, 6, 0)
+        layout.addWidget(apply_btn, 6, 2)
+        window.setLayout(layout)
+        window.show()
 
     def update_(self):
         self.grid.update_()

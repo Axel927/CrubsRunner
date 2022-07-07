@@ -17,7 +17,8 @@ class ListWidget(QtWidgets.QListWidget):
         try:
             self.addItem(elem.get_name())
         except AttributeError:
-            pass
+            if isinstance(elem, str):
+                self.addItem(elem)
 
     def get_contents(self) -> list:
         return self.contents
