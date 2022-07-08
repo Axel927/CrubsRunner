@@ -4,16 +4,15 @@
 
 from PySide6 import QtCore, QtGui
 import pyqtgraph.opengl as gl
-from data.initData import InitData
-from data.saveData import SaveData
-from widget.keyDialog import KeyDialog
+import data
+import widget
 
 
-class GlViewWidget(gl.GLViewWidget):
-    def __init__(self, parent, save_data: SaveData):
-        super(GlViewWidget, self).__init__()
+class ViewWidget(gl.GLViewWidget):
+    def __init__(self, parent, save_data: data.SaveData):
+        super(ViewWidget, self).__init__()
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.mousePos = None
         self.parent = parent
         self.getting_key = False
@@ -45,7 +44,7 @@ class GlViewWidget(gl.GLViewWidget):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if self.getting_key:
-            self.key.setText(self.text + KeyDialog.ret_key(event))
+            self.key.setText(self.text + widget.KeyDialog.ret_key(event))
             self.write_key.set_key(event.key())
 
         if self.parent.main_robot.is_selected():

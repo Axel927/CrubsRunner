@@ -3,12 +3,12 @@
 # Created by Axel Tremaudant on 07/07/2022
 
 from PySide6 import QtCore
-from data.initData import InitData
+import data
 
 
 class SaveData:
     def __init__(self):
-        self.init_data = InitData()
+        self.init_data = data.InitData()
 
         self.window = {
             'directory': "",

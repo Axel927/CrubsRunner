@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 01/07/2022
 
-from PySide6 import QtCore
-from element import robot
-from data.initData import InitData
-from data.saveData import SaveData
-from ui.runWindow import RunWindow
+from PySide6 import QtCore, QtWidgets
+
+import ui
+import data
+import element
+
 
 # Note : mr mean main robot and sr mean second robot
 
 
 class Run:
-    def __init__(self, save_data: SaveData, main_robot: robot.Robot, second_robot: robot.Robot, parent=None):
+    def __init__(self, save_data: data.SaveData, main_robot: element.Robot, second_robot: element.Robot, parent=None):
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.main_robot = main_robot
         self.second_robot = second_robot
         self.ongoing = False
@@ -61,10 +62,10 @@ class Run:
         self.timing_mr = False
         self.timing_sr = False
 
-    def set_main_robot(self, rbt: robot.Robot):
+    def set_main_robot(self, rbt: element.Robot):
         self.main_robot = rbt
 
-    def set_second_robot(self, rbt: robot.Robot):
+    def set_second_robot(self, rbt: element.Robot):
         self.second_robot = rbt
 
     def is_ongoing(self) -> bool:
@@ -108,7 +109,7 @@ class Run:
         self._stop()
 
     def run(self):
-        self.window = RunWindow(self.save_data, self.parent)
+        self.window = ui.Run(self.save_data, self.parent)
         self.time = -2
         self.stop_robot = 0
         self.nb_robot = 0
@@ -117,16 +118,32 @@ class Run:
             self.go_to_start(self.main_robot)
             self.mr_end = False
             self.nb_robot += 1
-            with open(self.main_robot.get_gcrubs_file(), 'r') as file:
-                self.main_robot_file = file.readlines()
+            try:
+                with open(self.main_robot.get_gcrubs_file(), 'r') as file:
+                    self.main_robot_file = file.readlines()
+            except FileNotFoundError:
+                QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                      self.init_data.get_window('error_open_file_title'),
+                                      self.init_data.get_window('error_open_file_message').format(
+                                          filename=file)).exec()
+                self.finish()
+                return
             self.start_time_move_mr.start(self.init_data.get_run('time_before_start'))
         if self.second_robot.is_running():
             self.go_to_start(self.second_robot)
             self.sr_end = False
             self.nb_robot += 1
-            with open(self.second_robot.get_gcrubs_file(), 'r') as file:
-                self.second_robot_file = file.readlines()
-            self.start_time_move_sr.start(self.init_data.get_run('time_before_start'))
+            try:
+                with open(self.second_robot.get_gcrubs_file(), 'r') as file:
+                    self.second_robot_file = file.readlines()
+            except FileNotFoundError:
+                QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                      self.init_data.get_window('error_open_file_title'),
+                                      self.init_data.get_window('error_open_file_message').format(
+                                          filename=file)).exec()
+                self.finish()
+                return
+        self.start_time_move_sr.start(self.init_data.get_run('time_before_start'))
 
         self.running = True
         self.timer.start(self.init_data.get_run('timer_refresh'))
@@ -227,8 +244,8 @@ class Run:
     def _stop_sleep_sr(self):
         self.sleep_sr.stop()
 
-    def moving(self, cmd: str, rbt: robot.Robot):
-        name = self.save_data.get_gcrubs('cmd_name')
+    def moving(self, cmd: str, rbt: element.Robot):
+        name = self.save_data.get_gcrubs('cmd_name')  # On recupere les commandes
         if cmd == "\n":  # Si ligne vide
             return
 
@@ -239,7 +256,7 @@ class Run:
         if cmd[:sep] == name.get('Pause')[:sep]:
             end_sep = sep
             for char in cmd[sep:]:
-                if not char.isdigit() and char != '.':
+                if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
                     break
                 end_sep += 1
 
@@ -294,29 +311,29 @@ class Run:
                     self.move(rbt, cmd, key, sep)
                     return
 
-    def move(self, rbt: robot.Robot, cmd: str, key: str, sep: int):
+    def move(self, rbt: element.Robot, cmd: str, key: str, sep: int):
         self.timing_mr = True
         self.timing_sr = True
         cmd_key = self.save_data.get_gcrubs('cmd_key')
         rotation = False
 
-        if cmd_key.get(key) == QtCore.Qt.Key_Up:
+        if cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_up'):
             move_cmd = ".move_robot(0, {dist_per_time}, 0)"
             last_move = ".move_robot(0, {rest}, 0)"
-        elif cmd_key.get(key) == QtCore.Qt.Key_Down:
+        elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_down'):
             move_cmd = ".move_robot(0, -{dist_per_time}, 0)"
             last_move = ".move_robot(0, -{rest}, 0)"
-        elif cmd_key.get(key) == QtCore.Qt.Key_Right:
+        elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_right'):
             move_cmd = ".move_robot({dist_per_time}, 0, 0)"
             last_move = ".move_robot({rest}, 0, 0)"
-        elif cmd_key.get(key) == QtCore.Qt.Key_Left:
+        elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_left'):
             move_cmd = ".move_robot(-{dist_per_time}, 0, 0)"
             last_move = ".move_robot(-{rest}, 0, 0)"
-        elif cmd_key.get(key) == QtCore.Qt.Key_D:
+        elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('turn_right'):
             rotation = True
             move_cmd = ".move_robot(0, 0, -{dist_per_time})"
             last_move = ".move_robot(0, 0, -{rest})"
-        elif cmd_key.get(key) == QtCore.Qt.Key_Q:
+        elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('turn_left'):
             rotation = True
             move_cmd = ".move_robot(0, 0, {dist_per_time})"
             last_move = ".move_robot(0, 0, {rest})"
@@ -365,7 +382,7 @@ class Run:
             self.last_move_sr = "self.second_robot" + last_move.format(rest="self.rest_sr")
 
     @staticmethod
-    def go_to_start(rbt: robot.Robot):
+    def go_to_start(rbt: element.Robot):
         if rbt.get_gcrubs_file() == "":
             return
 

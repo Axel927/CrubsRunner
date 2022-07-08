@@ -6,8 +6,8 @@ import sys
 import os
 from PySide6.QtWidgets import QApplication
 
-from ui import mainWindow
-from data.initData import InitData
+import ui
+import data
 
 if os.getcwd().split('/')[-1] == 'src':
     os.chdir('../')  # Set the directory CrubsRunner as the current working directory
@@ -16,9 +16,9 @@ if os.getcwd().split('/')[-1] == 'src':
 
 if __name__ == '__main__':
     app = QApplication()
-    init_data = InitData()
+    init_data = data.InitData()
 
-    window = mainWindow.MainWindow()
+    window = ui.MainWindow()
     window.resize(init_data.get_window('window_start_width'), init_data.get_window('window_start_height'))
     window.show()
 

@@ -3,18 +3,15 @@
 # Created by Axel Tremaudant on 20/06/22
 
 from PySide6 import QtWidgets, QtCore
-from data.initData import InitData
-from data.saveData import SaveData
-from widget.button import Button
-from widget.lineEdit import LineEdit
-from widget.label import Label
-from widget.keyDialog import KeyDialog
+
+import data
+import widget
 
 
 class GCrubs:
-    def __init__(self, save_data: SaveData, parent):
+    def __init__(self, save_data: data.SaveData, parent):
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.parent = parent
         self.cmd = list()
         self.cmd_size = 0
@@ -128,11 +125,11 @@ class GCrubs:
         self.cmd[self.cmd_size - 1][3].clicked.connect(self._key)
 
     def _cmd_append(self, key="", value=""):
-        self.cmd.append([Button(self.scroll_area, self.cmd_size),
+        self.cmd.append([widget.Button(self.scroll_area, self.cmd_size),
                          QtWidgets.QLineEdit(self.scroll_area),
-                         LineEdit(self.scroll_area),
-                         Button(self.scroll_area, self.cmd_size),
-                         Label(KeyDialog.ret_key(self.save_data.get_gcrubs('cmd_key').get(key)))
+                         widget.LineEdit(self.scroll_area),
+                         widget.Button(self.scroll_area, self.cmd_size),
+                         widget.Label(widget.KeyDialog.ret_key(self.save_data.get_gcrubs('cmd_key').get(key)))
                          ])
         self.cmd[self.cmd_size][0].setCursor(self.init_data.get_gcrubs('btn_cursor'))
         self.cmd[self.cmd_size][3].setCursor(self.init_data.get_gcrubs('btn_cursor'))
@@ -176,7 +173,7 @@ class GCrubs:
         self.parent.viewer.stop_get_key()
         self.key_dialog.close()
         for i in range(self.cmd_size):
-            self.cmd[i][4].setText(KeyDialog.ret_key(self.cmd[i][2].get_key()))
+            self.cmd[i][4].setText(widget.KeyDialog.ret_key(self.cmd[i][2].get_key()))
 
         self.window.show()
 

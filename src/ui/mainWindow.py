@@ -11,17 +11,11 @@ import warnings
 import pyqtgraph.opengl as gl
 from stl import mesh
 
-from ui import glGrid
-from element import board, robot, coordSys
-from data.initData import InitData
-from data.saveData import SaveData
-from widget import viewWidget as mc
-from ui import gcrubs
-from simulation import run
-from widget.listWidget import ListWidget
-from widget.keyDialog import KeyDialog
-from widget.button import Button
-from widget.label import Label
+import ui
+import element
+import data
+import widget
+import simulation
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -29,18 +23,18 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
 
         # Definition des attributs
-        self.save_data = SaveData()
-        self.init_data = InitData()
+        self.save_data = data.SaveData()
+        self.init_data = data.InitData()
 
         self.doing = list()
         self.undoing = list()
         self.dropped_filename = ""
         self.time = 0.
 
-        self.board = board.Board(self.save_data, self)
-        self.main_robot = robot.Robot(self.save_data, self, True)
-        self.second_robot = robot.Robot(self.save_data, self, False)
-        self.gcrubs = gcrubs.GCrubs(self.save_data, self)
+        self.board = element.Board(self.save_data, self)
+        self.main_robot = element.Robot(self.save_data, self, True)
+        self.second_robot = element.Robot(self.save_data, self, False)
+        self.gcrubs = ui.GCrubs(self.save_data, self)
 
         self.layout = QtWidgets.QVBoxLayout()
         self.center_widget = QtWidgets.QWidget()
@@ -48,19 +42,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.component_dock = QtWidgets.QDockWidget(self.init_data.get_window('name_component_dock'), self)
         self.properties_dock = QtWidgets.QDockWidget(self)
         self.sequence_dock = QtWidgets.QDockWidget(self)
-        self.list_widget = ListWidget()
+        self.list_widget = widget.ListWidget()
 
-        self.viewer = mc.GlViewWidget(self, self.save_data)
-        self.grid = glGrid.GlGridItem(self.save_data, self)
-        self.x_coord_sys = coordSys.CoordSys(self.save_data)
-        self.y_coord_sys = coordSys.CoordSys(self.save_data)
-        self.z_coord_sys = coordSys.CoordSys(self.save_data)
+        self.viewer = widget.ViewWidget(self, self.save_data)
+        self.grid = ui.GridItem(self.save_data, self)
+        self.x_coord_sys = element.CoordSys(self.save_data)
+        self.y_coord_sys = element.CoordSys(self.save_data)
+        self.z_coord_sys = element.CoordSys(self.save_data)
 
         self.menuBar = QtWidgets.QMenuBar(self)
         self.toolBar = self.addToolBar(self.init_data.get_window('name_tool_bar'))
         self.status_bar = QtWidgets.QStatusBar(self)
 
-        self.running = run.Run(self.save_data, self.main_robot, self.second_robot, self)
+        self.running = simulation.Run(self.save_data, self.main_robot, self.second_robot, self)
 
         self.new_project_action = QtGui.QAction(self.init_data.get_window('new_project_name'), self)
         self.open_project_action = QtGui.QAction(self.init_data.get_window('open_project_name'), self)
@@ -302,13 +296,13 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         self.grid.reset()
         self.board.remove(False)
-        self.board = board.Board(self.save_data, self)
+        self.board = element.Board(self.save_data, self)
         self.main_robot.remove(False)
-        self.main_robot = robot.Robot(self.save_data, self, True)
+        self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot.remove(False)
-        self.second_robot = robot.Robot(self.save_data, self, False)
+        self.second_robot = element.Robot(self.save_data, self, False)
         del self.list_widget
-        self.list_widget = ListWidget()
+        self.list_widget = widget.ListWidget()
         self.list_widget.add_content(self.grid)
         self.component_dock.setWidget(self.list_widget)
         self.create_connections()
@@ -333,7 +327,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.board = board.Board(self.save_data, self)
+            self.board = element.Board(self.save_data, self)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
                 self.save_data.set_board('file', file)
@@ -371,7 +365,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.main_robot = robot.Robot(self.save_data, self, True)
+            self.main_robot = element.Robot(self.save_data, self, True)
             self.running.set_main_robot(self.main_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.main_robot.set_file(file)
@@ -418,7 +412,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
-            self.second_robot = robot.Robot(self.save_data, self, False)
+            self.second_robot = element.Robot(self.save_data, self, False)
             self.running.set_second_robot(self.second_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.save_data.set_second_robot('file', file)
@@ -453,13 +447,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if file:
                 self.grid.reset()
                 self.board.remove(False)
-                self.board = board.Board(self.save_data, self)
+                self.board = element.Board(self.save_data, self)
                 self.main_robot.remove(False)
-                self.main_robot = robot.Robot(self.save_data, self, True)
+                self.main_robot = element.Robot(self.save_data, self, True)
                 self.second_robot.remove(False)
-                self.second_robot = robot.Robot(self.save_data, self, False)
+                self.second_robot = element.Robot(self.save_data, self, False)
                 del self.list_widget
-                self.list_widget = ListWidget()
+                self.list_widget = widget.ListWidget()
                 self.list_widget.add_content(self.grid)
                 self.component_dock.setWidget(self.list_widget)
                 self.create_connections()
@@ -808,12 +802,12 @@ class MainWindow(QtWidgets.QMainWindow):
             layout.addWidget(ok_btn, 2, 1)
             dialog.setLayout(layout)
 
-            if self.main_robot.get_gcrubs_file() == "":
+            if self.main_robot.get_gcrubs_file() == "" or not self.main_robot.visible():
                 main_robot_cb.setEnabled(False)
-            if self.second_robot.get_gcrubs_file() == "":
+            if self.second_robot.get_gcrubs_file() == "" or not self.second_robot.visible():
                 second_robot_cb.setEnabled(False)
 
-            if self.main_robot.get_gcrubs_file() == "" and self.second_robot.get_gcrubs_file() == "":
+            if not main_robot_cb.isEnabled() and not second_robot_cb.isEnabled():
                 ok_btn.setEnabled(False)
 
             def ok():
@@ -833,7 +827,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dialog.close()
                 self.stop_run_action.setEnabled(True)
                 self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
-                self.running = run.Run(self.save_data, self.main_robot, self.second_robot, self)
+                self.running = simulation.Run(self.save_data, self.main_robot, self.second_robot, self)
                 self.running.run()
 
             def cancel():
@@ -849,7 +843,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stop_run_action.setEnabled(False)
 
     def element_properties(self):
-        self.list_widget.get_contents()[self.list_widget.currentRow()].properties_window()
+        self.list_widget.get_contents()[self.list_widget.currentRow()].properties()
 
     def select_element(self):
         for i in range(self.list_widget.get_len()):
@@ -861,7 +855,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except AttributeError:
                 continue
 
-    def show_stl(self, elem: robot.Board):
+    def show_stl(self, elem: element.Board):
         if elem.get_file() == "":
             return
         try:
@@ -903,7 +897,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewer.addItem(elem)
 
     def keys(self):
-        window = KeyDialog(self.save_data, self)
+        window = widget.KeyDialog(self.save_data, self)
         window.setModal(self.init_data.get_window('keys_modal'))
         window.setWindowTitle(self.init_data.get_window('keys_title'))
 
@@ -920,11 +914,11 @@ class MainWindow(QtWidgets.QMainWindow):
             window.close()
 
         def apply():
-            data = dict()
+            key_ = dict()
             for k, val in zip(self.save_data.get_gcrubs('keys').keys(), keys):
-                data[k] = val[2].get_key()
+                key_[k] = val[2].get_key()
 
-            self.save_data.set_gcrubs('keys', data)
+            self.save_data.set_gcrubs('keys', key_)
             close_()
 
         keys = list()
@@ -932,8 +926,8 @@ class MainWindow(QtWidgets.QMainWindow):
         for i, key in zip(range(6), self.save_data.get_gcrubs('keys').values()):
             keys.append(list())
             keys[i].append(QtWidgets.QLabel(self.init_data.get_window('keys_lbl_{num}'.format(num=i))))
-            keys[i].append(Button(self, i))
-            keys[i].append(Label(self.init_data.get_window('keys_lbl_key').format(
+            keys[i].append(widget.Button(self, i))
+            keys[i].append(widget.Label(self.init_data.get_window('keys_lbl_key').format(
                 key=window.ret_key(key))))
             keys[i][2].set_key(key)
             for j in range(3):
@@ -990,13 +984,13 @@ class MainWindow(QtWidgets.QMainWindow):
         elif extension == self.init_data.get_extension('project'):
             self.grid.reset()
             self.board.remove(False)
-            self.board = board.Board(self.save_data, self)
+            self.board = element.Board(self.save_data, self)
             self.main_robot.remove(False)
-            self.main_robot = robot.Robot(self.save_data, self, True)
+            self.main_robot = element.Robot(self.save_data, self, True)
             self.second_robot.remove(False)
-            self.second_robot = robot.Robot(self.save_data, self, False)
+            self.second_robot = element.Robot(self.save_data, self, False)
             del self.list_widget
-            self.list_widget = ListWidget()
+            self.list_widget = widget.ListWidget()
             self.list_widget.add_content(self.grid)
             self.component_dock.setWidget(self.list_widget)
             self.create_connections()
@@ -1004,7 +998,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif extension == self.init_data.get_extension('board'):
             if self.save_data.get_board('file') == '':
                 self.board.remove(False)
-                self.board = board.Board(self.save_data, self)
+                self.board = element.Board(self.save_data, self)
                 self.new_board(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
@@ -1025,12 +1019,12 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.save_data.get_main_robot('file') == "" and \
                     param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
                 self.main_robot.remove(False)
-                self.main_robot = robot.Robot(self.save_data, self, True)
+                self.main_robot = element.Robot(self.save_data, self, True)
                 self.new_main_robot(False, self.dropped_filename)
             elif self.save_data.get_second_robot('file') == "" and \
                     param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
                 self.second_robot.remove(False)
-                self.second_robot = robot.Robot(self.save_data, self, False)
+                self.second_robot = element.Robot(self.save_data, self, False)
                 self.new_second_robot(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),

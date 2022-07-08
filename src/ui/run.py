@@ -4,15 +4,14 @@
 
 
 from PySide6 import QtWidgets
-from data.saveData import SaveData
-from data.initData import InitData
+import data
 
 # Note : mr mean main robot and sr mean second robot
 
 
-class RunWindow:
-    def __init__(self, save_data: SaveData, parent=None):
-        self.init_data = InitData()
+class Run:
+    def __init__(self, save_data: data.SaveData, parent=None):
+        self.init_data = data.InitData()
         self.save_data = save_data
         self.parent = parent
 

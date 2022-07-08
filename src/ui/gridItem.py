@@ -5,15 +5,14 @@
 import pyqtgraph.opengl as gl
 from PySide6 import QtGui, QtWidgets
 from time import time
-from data.initData import InitData
-from data.saveData import SaveData
+import data
 
 
-class GlGridItem(gl.GLGridItem):
-    def __init__(self, save_data: SaveData, parent):
-        super(GlGridItem, self).__init__()
+class GridItem(gl.GLGridItem):
+    def __init__(self, save_data: data.SaveData, parent):
+        super(GridItem, self).__init__()
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.parent = parent
         self.time = 0.
 
@@ -35,7 +34,7 @@ class GlGridItem(gl.GLGridItem):
         self.group_box = QtWidgets.QGroupBox(self.init_data.get_grid('element_name'), self.window)
         self.window_layout = QtWidgets.QGridLayout(self.window)
 
-    def properties_window(self):
+    def properties(self):
         self.parent.properties_dock.setWidget(self.window)
         self.parent.properties_dock.setWindowTitle(self.init_data.get_grid('window_name'))
 

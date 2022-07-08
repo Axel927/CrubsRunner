@@ -3,15 +3,14 @@
 # Created by Axel Tremaudant on 07/07/2022
 
 import pyqtgraph.opengl as gl
-from data.saveData import SaveData
-from data.initData import InitData
+import data
 
 
 class CoordSys(gl.GLMeshItem):
-    def __init__(self, save_data: SaveData):
+    def __init__(self, save_data: data.SaveData):
         super(CoordSys, self).__init__(smooth=True, drawFaces=True, drawEdges=True)
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.file = self.init_data.get_view('file')
         self.name = self.init_data.get_view('coord_sys_name')
         self.element_type = ""

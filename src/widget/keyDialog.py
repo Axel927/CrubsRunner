@@ -3,14 +3,14 @@
 # Created by Axel Tremaudant on 07/07/2022
 
 from PySide6 import QtWidgets, QtGui, QtCore
-from data.initData import InitData
+import data
 
 
 class KeyDialog(QtWidgets.QDialog):
     def __init__(self, save_data, parent=None):
         super(KeyDialog, self).__init__(parent)
         self.save_data = save_data
-        self.init_data = InitData()
+        self.init_data = data.InitData()
         self.movement = ''
         self.key = None
         self.to_write = None
