@@ -2,12 +2,20 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 10/06/2022
 
+"""
+Fichier contenant toutes les valeurs utiles a l'application dans la classe InitData.
+Ces valeurs ne changent pas pendant que l'application tourne.
+"""
+
 from PySide6 import QtCore, QtWidgets, QtGui
 
 
-class InitData:
+class Init:
+    """
+    Classe contenant toutes les valeurs utiles a CrubsRunner.
+    """
     def __init__(self):
-        self.window = {
+        self.window = {  # Donnees pour la fenetre principale
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
             'speed_tip': "Vitesse de deplacement du robot",
@@ -58,6 +66,8 @@ class InitData:
             'import_ok_btn_name': "Valider",
             'import_cancel_btn_checked': True,
             'import_ok_btn_checked': False,
+            'import_height': 150,
+            'import_width': 280,
 
             'export_name': "Exporter",
             'export_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_E),
@@ -144,9 +154,9 @@ class InitData:
             'keys_close_btn_name': "Annuler",
             'keys_close_default': False,
             'keys_close_cursor': QtCore.Qt.PointingHandCursor,
-        }
+        }  # end self.window
 
-        self.board = {
+        self.board = {  # Contient toutes les donnees pour le plateau
             'type': "board",
             'name': "Plateau",
             'file': "",
@@ -171,9 +181,9 @@ class InitData:
             'color_cursor': QtCore.Qt.PointingHandCursor,
             'color_default': False,
             'color_dialog_title': "Couleur du plateau",
-            'edge_color_name': "Choisir la couleur des bords",
+            'edge_color_name': "Choisir la couleur des arretes",
             'edge_color_default': False,
-            'edge_color_dialog_title': "Couleur des bords du plateau",
+            'edge_color_dialog_title': "Couleur des arretes du plateau",
 
             'close_btn_name': "Fermer",
             'close_cursor': QtCore.Qt.PointingHandCursor,
@@ -190,8 +200,9 @@ class InitData:
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le plateau ?\n"
                                           "Cette action est irreversible.",
             'remove_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
-        }
+        }  # end self.board
 
+        # Contient toutes les donnees pour le robot principal et les donnees communes aux deux robots
         self.main_robot = {
             'type': "robot",
             'name': "Robot principal",
@@ -213,9 +224,9 @@ class InitData:
 
             'window_title': "Proprietes du robot principal",
             'color_name': "Choisir la couleur du robot",
-            'edge_color_name': "Choisir la couleur des bords",
+            'edge_color_name': "Choisir la couleur des arretes",
             'color_dialog_title': "Couleur du robot",
-            'edge_color_dialog_title': "Couleur des bords",
+            'edge_color_dialog_title': "Couleur des arretes",
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le robot principal ?\n"
                                           "Cette action est irreversible.",
             'axis_rotation_x_name': "x",
@@ -272,9 +283,9 @@ class InitData:
             'sequence_origin_btn_name': "Fait",
             'sequence_origin_btn_default': True,
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,
-        }
+        }   # End self.main_robot
 
-        self.second_robot = {
+        self.second_robot = {  # Contient les donnees pour le robot secondaire
             'type': "robot",
             'name': "Robot secondaire",
             'file': "",
@@ -300,9 +311,9 @@ class InitData:
 
             'sequence_dialog_title': "Sequence du robot secondaire",
             'sequence_text': "{comment} Sequence gcrubs generee par CrubsRunner le {date} pour le robot secondaire.\n\n"
-        }
+        }  # End self.second_robot
 
-        self.view = {
+        self.view = {  # Contient les donnees pour la gestion de la vue du widget central
             'start_view_position_rotation': QtGui.QQuaternion.fromEulerAngles(QtGui.QVector3D(-45, 0, 0)),
             'start_view_position_distance': 4000,
             'start_view_position_pos': QtGui.QVector3D(0, 0, 0),
@@ -323,9 +334,9 @@ class InitData:
             'coord_sys_x_color': (1., 0., 0., 1.),
             'coord_sys_y_color': (0., 1., 0., 1.),
             'coord_sys_z_color': (0., 0., 1., 1.),
-        }
+        }  # End self.view
 
-        self.grid = {
+        self.grid = {  # Contient les donnees de la grille dans le widget central
             'element_name': "Grille",
             'height': 2000,
             'width': 3000,
@@ -367,9 +378,9 @@ class InitData:
             'color_dialog_name': "Choisir la couleur de la grille",
 
             'group_box_name': "Grille"
-        }
+        }  # End self.grid
 
-        self.gcrubs = {
+        self.gcrubs = {  # Contient les donnees pour toute la partie fichier sequentiel
             'extension': "Sequence CrubsRunner (*.gcrubs)",
             'edit_action_name': "Editer les commandes gcrubs",
             'edit_action_status_tip': "Editer les commandes gcrubs",
@@ -396,7 +407,7 @@ class InitData:
             'del_btn_icon': QtGui.QIcon("icon/icon_del.png"),
             'key_btn_icon': QtGui.QIcon('icon/icon_key.png'),
             'sa_height': 430,
-            'sa_width': 720,
+            'sa_width': 730,
             'window_modal': True,
 
             'key_dialog_title': "Definir le mouvement associe",
@@ -407,9 +418,9 @@ class InitData:
             'key_close_cursor': QtCore.Qt.PointingHandCursor,
             'key_close_default': True,
             'period': 100  # ms
-        }
+        }  # End self.gcrubs
 
-        self.run = {
+        self.run = {  # Contient les donnees pour la simulation
             'run_action_name': "Lancer une simulation",
             'run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R),
             'run_action_tip': "Lancer une simulation",
@@ -439,42 +450,88 @@ class InitData:
             'timer_refresh': 1000,  # ms
             'accuracy_timer': None,  # None pour ne pas voir les chiffres apres la virgule
             'time_before_start': 2000  # ms
-        }
+        }  # End self.run
 
-        self.extensions = {
+        self.extensions = {  # Contient toutes les extensions ouvrables par l'application
             'project': ".crp",
             'board': ".crb",
             'robot': ".crr",
             'sequence': ".gcrubs",
             '3d_file': ".stl"
-        }
+        }  # End self.extensions
 
     def get_window(self, key: str):
+        """
+        Renvoie la donnee de la fenetre principale qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.window.get(key)
 
     def get_board(self, key: str):
+        """
+        Renvoie la donnee du plateau qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.board.get(key)
 
     def get_main_robot(self, key: str):
+        """
+        Renvoie la donnee du robot principal qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.main_robot.get(key)
 
     def get_second_robot(self, key: str):
+        """
+        Renvoie la donnee du robot secondaire qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.second_robot.get(key)
 
     def get_view(self, key: str):
+        """
+        Renvoie la donnee de la gestion de la vue qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.view.get(key)
 
     def get_grid(self, key: str):
+        """
+        Renvoie la donnee de la grille qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.grid.get(key)
 
     def get_extension(self, key: str):
+        """
+        Renvoie l'extension qui correspond a la cle.
+        Si key == 'value': renvoie toutes les valeurs
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         if key == 'value':
-            return self.extensions.values()
+            return self.extensions.values()  # Renvoie toutes les extensions
         else:
             return self.extensions.get(key)
 
     def get_gcrubs(self, key: str):
+        """
+        Renvoie la donnee de la partie sequentielle qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.gcrubs.get(key)
 
     def get_run(self, key: str):
+        """
+        Renvoie la donnee de la partie simulation qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
         return self.run.get(key)

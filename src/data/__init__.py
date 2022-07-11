@@ -1,7 +1,7 @@
-from .initData import InitData
-from .saveData import SaveData
+from .init import Init
+from .save import Save
 
 __all__ = [
-    'InitData',
-    'SaveData'
+    'Init',
+    'Save'
 ]

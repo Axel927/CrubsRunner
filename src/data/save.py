@@ -2,20 +2,25 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 07/07/2022
 
+"""
+Fichier contenant toutes les valeurs utiles pendant le programme et qui peuvent etre modifiees durant l'utilisation.
+Ces valeurs sont celles qui sont ecrites dans les fichiers de sauvegarde.
+"""
+
 from PySide6 import QtCore
 import data
 
 
-class SaveData:
+class Save:
     def __init__(self):
-        self.init_data = data.InitData()
+        self.init_data = data.Init()
 
-        self.window = {
+        self.window = {  # Donnees du projet
             'directory': "",
             'project_file': ""
         }
 
-        self.grid = {
+        self.grid = {  # Donnees de la grille
             'height': self.init_data.get_grid('spacing_height'),
             'width': self.init_data.get_grid('spacing_width'),
             'transparency': self.init_data.get_grid('transparency'),
@@ -26,13 +31,13 @@ class SaveData:
             'moving_speed': 10
         }
 
-        self.board = {
+        self.board = {  # Donnees du plateau
             'file': "",
             'color': self.init_data.get_board('color'),
             'edge_color': self.init_data.get_board('edge_color')
         }
 
-        self.main_robot = {
+        self.main_robot = {  # Donnees du robot principal
             'file': "",
             'color': self.init_data.get_main_robot('color'),
             'edge_color': self.init_data.get_main_robot('edge_color'),
@@ -46,7 +51,7 @@ class SaveData:
             'start_position': (0, 0, 0)  # x, y, angle
         }
 
-        self.second_robot = {
+        self.second_robot = {  # Donnees du robot secondaire
             'file': "",
             'color': self.init_data.get_second_robot('color'),
             'edge_color': self.init_data.get_second_robot('edge_color'),
@@ -60,8 +65,8 @@ class SaveData:
             'start_position': (0, 0, 0)  # x, y, angle
         }
 
-        self.gcrubs = {
-            'cmd_name': {
+        self.gcrubs = {  # Donnees concernant la sequence
+            'cmd_name': {  # Associe le nom de la commande avec la commande
                 'Commentaire': ";;",
                 'Pause': "ts;;{temps};;",
                 "Se deplacer en avant": "cm;;8;;{dist};;",
@@ -70,16 +75,16 @@ class SaveData:
                 "Tourner a gauche": "cm;;0;;{angle};;",
             },
 
-            'cmd_key': {
+            'cmd_key': {  # Associe le nom de la commande avec son raccourcis clavier
                 'Commentaire': None,
                 'Pause': None,
-                "Se deplacer en avant": None,
-                "Se deplacer en arriere": None,
-                "Tourner a droite": None,
-                "Tourner a gauche": None,
+                "Se deplacer en avant": QtCore.Qt.Key_Up,
+                "Se deplacer en arriere": QtCore.Qt.Key_Down,
+                "Tourner a droite": QtCore.Qt.Key_D,
+                "Tourner a gauche": QtCore.Qt.Key_Q,
             },
 
-            'keys': {
+            'keys': {  # Associe la direction dans laquelle doit se deplacer le robot avec sa touche du clavier
                 'go_right': QtCore.Qt.Key_Right,
                 'go_left': QtCore.Qt.Key_Left,
                 'go_up': QtCore.Qt.Key_Up,
@@ -90,33 +95,88 @@ class SaveData:
         }
 
     def get_window(self, key: str):
+        """
+        Renvoie la donnee de la fenetre principale qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.window.get(key)
 
     def set_window(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne le projet en general.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         self.window[key] = value
 
     def get_board(self, key: str):
+        """
+        Renvoie la donnee du plateau qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.board.get(key)
 
     def set_board(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne le plateau.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         self.board[key] = value
 
     def get_main_robot(self, key: str):
+        """
+        Renvoie la donnee du robot principal qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.main_robot.get(key)
 
     def set_main_robot(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne le robot principal.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         self.main_robot[key] = value
 
     def get_second_robot(self, key: str):
+        """
+        Renvoie la donnee du robot secondaire qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.second_robot.get(key)
 
     def set_second_robot(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne le robot secondaire.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         self.second_robot[key] = value
 
     def get_grid(self, key: str):
+        """
+        Renvoie la donnee de la grille qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.grid.get(key)
 
     def set_grid(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne la grille.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         if key == 'transparency':
             self.grid['color'] = (
                 self.grid.get('color')[0], self.grid.get('color')[1], self.grid.get('color')[2], value)
@@ -124,13 +184,34 @@ class SaveData:
         self.grid[key] = value
 
     def get_gcrubs(self, key: str):
+        """
+        Renvoie la donnee de la partie sequentielle qui correspond a la cle.
+        :param key: str: Cle pour obtenir la valeur correspondante
+        :return: any: Valeur correspondant a la cle
+        """
         return self.gcrubs.get(key)
 
     def set_gcrubs(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne la partie sequentielle.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
         if value != dict():  # Si c'est pas un dico vide
             self.gcrubs[key] = value
 
-    def save(self, to_save):
+    def save(self, to_save: str):
+        """
+        Renvoie sous forme de string le dictionnaire to_save.
+        Si to_save n'est pas dans la liste des dictionnaires, renvoie "".
+
+        Liste des dictionnaires :
+            window, board, main_robot, second_robot, grid, gcrubs
+
+        :param to_save: str: Dictionnaire que l'on veut sous format str
+        :return: str: Dictionnaire sous format str
+        """
         ans = ""
         if to_save == 'window':
             ans = self.init_data.get_window('window_first_line')
@@ -165,9 +246,23 @@ class SaveData:
         return ans
 
     def get_len_cmd(self) -> int:
+        """
+        Renvoie le nombre de commandes.
+        :return: int: Nombre de commandes
+        """
         return len(self.gcrubs.get('cmd_name'))
 
     def get_len(self, dictionary: str) -> int:
+        """
+        Renvoie le nombre d'elements pour chaque dictionnaire.
+        Renvoie 0 si ce n'est pas un des dictionnaires.
+
+        Liste des dictionnaires :
+            window, board, main_robot, second_robot, grid, gcrubs
+
+        :param dictionary: str: Dictionnaire dont on veut le nombre d'elements
+        :return: int : Nombre d'element du dictionnaire
+        """
         if dictionary == 'window':
             return len(self.window)
         elif dictionary == 'board':

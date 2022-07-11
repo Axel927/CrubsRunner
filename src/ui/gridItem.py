@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 07/06/2022
 
+"""
+Fichier qui contient la classe GridItem.
+"""
+
 import pyqtgraph.opengl as gl
 from PySide6 import QtGui, QtWidgets
 from time import time
@@ -9,10 +13,18 @@ import data
 
 
 class GridItem(gl.GLGridItem):
-    def __init__(self, save_data: data.SaveData, parent):
+    """
+    Classe qui s'occupe de la grille dans le widget central et de ses parametres.
+    """
+    def __init__(self, save_data: data.Save, parent):
+        """
+        Constructeur de GridItem.
+        :param save_data: data.Save: Donnees de sauvegarde
+        :param parent: ui.MainWindow: Fenetre principale
+        """
         super(GridItem, self).__init__()
         self.save_data = save_data
-        self.init_data = data.InitData()
+        self.init_data = data.Init()
         self.parent = parent
         self.time = 0.
 
@@ -35,6 +47,10 @@ class GridItem(gl.GLGridItem):
         self.window_layout = QtWidgets.QGridLayout(self.window)
 
     def properties(self):
+        """
+        Cree la fenetre des proprietes
+        :return: None
+        """
         self.parent.properties_dock.setWidget(self.window)
         self.parent.properties_dock.setWindowTitle(self.init_data.get_grid('window_name'))
 
@@ -87,6 +103,10 @@ class GridItem(gl.GLGridItem):
         self.window.show()
 
     def _connections(self):
+        """
+        Cree les connexions entre les widgets et les slots.
+        :return: None
+        """
         self.cb_see_grid.stateChanged.connect(self._see_grid)
         self.height_grid_sb.valueChanged.connect(self._height_grid)
         self.width_grid_sb.valueChanged.connect(self._width_grid)
@@ -97,6 +117,10 @@ class GridItem(gl.GLGridItem):
         self.coord_sys_cb.stateChanged.connect(self._see_coord_sys)
 
     def _see_grid(self):
+        """
+        Slot pour afficher ou non la grille.
+        :return: None
+        """
         if self.cb_see_grid.isChecked():
             self.setVisible(True)
             self.height_grid_sb.setVisible(True)
@@ -119,6 +143,10 @@ class GridItem(gl.GLGridItem):
             self.save_data.set_grid('visible', False)
 
     def _see_coord_sys(self):
+        """
+        Slot pour voir ou non le systeme de coordonnees.
+        :return: None
+        """
         if self.coord_sys_cb.isChecked():
             self.save_data.set_grid('coord_sys_visible', True)
             self.parent.x_coord_sys.setVisible(True)
@@ -131,45 +159,61 @@ class GridItem(gl.GLGridItem):
             self.parent.z_coord_sys.setVisible(False)
 
     def _height_grid(self):
+        """
+        Slot pour mettre a jour la hauteur des carreaux.
+        :return: None
+        """
         self.save_data.set_grid('height', self.height_grid_sb.value())
         self.setSpacing(self.save_data.get_grid('width'), self.save_data.get_grid('height'))
 
     def _width_grid(self):
+        """
+        Slot pour mettre a jour la largeur des carreaux.
+        :return: None
+        """
         self.save_data.set_grid('width', self.width_grid_sb.value())
         self.setSpacing(self.save_data.get_grid('width'), self.save_data.get_grid('height'))
 
     def _color_grid(self):
-        if time() - self.time < 0.2:
+        """
+        slot pour modifier la couleur de la grille.
+        :return: None
+        """
+        if time() - self.time < 0.2:  # Evite le bug de plusieurs apparitions
             return
+
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_grid('color_dialog_name'))
 
         color = self.save_data.get_grid('color')
         self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
-        self.color_dialog.setVisible(True)
 
         color = self.color_dialog.getColor()
 
-        if 0 != color.green() and 0 != color.blue() and color.red() != 0:
-            self.setColor(color)
-            self.save_data.set_grid('color', (self.color().red(),
-                                              self.color().green(),
-                                              self.color().blue(),
-                                              self.transparency_grid_sb.value()
-                                              ))
-            self.setColor(self.save_data.get_grid('color'))
-            self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
-                                                                                                        v=color.green(),
-                                                                                                        b=color.blue()))
-
-        self.color_dialog.setVisible(False)
+        self.setColor(color)
+        self.save_data.set_grid('color', (self.color().red(),
+                                          self.color().green(),
+                                          self.color().blue(),
+                                          self.transparency_grid_sb.value()
+                                          ))
+        self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
+                                                                                                    v=color.green(),
+                                                                                                    b=color.blue()))
         self.color_dialog.close()
         self.time = time()
 
     def _close_window(self):
+        """
+        Slot pour fermer la fenetre.
+        :return: None
+        """
         self.window.close()
 
     def reset(self):
+        """
+        Methode pour remettre la grille dans son etat initial.
+        :return: None
+        """
         self.setSpacing(self.init_data.get_grid('spacing_width'), self.init_data.get_grid('spacing_height'))
         self.setColor(self.init_data.get_grid('color'))
         self.setVisible(True)
@@ -180,7 +224,6 @@ class GridItem(gl.GLGridItem):
             self.init_data.get_window('color_status_message').format(r=self.init_data.get_grid('color')[0],
                                                                      v=self.init_data.get_grid('color')[1],
                                                                      b=self.init_data.get_grid('color')[2]))
-
         self.save_data.set_grid('color', self.init_data.get_grid('color'))
         self.save_data.set_grid('transparency', self.init_data.get_grid('transparency'))
         self.save_data.set_grid('height', self.init_data.get_grid('spacing_height'))
@@ -192,10 +235,18 @@ class GridItem(gl.GLGridItem):
         self.parent.z_coord_sys.setVisible(not self.init_data.get_view('color_sys_visible'))
 
     def _transparency_grid(self):
+        """
+        Slot pour changer la transparence de la grille.
+        :return: None
+        """
         self.save_data.set_grid('transparency', self.transparency_grid_sb.value())
         self.setColor(self.save_data.get_grid('color'))
 
     def update_(self):
+        """
+        Met la grille a jour.
+        :return: None
+        """
         self.setSpacing(self.save_data.get_grid('width'), self.save_data.get_grid('height'))
         self.setVisible(self.save_data.get_grid('visible'))
         self.setColor(self.save_data.get_grid('color'))
@@ -204,5 +255,9 @@ class GridItem(gl.GLGridItem):
         self.parent.y_coord_sys.setVisible(self.save_data.get_grid('color_sys_visible'))
         self.parent.z_coord_sys.setVisible(self.save_data.get_grid('color_sys_visible'))
 
-    def get_name(self):
+    def get_name(self) -> str:
+        """
+        Renvoie le nom de la grille.
+        :return: str: Nom
+        """
         return self.init_data.get_grid('element_name')

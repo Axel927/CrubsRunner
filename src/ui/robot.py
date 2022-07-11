@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 08/07/2022
 
+"""
+Fichier contenant la partie interface de la classe Robot.
+"""
+
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
 import data
@@ -9,11 +13,20 @@ import widget
 
 
 class Robot:
-    def __init__(self, parent, save_data: data.SaveData, robot):
+    """
+    Classe pour l'interface des robots.
+    """
+    def __init__(self, parent, save_data: data.Save, robot):
+        """
+        Constructeur de Robot.
+        :param parent: ui.MainWindow: Fenetre principale.
+        :param save_data: data.Save: Donnees de sauvegarde
+        :param robot: element.Robot: Robot concerne
+        """
         self.parent = parent
         self.save_data = save_data
         self.robot = robot
-        self.init_data = data.InitData()
+        self.init_data = data.Init()
         self.time = 0.
 
         self.window = QtWidgets.QDialog(self.parent)
@@ -54,6 +67,10 @@ class Robot:
         self.sequence_origin_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_origin_btn_name'))
 
     def properties_window(self):
+        """
+        Cree la fenetre des proprietes
+        :return: None
+        """
         if self.robot.is_main_robot():
             self.parent.properties_dock.setWindowTitle(self.init_data.get_main_robot('window_title'))
         else:
@@ -159,11 +176,15 @@ class Robot:
         self.window.show()
 
     def _connections(self):
+        """
+        Cree les connexions entre les widgets et les slots.
+        :return: None
+        """
         self.color_btn.clicked.connect(self._color_robot)
         self.edge_color_btn.clicked.connect(self._edge_color_robot)
         self.close_btn.clicked.connect(self._close)
         self.reset_btn.clicked.connect(self.reset)
-        self.remove_btn.clicked.connect(self.remove)
+        self.remove_btn.clicked.connect(self._remove)
         self.angle_rotation_sb.valueChanged.connect(self._rotate)
         self.axis_rotation_rb_x.clicked.connect(self._axis_x)
         self.axis_rotation_rb_y.clicked.connect(self._axis_y)
@@ -179,8 +200,13 @@ class Robot:
         self.sequence_origin_btn.clicked.connect(self._set_origin)
 
     def _color_robot(self):
+        """
+        Slot pour choisir la couleur du robot.
+        :return: None
+        """
         if time() - self.time < 0.2:
             return
+
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_main_robot('color_dialog_title'))
 
@@ -190,31 +216,31 @@ class Robot:
         else:
             color = self.save_data.get_second_robot('color')
         self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
-        self.color_dialog.setVisible(True)
 
         color = self.color_dialog.getColor()
+        if self.robot.is_main_robot():
+            self.save_data.set_main_robot('color', (
+                color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
+            self.robot.setColor(self.save_data.get_main_robot('color'))
+        else:
+            self.save_data.set_second_robot('color', (
+                color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
+            self.robot.setColor(self.save_data.get_second_robot('color'))
 
-        if 0 != color.green() and 0 != color.blue() and color.red() != 0:
-            if self.robot.is_main_robot():
-                self.save_data.set_main_robot('color', (
-                    color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
-                self.robot.setColor(self.save_data.get_main_robot('color'))
-            else:
-                self.save_data.set_second_robot('color', (
-                    color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
-                self.robot.setColor(self.save_data.get_second_robot('color'))
-
-            self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
-                                                                                                        v=color.green(),
-                                                                                                        b=color.blue()))
-
-        self.color_dialog.setVisible(False)
+        self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
+                                                                                                    v=color.green(),
+                                                                                                    b=color.blue()))
         self.color_dialog.close()
         self.time = time()
 
     def _edge_color_robot(self):
+        """
+        Slot pour choisir la couleur des arretes.
+        :return: None
+        """
         if time() - self.time < 0.2:
             return
+
         self.color_dialog.open()
         self.color_dialog.setWindowTitle(self.init_data.get_main_robot('edge_color_dialog_title'))
 
@@ -224,32 +250,35 @@ class Robot:
         else:
             color = self.save_data.get_second_robot('edge_color')
         self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
-        self.color_dialog.setVisible(True)
 
         color = self.color_dialog.getColor()
+        if self.robot.is_main_robot():
+            self.save_data.set_main_robot('edge_color', (
+                color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
+            self.robot.set_edge_color(self.save_data.get_main_robot('edge_color'))
+        else:
+            self.save_data.set_second_robot('edge_color', (
+                color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
+            self.robot.set_edge_color(self.save_data.get_second_robot('edge_color'))
 
-        if 0 != color.green() and 0 != color.blue() and color.red() != 0:
-            if self.robot.is_main_robot():
-                self.save_data.set_main_robot('edge_color', (
-                    color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
-                self.robot.set_edge_color(self.save_data.get_main_robot('edge_color'))
-            else:
-                self.save_data.set_second_robot('edge_color', (
-                    color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
-                self.robot.set_edge_color(self.save_data.get_second_robot('edge_color'))
-
-            self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
-                                                                                                        v=color.green(),
-                                                                                                        b=color.blue()))
-
-        self.color_dialog.setVisible(False)
+        self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
+                                                                                                    v=color.green(),
+                                                                                                    b=color.blue()))
         self.color_dialog.close()
         self.time = time()
 
     def _close(self):
+        """
+        Slot pour fermer la fenetre.
+        :return: None
+        """
         self.window.close()
 
     def reset(self):
+        """
+        Fonction pour remettre le robot dans l'etat initial.
+        :return: None
+        """
         if self.robot.is_main_robot():
             self.robot.setColor(self.init_data.get_main_robot('color'))
             self.robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
@@ -261,16 +290,25 @@ class Robot:
         self.window.close()
 
     def import_gcrubs(self):
+        """
+        fonction pour importer un fichier sequentiel.
+        :return: None
+        """
+        if time() - self.time < 0.2:
+            return
+
         file = QtWidgets.QFileDialog.getOpenFileName(self.window,
                                                      self.init_data.get_main_robot('import_gcrubs_title'),
                                                      self.save_data.get_window('directory'),
                                                      self.init_data.get_main_robot('import_gcrubs_extension'))[0]
         self.robot.set_gcrubs_file(file)
+        self.sequence_text.clear()
+
         try:
             with open(file, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
-                    self.sequence_text.append(line)
+                    self.sequence_text.append(line.replace('\n', '', 1))
         except FileNotFoundError:
             QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                   self.init_data.get_window('error_open_file_title'),
@@ -283,7 +321,21 @@ class Robot:
             self.save_data.set_second_robot('gcrubs_file', file)
             self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
+        self.time = time()
+
+    def _remove(self):
+        """
+        Slot pour supprimer le robot.
+        :return: None
+        """
+        self.remove(True)
+
     def remove(self, message=True):
+        """
+        Fonction pour supprimer le robot.
+        :param message: bool: Si True, un message s'affiche
+        :return: None
+        """
         if message:
             if self.robot.is_main_robot():
                 ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
@@ -298,13 +350,15 @@ class Robot:
 
             if ans == QtWidgets.QMessageBox.No:
                 return
+
         for i in range(self.parent.list_widget.get_len()):
             if self.robot.get_name() == self.parent.list_widget.get_contents()[i].get_name():
                 self.parent.list_widget.remove_content(i)
                 break
+
         self.robot.set_file("")
         if self.robot.is_main_robot():
-            self.save_data.set_main_robot('file', '')
+            self.save_data.set_main_robot('file', "")
         else:
             self.save_data.set_second_robot('file', "")
         self.reset()
@@ -312,6 +366,10 @@ class Robot:
         del self
 
     def _speed(self):
+        """
+        Slot pour modifier la vitesse de deplacement du robot.
+        :return: None
+        """
         self.robot.set_speed(self.speed_sb.value())
         if self.robot.is_main_robot():
             self.save_data.set_main_robot('speed', self.speed_sb.value())
@@ -319,6 +377,10 @@ class Robot:
             self.save_data.set_second_robot('speed', self.speed_sb.value())
 
     def _speed_rotation(self):
+        """
+        Slot pour modifier la vitesse de rotation du robot.
+        :return: None
+        """
         self.robot.set_speed_rotation(self.speed_rotation_sb.value())
         if self.robot.is_main_robot():
             self.save_data.set_main_robot('speed_rotation', self.speed_rotation_sb.value())
@@ -326,10 +388,15 @@ class Robot:
             self.save_data.set_second_robot('speed_rotation', self.speed_rotation_sb.value())
 
     def _rotate(self):
-        self.robot.translate(0, 0, -self.robot.get_offset())
+        """
+        Slot pour faire tourner le robot autour d'un axe.
+        :return: None
+        """
+        self.robot.translate(0, 0, -self.robot.get_offset())  # Retour a la position de depart
         self.robot.rotate(self.angle_rotation_sb.value() - self.axis_angle, int(self.axis_rotation_rb_x.isChecked()),
                           int(self.axis_rotation_rb_y.isChecked()), int(self.axis_rotation_rb_z.isChecked()),
                           local=True)
+
         self.axis_angle = self.angle_rotation_sb.value()
         if self.robot.is_main_robot():
             if self.axis_rotation_rb_x.isChecked():
@@ -344,6 +411,7 @@ class Robot:
                 self.save_data.set_main_robot('axis_rotation', 'z')
                 self.save_data.set_main_robot('angle_rotation', self.angle_rotation_sb.value())
             self.save_data.set_main_robot('offset', self.robot.get_offset())
+
         else:
             if self.axis_rotation_rb_x.isChecked():
                 self.save_data.set_second_robot('axis_rotation', 'x')
@@ -357,10 +425,16 @@ class Robot:
                 self.save_data.set_second_robot('axis_rotation', 'z')
                 self.save_data.set_second_robot('angle_rotation', self.angle_rotation_sb.value())
             self.save_data.set_second_robot('offset', self.robot.get_offset())
+
         self.robot.translate(0, 0, self.robot.get_offset())
         self.offset_sb.setValue(self.robot.get_offset())
 
     def _offset_rotate(self, axis: str) -> float:
+        """
+        Fonction qui determine la hauteur a laquelle doit etre place le robot pour etre sur le plateau.
+        :param axis: str: Axe de rotation
+        :return: float: Distance a parcourir
+        """
         if axis == 'x':
             if self.axis_angle == 90:
                 return -self.robot.get_min_max()[1][0]
@@ -372,6 +446,7 @@ class Robot:
                 return -self.robot.get_min_max()[2][0]
             else:
                 return self.robot.get_offset()
+
         elif axis == 'y':
             if self.axis_angle == 90:
                 return self.robot.get_min_max()[0][1]
@@ -383,12 +458,17 @@ class Robot:
                 return -self.robot.get_min_max()[2][0]
             else:
                 return self.robot.get_offset()
+
         elif axis == 'z':
             return self.robot.get_offset()
         else:
             return 0.
 
     def _axis_x(self):
+        """
+        Slot si l'axe x est selectionne.
+        :return: None
+        """
         self.axis_angle = 0
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
@@ -397,8 +477,10 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'x':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
+
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
@@ -406,14 +488,20 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'x':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])
+
         self.angle_rotation_sb.setValue(0)
         self.robot.translate(0, 0, -self.robot.get_offset() - self.robot.get_min_max()[2][0])
         self.robot.set_offset(-self.robot.get_min_max()[2][0])
         self.offset_sb.setValue(self.robot.get_offset())
 
     def _axis_y(self):
+        """
+        Slot si l'axe y est selectionne.
+        :return: None
+        """
         self.axis_angle = 0
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'x':
@@ -422,8 +510,10 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
+
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'x':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
@@ -431,14 +521,20 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])
+
         self.angle_rotation_sb.setValue(0)
         self.robot.translate(0, 0, -self.robot.get_offset() - self.robot.get_min_max()[2][0])
         self.robot.set_offset(-self.robot.get_min_max()[2][0])
         self.offset_sb.setValue(self.robot.get_offset())
 
     def _axis_z(self):
+        """
+        Slot si l'axe z est selectionne.
+        :return: None
+        """
         self.axis_angle = 0
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
@@ -447,8 +543,10 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
+
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
@@ -456,14 +554,20 @@ class Robot:
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])
+
         self.angle_rotation_sb.setValue(0)
         self.robot.translate(0, 0, -self.robot.get_offset() - self.robot.get_min_max()[2][0])
         self.robot.set_offset(-self.robot.get_min_max()[2][0])
         self.offset_sb.setValue(self.robot.get_offset())
 
     def _offset(self):
+        """
+        Slot pour deplacer le robot selon la valeur de l'offset
+        :return: None
+        """
         self.robot.translate(0, 0, self.offset_sb.value() - self.robot.get_offset())
         self.robot.set_offset(self.offset_sb.value())
         if self.robot.is_main_robot():
@@ -472,6 +576,10 @@ class Robot:
             self.save_data.set_second_robot('offset', self.robot.get_offset())
 
     def create_sequence(self):
+        """
+        Fonction pour cree la fenetre pour creer la sequence.
+        :return: None
+        """
         self._close()
         self.robot.set_origined(False)
 
@@ -520,6 +628,10 @@ class Robot:
             self.parent.z_coord_sys.setVisible(True)
 
     def sequence_list_update(self):
+        """
+        Met a jour la liste qui contient les commandes
+        :return: None
+        """
         self.sequence_list.clear()
         for key in self.save_data.get_gcrubs('cmd_name').keys():
             self.sequence_list.add_content(key)
@@ -527,6 +639,10 @@ class Robot:
         self.sequence_list.sortItems(self.init_data.get_main_robot('list_sorting_order'))
 
     def _cancel_sequence(self):
+        """
+        Slot pour annuler la sequence.
+        :return: None
+        """
         if self.robot.is_main_robot():
             self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
         else:
@@ -537,6 +653,10 @@ class Robot:
         self.ready_sequence = False
 
     def save_sequence(self):
+        """
+        Fonction pour sauvegarder la sequence.
+        :return: None
+        """
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('gcrubs_file') == '':
                 filename = \
@@ -570,13 +690,47 @@ class Robot:
             self.robot.set_gcrubs_file(filename)
 
     def _set_sequence(self):
+        """
+        Slot pour ajouter la commande selectionnee dans la sequence
+        :return:
+        """
+        if time() - self.time < 0.2:
+            return
         self.sequence_text.append(self.save_data.get_gcrubs("cmd_name").get(
             self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
 
         self.key = None
+        self.time = time()
+
+    def add_sequence_text(self, text: str):
+        """
+        Fonction pour ajouter du texte a la sequence.
+        :param text: Texte a ajouter
+        :return: None
+        """
+        self.sequence_text.append(text)
+
+    def get_sequence_text(self) -> str:
+        """
+        Renvoie le text sequentiel actuel.
+        :return: str: text
+        """
+        return self.sequence_text.document().toPlainText()
+
+    def set_sequence_text(self, text: str):
+        """
+        Definit le texte de la sequence.
+        :param text: str: text
+        :return: None
+        """
+        self.sequence_text.setText(text)
 
     def _set_origin(self):
-        if self.robot.is_origined():
+        """
+        Slot pour placer le robot a l'origine et au point de depart.
+        :return: None
+        """
+        if self.robot.is_origined():  # Si l'origine du robot a deja ete choisie
             if time() - self.time < 0.2:
                 # Permet d'eviter un bug d'affichage lors de la deuxieme ouverture de sequence_dialog
                 return
@@ -606,7 +760,8 @@ class Robot:
                         angle=self.robot.get_angle()))
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
-            else:
+
+            else:  # Second_robot
                 if self.save_data.get_second_robot('sequence') == '':
                     self.sequence_text.setText(self.init_data.get_second_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),

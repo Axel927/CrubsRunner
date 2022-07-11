@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 # Created by Axel Tremaudant on 07/06/2022
 
+"""
+Fichier qui contient la classe MainWindow.
+"""
+
 from PySide6 import QtWidgets, QtGui, QtCore
-import numpy as np
-from sys import float_info
 from time import time
 from platform import system
 import warnings
-import pyqtgraph.opengl as gl
-from stl import mesh
 
+import algo
 import ui
 import element
 import data
@@ -19,12 +20,18 @@ import simulation
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """
+    Classe de la fenetre principale de CrubsRunner.
+    """
     def __init__(self):
+        """
+        Constructeur de MainWindow.
+        """
         super(MainWindow, self).__init__()
 
         # Definition des attributs
-        self.save_data = data.SaveData()
-        self.init_data = data.InitData()
+        self.save_data = data.Save()
+        self.init_data = data.Init()
 
         self.doing = list()
         self.undoing = list()
@@ -79,6 +86,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.init_window()
 
     def init_window(self):
+        """
+        Initialise la fenetre.
+        :return: None
+        """
         self.setWindowTitle(self.init_data.get_window('window_title'))
 
         self.create_actions()
@@ -99,10 +110,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.showFullScreen()
 
     def create_dock_widget(self):
+        """
+        Cree le dock widget.
+        :return: None
+        """
         self.component_dock.setAllowedAreas(self.init_data.get_window('component_dock_allowed_areas'))
         self.component_dock.setFeatures(self.init_data.get_window('component_dock_features'))
 
-        # self.list_widget.addItem(self.init_data.get_grid('element_name'))
         self.component_dock.setWidget(self.list_widget)
         self.addDockWidget(self.init_data.get_window('add_component_dock_area'), self.component_dock)
 
@@ -117,6 +131,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addDockWidget(self.init_data.get_window('add_sequence_dock_area'), self.sequence_dock)
 
     def create_toolbar(self):
+        """
+        Cree la barre d'outils.
+        :return: None
+        """
         self.toolBar.addAction(self.new_project_action)
         self.toolBar.addAction(self.open_project_action)
         self.toolBar.addAction(self.save_action)
@@ -144,6 +162,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar.setMovable(self.init_data.get_window('tool_bar_movable'))
 
     def create_actions(self):
+        """
+        Cree les actions.
+        :return: None
+        """
         self.new_project_action.setShortcuts(self.init_data.get_window('new_project_shortcut'))
         self.new_project_action.setStatusTip(self.init_data.get_window('new_project_status_tip'))
         self.new_project_action.setIcon(self.init_data.get_window('new_project_icon'))
@@ -210,6 +232,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.key_action.setIcon(self.init_data.get_window('key_action_icon'))
 
     def create_menubar(self):
+        """
+        Cree la barre de menus.
+        :return: None
+        """
         file_menu = self.menuBar.addMenu(self.init_data.get_window('menu_bar_menu1'))
         file_menu.addAction(self.new_project_action)
         file_menu.addAction(self.open_project_action)
@@ -233,6 +259,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setMenuBar(self.menuBar)
 
     def init_3d(self):
+        """
+        Initialise la partie 3D.
+        :return: None
+        """
         self.layout.addWidget(self.viewer, 1)
 
         self.start_view()
@@ -244,6 +274,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_coord_sys()
 
     def create_connections(self):
+        """
+        Cree les connexions.
+        :return: None
+        """
         self.new_project_action.connect(QtCore.SIGNAL('triggered()'), self.new_project)
         self.open_project_action.connect(QtCore.SIGNAL('triggered()'), self.open_project)
         self.save_action.connect(QtCore.SIGNAL('triggered()'), self.save_project)
@@ -264,6 +298,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.key_action.connect(QtCore.SIGNAL('triggered()'), self.keys)
 
     def create_coord_sys(self):
+        """
+        Cree le systeme de coordonnees.
+        :return: None
+        """
         self.x_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
         self.y_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
         self.z_coord_sys.set_file(self.init_data.get_view('coord_sys_file'))
@@ -284,16 +322,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.y_coord_sys.set_element_type("coord_sys")
         self.z_coord_sys.set_element_type("coord_sys")
 
-        self.show_stl(self.x_coord_sys)
-        self.show_stl(self.y_coord_sys)
-        self.show_stl(self.z_coord_sys)
+        algo.object.show_stl(self.x_coord_sys)
+        self.viewer.addItem(self.x_coord_sys)
+        algo.object.show_stl(self.y_coord_sys)
+        self.viewer.addItem(self.y_coord_sys)
+        algo.object.show_stl(self.z_coord_sys)
+        self.viewer.addItem(self.z_coord_sys)
 
         self.y_coord_sys.rotate(90, 0, 0, 1)
         self.z_coord_sys.rotate(-90, 0, 1, 0)
 
     def new_project(self):
-        if time() - self.time < 0.2:
+        """
+        Slot pour creer un nouveau projet.
+        :return: None
+        """
+        if time() - self.time < 0.2:  # Evite une multiple apparition de la fenetre
             return
+
         self.grid.reset()
         self.board.remove(False)
         self.board = element.Board(self.save_data, self)
@@ -313,7 +359,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time = time()
 
     def new_board(self, message=True, file=""):
-        # Plateau
+        """
+        Slot pour creer un nouveau plateau.
+        :param message: bool: Si True, affiche un message
+        :param file: str: Nom du fichier
+        :return: None
+        """
         if message:
             QtWidgets.QMessageBox(self.init_data.get_board('new_message_box_type'),
                                   self.init_data.get_board('new_message_box_title'),
@@ -328,29 +379,33 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if file:
             self.board = element.Board(self.save_data, self)
-            if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
+            if '.' + extension in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
                 self.save_data.set_board('file', file)
                 self.board.setColor(self.init_data.get_board('color'))
                 self.board.set_edge_color(self.init_data.get_board('edge_color'))
                 self.board.set_name(self.init_data.get_board('name'))
-                self.show_stl(self.board)
+                algo.object.show_stl(self.board)
+                self.viewer.addItem(self.board)
                 self.board.translate(self.init_data.get_board('appearance_translation_x'),
                                      self.init_data.get_board('appearance_translation_y'),
                                      self.init_data.get_board('appearance_translation_z'))
                 self.list_widget.add_content(self.board)
 
-            elif extension[-4:-1] == self.init_data.get_extension('board')[1:] or \
+            elif extension == self.init_data.get_extension('board')[1:] or \
                     extension == self.init_data.get_extension('board')[1:]:
-
-                self.open_project(file)
                 self.board.set_name(self.init_data.get_board('name'))
                 self.x_coord_sys.setVisible(True)
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
 
     def new_main_robot(self, message=True, file=""):
-        # Robot principal
+        """
+        Slot pour creer un nouveau robot principal.
+        :param message: bool: Si True, affiche un message
+        :param file: str: Nom du fichier
+        :return: None
+        """
         if message:
             QtWidgets.QMessageBox(self.init_data.get_main_robot('new_message_box_type'),
                                   self.init_data.get_main_robot('new_message_box_title'),
@@ -373,7 +428,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.setColor(self.init_data.get_main_robot('color'))
                 self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                self.show_stl(self.main_robot)
+                algo.object.show_stl(self.main_robot)
+                self.viewer.addItem(self.main_robot)
                 self.list_widget.add_content(self.main_robot)
                 self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
                 self.main_robot.translate(0, 0, self.main_robot.get_offset())
@@ -392,7 +448,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.scale(coef, coef, coef)
 
     def new_second_robot(self, message=True, file=""):
-        # Robot secondaire
+        """
+        Slot pour creer le robot secondaire.
+        :param message: bool: Si True, affiche un message
+        :param file: str: Nom du fichier
+        :return: None
+        """
         if message:
             ans = QtWidgets.QMessageBox(self.init_data.get_second_robot('new_message_box_type'),
                                         self.init_data.get_second_robot('new_message_box_title'),
@@ -420,7 +481,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.setColor(self.init_data.get_second_robot('color'))
                 self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
-                self.show_stl(self.second_robot)
+                algo.object.show_stl(self.second_robot)
+                self.viewer.addItem(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
                 self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
                 self.second_robot.translate(0, 0, self.second_robot.get_offset())
@@ -438,19 +500,25 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.scale(coef, coef, coef)
 
     def open_project(self, file=""):
+        """
+        Slot pour ouvrir un projet.
+        :param file: str: Nom du fichier
+        :return: None
+        """
         if time() - self.time < 0.2:
             return
+
         if file == "":
             file = QtWidgets.QFileDialog.getOpenFileName(self, self.init_data.get_window('open_project_dialog_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_window('project_extension'))[0]
-            if file:
+            if file:  # On retire tout
                 self.grid.reset()
-                self.board.remove(False)
+                del self.board
                 self.board = element.Board(self.save_data, self)
-                self.main_robot.remove(False)
+                del self.main_robot
                 self.main_robot = element.Robot(self.save_data, self, True)
-                self.second_robot.remove(False)
+                del self.second_robot
                 self.second_robot = element.Robot(self.save_data, self, False)
                 del self.list_widget
                 self.list_widget = widget.ListWidget()
@@ -479,6 +547,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
                                 except (IndexError, SyntaxError, NameError):
                                     self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][:-1]))
+
                         elif param.find(self.init_data.get_window('board_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('board')):
                                 param = file.readline()
@@ -490,6 +559,7 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.board.translate(self.init_data.get_board('appearance_translation_x'),
                                                  self.init_data.get_board('appearance_translation_y'),
                                                  self.init_data.get_board('appearance_translation_z'))
+
                         elif param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('main_robot')):
                                 param = file.readline()
@@ -500,6 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.save_data.set_main_robot(param.split(' = ')[0],
                                                                   eval(param.split(' = ')[1][:-1]))
                             self.list_widget.add_content(self.main_robot)
+
                         elif param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('second_robot')):
                                 param = file.readline()
@@ -510,6 +581,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.save_data.set_second_robot(param.split(' = ')[0],
                                                                     eval(param.split(' = ')[1][:-1]))
                             self.list_widget.add_content(self.second_robot)
+
                         elif param.find(self.init_data.get_window('gcrubs_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('gcrubs')):
                                 param = file.readline()
@@ -529,6 +601,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time = time()
 
     def save_project(self):
+        """
+        Slot pour sauvegarder le projet.
+        :return: None
+        """
         if self.save_data.get_window('project_file') == "":
             self.save_as_project()
         else:
@@ -541,6 +617,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.second_robot.save_sequence()
 
     def save_as_project(self):
+        """
+        Slot pour enregistrer sous le projet.
+        :return: None
+        """
         file = \
             QtWidgets.QFileDialog.getSaveFileName(self, self.init_data.get_window('save_as_project_dialog_title'),
                                                   self.save_data.get_window('directory'),
@@ -553,6 +633,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.write_file(file)
 
     def write_file(self, file_name: str):
+        """
+        Fonction pour ecrire toutes les donnees du projet dans un fichier.
+        :param file_name: str: Nom du fichier dans lequel ecrire.
+        :return: None
+        """
         try:
             with open(file_name, 'w') as file:
                 file.write(self.init_data.get_window('saving_file_first_line').format(
@@ -570,10 +655,15 @@ class MainWindow(QtWidgets.QMainWindow):
                                       filename=file_name)).exec()
 
     def import_component(self, file=""):
+        """
+        Slot pour importer un composant.
+        :param file: str: Nom du ficher a importer
+        :return: None
+        """
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('import_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
-        dialog.setMinimumSize(280, 150)
+        dialog.setMinimumSize(self.init_data.get_window('import_width'), self.init_data.get_window('import_height'))
 
         radio_board = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_board_name'), dialog)
         radio_main_robot = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_main_robot_name'), dialog)
@@ -618,6 +708,10 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def export_component(self):
+        """
+        Slot pour exporter un composant.
+        :return: None
+        """
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('export_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
@@ -657,13 +751,12 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.close()
 
         def ok_btn_clicked():
-            if radio_board.isChecked() and radio_board.isVisible():
+            if radio_board.isChecked() and radio_board.isVisible():  # Si on veut exporter le plateau
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
                                                                  'import_radio_board_name'),
                                                              self.save_data.get_window('directory'),
                                                              self.save_data.get_board('save_extension'))[0]
-
                 if file:
                     file += self.init_data.get_extension('board')
                     self.save_data.set_window('directory', file.rpartition('/')[0])
@@ -677,6 +770,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                   filename=file_name)).exec()
                         return
 
+            # Si on veut exporter le robot principal
             elif radio_main_robot.isChecked() and radio_main_robot.isVisible():
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
@@ -697,6 +791,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                   filename=file_name)).exec()
                         return
 
+            # Si on veut exporter le robot secondaire
             elif radio_second_robot.isChecked() and radio_second_robot.isVisible():
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
@@ -725,8 +820,12 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def undo(self):
+        """
+        Slot pour defaire.
+        :return: None
+        """
         if len(self.doing) > 0:
-            while len(self.undoing) > self.init_data.get_window('max_len_doing'):
+            for _ in range(len(self.undoing) - self.init_data.get_window('max_len_doing')):
                 self.undoing.pop(0)
             self.undoing.append(self.doing.pop(-1))
             self.undoing[-1][0].move_robot(self.undoing[-1][1], self.undoing[-1][2], self.undoing[-1][3])
@@ -736,8 +835,12 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                             angle=self.undoing[-1][0].get_angle()))
 
     def redo(self):
+        """
+        Slot pour refaire.
+        :return: None
+        """
         if len(self.undoing) > 0:
-            while len(self.doing) > self.init_data.get_window('max_len_doing'):
+            for _ in range(len(self.doing) - self.init_data.get_window('max_len_doing')):
                 self.doing.pop(0)
             self.doing.append(self.undoing.pop(-1))
             self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
@@ -747,33 +850,67 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                             angle=self.doing[-1][0].get_angle()))
 
     def do(self, action):
-        while len(self.doing) > self.init_data.get_window('max_len_doing'):
+        """
+        Fonction pour faire.
+        :param action: any: Action a ajouter.
+        :return: None
+        """
+        for _ in range(len(self.doing) - self.init_data.get_window('max_len_doing')):
             self.doing.pop(0)
         self.doing.append(action)
 
     def updo(self, action):
+        """
+        Fonction pour modifier ce qui a ete fait precedemment sans ajouter en plus.
+        :param action: any: Action a ajouter
+        :return: None
+        """
         self.doing[-1] = action
 
     def top_view(self):
+        """
+        Slot pour passer en vue de dessus.
+        :return: None
+        """
         self.viewer.setCameraPosition(elevation=self.init_data.get_view('top_view_position_elevation'))
 
     def bottom_view(self):
+        """
+        Slot pour passer en vue de dessous.
+        :return: None
+        """
         self.viewer.setCameraPosition(elevation=self.init_data.get_view('bottom_view_position_elevation'))
 
     def start_view(self):
+        """
+        Slot pour passer en vue initiale.
+        :return: None
+        """
         self.viewer.setCameraPosition(rotation=self.init_data.get_view('start_view_position_rotation'),
                                       distance=self.init_data.get_view('start_view_position_distance'),
                                       pos=self.init_data.get_view('start_view_position_pos'))
 
     def edit_gcrubs(self):
+        """
+        Slot pour editer les commandes gcrubs.
+        :return: None
+        """
         self.gcrubs.edit()
 
     def speed(self):
+        """
+        Slot pour mettre a jour la vitesse de deplacement des robots.
+        :return:
+        """
         self.save_data.set_grid('moving_speed', self.speed_sb.value())
 
     def run(self):
-        if self.running.is_ongoing():
-            if self.running.is_running():
+        """
+        Slot pour lancer la simulation.
+        :return: None
+        """
+        if self.running.is_ongoing():  # Si la simulation est deja en cours
+            if self.running.is_running():  # Si la simulation est en pause ou non
                 self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
                 self.running.stop()
             else:
@@ -839,13 +976,25 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.show()
 
     def stop_run(self):
+        """
+        Slot pour arreter la simulation.
+        :return: None
+        """
         self.running.finish()
         self.stop_run_action.setEnabled(False)
 
     def element_properties(self):
+        """
+        Slot pour acceder aux proprietes des elements.
+        :return: None
+        """
         self.list_widget.get_contents()[self.list_widget.currentRow()].properties()
 
     def select_element(self):
+        """
+        Slot pour choisir l'element selectionne.
+        :return: None
+        """
         for i in range(self.list_widget.get_len()):
             try:
                 if i == self.list_widget.currentRow():
@@ -855,48 +1004,11 @@ class MainWindow(QtWidgets.QMainWindow):
             except AttributeError:
                 continue
 
-    def show_stl(self, elem: element.Board):
-        if elem.get_file() == "":
-            return
-        try:
-            points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)
-        except FileNotFoundError:
-            QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
-                                  self.init_data.get_window('error_open_file_title'),
-                                  self.init_data.get_window('error_open_file_message').format(
-                                      filename=elem.get_file())).exec()
-            return
-
-        faces = np.arange(points.shape[0]).reshape(-1, 3)
-        meshdata = gl.MeshData(vertexes=points, faces=faces)
-
-        elem.setMeshData(meshdata=meshdata)
-
-        min_coord = [float_info.max] * 3  # 1.7976931348623157e+308
-        max_coord = [float_info.min] * 3  # 2.2250738585072014e-308
-        for point in points:
-            for i in range(len(point)):
-                min_coord[i] = min(min_coord[i], point[i])
-                max_coord[i] = max(max_coord[i], point[i])
-
-        dim = list()
-        min_max = list()
-        for i in range(len(min_coord)):
-            dim.append(max_coord[i] - min_coord[i])
-            min_max.append([min_coord[i], max_coord[i]])
-
-        if max(dim) < 1.:
-            elem.set_invisible(True)
-            for i in range(len(dim)):
-                dim[i] *= self.init_data.get_main_robot('invisible_coef')
-                for j in range(len(min_max[i])):
-                    min_max[i][j] *= self.init_data.get_main_robot('invisible_coef')
-
-        elem.set_dimensions(dim)
-        elem.set_min_max(min_max)
-        self.viewer.addItem(elem)
-
     def keys(self):
+        """
+        Slot pour gerer les touches qui permettent de deplacer le robot.
+        :return: None
+        """
         window = widget.KeyDialog(self.save_data, self)
         window.setModal(self.init_data.get_window('keys_modal'))
         window.setWindowTitle(self.init_data.get_window('keys_title'))
@@ -930,7 +1042,7 @@ class MainWindow(QtWidgets.QMainWindow):
             keys[i].append(widget.Label(self.init_data.get_window('keys_lbl_key').format(
                 key=window.ret_key(key))))
             keys[i][2].set_key(key)
-            for j in range(3):
+            for j in range(len(keys[i])):
                 layout.addWidget(keys[i][j], i, j)
 
             keys[i][1].clicked.connect(keys[i][1].set_clicked)
@@ -951,6 +1063,10 @@ class MainWindow(QtWidgets.QMainWindow):
         window.show()
 
     def update_(self):
+        """
+        Fonction pour tout mettre a jour.
+        :return: None
+        """
         self.grid.update_()
         self.board.update_()
         self.main_robot.update_()
@@ -960,6 +1076,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.x_coord_sys.update_()
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
+        """
+        Fonction qui gere les entrees de glisser.
+        :param event: QtGui.QDragEnterEvent: Evenement
+        :return: None
+        """
         mime_data = event.mimeData()
         mime_list = mime_data.formats()
         filename = ""
@@ -970,6 +1091,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
 
+        # Si l'extension est utilisable
         if filename != "" and '.' + filename.split('.')[-1] in self.init_data.get_extension('value'):
             event.accept()
             self.dropped_filename = filename
@@ -978,10 +1100,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dropped_filename = ""
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        """
+        Fonction qui gere les evenements de depot.
+        :param event: QtGui.QDropEvent: Evenement
+        :return: None
+        """
         extension = '.' + self.dropped_filename.split('.')[-1]
-        if extension in self.init_data.get_extension('3d_file'):
+        if extension in self.init_data.get_extension('3d_file'):  # Si c'est un fichier 3D
             self.import_component(self.dropped_filename)
-        elif extension == self.init_data.get_extension('project'):
+
+        elif extension == self.init_data.get_extension('project'):  # Si c'est un fichier de projet
+            # On supprime tout
             self.grid.reset()
             self.board.remove(False)
             self.board = element.Board(self.save_data, self)
@@ -990,21 +1119,25 @@ class MainWindow(QtWidgets.QMainWindow):
             self.second_robot.remove(False)
             self.second_robot = element.Robot(self.save_data, self, False)
             del self.list_widget
+
+            # On cree tout
             self.list_widget = widget.ListWidget()
             self.list_widget.add_content(self.grid)
             self.component_dock.setWidget(self.list_widget)
             self.create_connections()
             self.open_project(self.dropped_filename)
-        elif extension == self.init_data.get_extension('board'):
+
+        elif extension == self.init_data.get_extension('board'):  # Si c'est un fichier de plateau
             if self.save_data.get_board('file') == '':
-                self.board.remove(False)
+                del self.board
                 self.board = element.Board(self.save_data, self)
                 self.new_board(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
                                       self.init_data.get_window('import_message_box_title'),
                                       self.init_data.get_window('import_message_box_message')).exec()
-        elif extension == self.init_data.get_extension('robot'):
+
+        elif extension == self.init_data.get_extension('robot'):  # Si c'est un fichier de robot
             try:
                 with open(self.dropped_filename, 'r') as file:
                     file.readline()
@@ -1016,25 +1149,33 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.init_data.get_window('error_open_file_title'),
                                       self.init_data.get_window('error_open_file_message').format(
                                           filename=self.dropped_filename)).exec()
+
             if self.save_data.get_main_robot('file') == "" and \
                     param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
-                self.main_robot.remove(False)
+                del self.main_robot
                 self.main_robot = element.Robot(self.save_data, self, True)
                 self.new_main_robot(False, self.dropped_filename)
+
             elif self.save_data.get_second_robot('file') == "" and \
                     param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
-                self.second_robot.remove(False)
+                del self.second_robot
                 self.second_robot = element.Robot(self.save_data, self, False)
                 self.new_second_robot(False, self.dropped_filename)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
                                       self.init_data.get_window('import_message_box_title'),
                                       self.init_data.get_window('drop_message_box_message')).exec()
-        elif extension == self.init_data.get_extension('sequence'):
+
+        elif extension == self.init_data.get_extension('sequence'):  # Si c'est un fichier sequentiel
             pass
 
         self.dropped_filename = ""
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        """
+        Fonction qui gere le menu clic droit de la souris.
+        :param event: QtGui.QContextMenuEvent: Evenement
+        :return: None
+        """
         # Ne pas virer !!! Permet d'eviter de pouvoir virer la barre d'outils
         pass
