@@ -190,11 +190,17 @@ class Run:
                 self.finish()
                 return
 
-        self.start_time_move_mr.start(self.init_data.get_run('time_before_start'))
-        self.start_time_move_sr.start(self.init_data.get_run('time_before_start'))
+        self.start_time_move_mr.start(self.init_data.get_run('time_before_start') /
+                                      self.init_data.get_window('speed_simulation_btn_values')[
+                                          self.parent.speed_simulation_btn_nb])
+        self.start_time_move_sr.start(self.init_data.get_run('time_before_start') /
+                                      self.init_data.get_window('speed_simulation_btn_values')[
+                                          self.parent.speed_simulation_btn_nb])
 
         self.running = True
-        self.timer.start(self.init_data.get_run('timer_refresh'))  # Demarre le chrono
+        self.timer.start(
+            self.init_data.get_run('timer_refresh') / self.init_data.get_window('speed_simulation_btn_values')[
+                self.parent.speed_simulation_btn_nb])  # Demarre le chrono
 
     def _timer(self):
         """
@@ -310,7 +316,8 @@ class Run:
         :param time: float: Duree
         :return: None
         """
-        self.sleep_mr.start(time * 1000)
+        self.sleep_mr.start(
+            time * 1000 / self.init_data.get_window('speed_simulation_btn_values')[self.parent.speed_simulation_btn_nb])
 
     def _stop_sleep_mr(self):
         """
@@ -326,7 +333,8 @@ class Run:
         :param time: float: Duree
         :return: None
         """
-        self.sleep_sr.start(time * 1000)
+        self.sleep_sr.start(time * 1000 / self.init_data.get_window('speed_simulation_btn_values')[
+            self.parent.speed_simulation_btn_nb])
         self.next_command_sr()
 
     def _stop_sleep_sr(self):
@@ -344,6 +352,12 @@ class Run:
         :param rbt: Robot auquel correspond la commande
         :return: None
         """
+        if self.timer.interval() != self.init_data.get_run('timer_refresh') / \
+                self.init_data.get_window('speed_simulation_btn_values')[self.parent.speed_simulation_btn_nb]:
+            self.timer.stop()
+            self.timer.start(self.init_data.get_run('timer_refresh') /
+                             self.init_data.get_window('speed_simulation_btn_values')[
+                                 self.parent.speed_simulation_btn_nb])
         name = self.save_data.get_gcrubs('cmd_name')  # On recupere les commandes
         if cmd == "\n":  # Si ligne vide
             return
@@ -470,9 +484,13 @@ class Run:
         if rbt.is_main_robot():
             # Calcul de la distance a parcourir a chaque appel de _time_move_mr
             if rotation:
-                self.dist_per_time_mr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_mr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000 * \
+                                        self.init_data.get_window('speed_simulation_btn_values')[
+                                            self.parent.speed_simulation_btn_nb]
             else:
-                self.dist_per_time_mr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_mr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000 * \
+                                        self.init_data.get_window('speed_simulation_btn_values')[
+                                            self.parent.speed_simulation_btn_nb]
 
             # Calcul du nombre d'appel a _time_move_mr
             if self.dist_per_time_mr != 0:
@@ -489,9 +507,13 @@ class Run:
         else:
             # Calcul de la distance a parcourir a chaque appel de _time_move_sr
             if rotation:
-                self.dist_per_time_sr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_sr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000 * \
+                                        self.init_data.get_window('speed_simulation_btn_values')[
+                                            self.parent.speed_simulation_btn_nb]
             else:
-                self.dist_per_time_sr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000
+                self.dist_per_time_sr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000 * \
+                                        self.init_data.get_window('speed_simulation_btn_values')[
+                                            self.parent.speed_simulation_btn_nb]
 
             # Calcul du nombre d'appel a _time_move_sr
             if self.dist_per_time_sr != 0:

@@ -11,5 +11,5 @@ __all__ = [
     "KeyDialog",
     "LineEdit",
     "ListWidget",
-    "ViewWidget"
+    "ViewWidget",
 ]

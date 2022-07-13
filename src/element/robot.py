@@ -11,6 +11,7 @@ from math import cos, sin, radians
 
 import data
 import element
+import functions
 import ui
 
 
@@ -160,6 +161,21 @@ class Robot(element.Board):
         """
         return self.window
 
+    def get_axis_angle(self) -> int:
+        """
+        Renvoie l'angle de rotation autour de l'axe (lors de la mise en place)
+        :return: int: angle
+        """
+        return self.axis_angle
+
+    def set_axis_angle(self, angle: int):
+        """
+        Definit l'angle de rotation autour de l'axe (lors de la mise en place)
+        :param angle: int: angle
+        :return: None
+        """
+        self.axis_angle = angle
+
     def set_moving(self, dx=0., dy=0., rz=0.):
         """
         Fait bouger le robot selon dx, dy et rz dans le repere local.
@@ -182,7 +198,7 @@ class Robot(element.Board):
                 self.file = self.save_data.get_main_robot('file')
             else:
                 self.file = self.save_data.get_second_robot('file')
-            self.parent.show_stl(self)
+            functions.object.show_stl(self)
             if self.is_invisible():  # Si le robot est minuscule
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.scale(coef, coef, coef)  # Agrandit le robot
@@ -229,6 +245,9 @@ class Robot(element.Board):
                 self.window.axis_rotation_rb_x.setChecked(False)
                 self.window.axis_rotation_rb_y.setChecked(False)
                 self.window.axis_rotation_rb_z.setChecked(True)
+
+        if self.file == "":
+            self.remove(False)
 
         if not self.is_updated:  # Si le robot n'a pas deja ete mis a jour
             self.is_updated = True

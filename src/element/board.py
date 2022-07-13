@@ -6,6 +6,7 @@
 Fichier contenant la classe Board, partie objet.
 """
 
+import functions
 import element
 import data
 import ui
@@ -42,7 +43,17 @@ class Board(element.CoordSys):
         """
         if self.file == '':
             self.file = self.save_data.get_board('file')
-            self.parent.show_stl(self)
+            functions.object.show_stl(self)
 
         self.setColor(self.save_data.get_board('color'))
         self.set_edge_color(self.save_data.get_board('edge_color'))
+        if self.file == "":
+            self.remove(False)
+
+    def remove(self, message: bool):
+        """
+        Retire l'element.
+        :param message: bool: Si True, affiche un message
+        :return: None
+        """
+        self.window.remove(message)

@@ -11,7 +11,7 @@ from time import time
 from platform import system
 import warnings
 
-import algo
+import functions
 import ui
 import element
 import data
@@ -23,6 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     Classe de la fenetre principale de CrubsRunner.
     """
+
     def __init__(self):
         """
         Constructeur de MainWindow.
@@ -41,6 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.board = element.Board(self.save_data, self)
         self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot = element.Robot(self.save_data, self, False)
+        self.vinyl = element.Vinyl(self, self.save_data)
         self.gcrubs = ui.GCrubs(self.save_data, self)
 
         self.layout = QtWidgets.QVBoxLayout()
@@ -81,6 +83,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottom_view_action = QtGui.QAction(self.init_data.get_window('bottom_view_action_name'), self)
 
         self.speed_sb = QtWidgets.QSpinBox(self)
+        self.speed_simulation_btn_nb = 2
+        self.speed_simulation_btn = QtWidgets.QPushButton(self.init_data.get_window('speed_simulation_btn_name').format(
+            multi=self.init_data.get_window('speed_simulation_btn_values')[self.speed_simulation_btn_nb]), self)
 
         # Initialisation de la fenetre
         self.init_window()
@@ -155,9 +160,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar.addWidget(self.speed_sb)
         self.toolBar.addAction(self.run_action)
         self.toolBar.addAction(self.stop_run_action)
+        self.toolBar.addWidget(self.speed_simulation_btn)
 
         self.speed_sb.setValue(self.save_data.get_grid('moving_speed'))
         self.speed_sb.setStatusTip(self.init_data.get_window('speed_tip'))
+        
+        self.speed_simulation_btn.setToolTip(self.init_data.get_window('speed_simulation_btn_tip'))
 
         self.toolBar.setMovable(self.init_data.get_window('tool_bar_movable'))
 
@@ -296,6 +304,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run_action.connect(QtCore.SIGNAL('triggered()'), self.run)
         self.stop_run_action.connect(QtCore.SIGNAL('triggered()'), self.stop_run)
         self.key_action.connect(QtCore.SIGNAL('triggered()'), self.keys)
+        self.speed_simulation_btn.clicked.connect(self.speed_simulation)
+
+    def speed_simulation(self):
+        if time() - self.time < 0.2:
+            return
+
+        self.speed_simulation_btn_nb += 1
+        if self.speed_simulation_btn_nb == len(self.init_data.get_window('speed_simulation_btn_values')):
+            self.speed_simulation_btn_nb = 0
+        self.speed_simulation_btn.setText(self.init_data.get_window('speed_simulation_btn_name').format(
+            multi=self.init_data.get_window('speed_simulation_btn_values')[self.speed_simulation_btn_nb]))
+
+        self.time = time()
 
     def create_coord_sys(self):
         """
@@ -322,11 +343,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.y_coord_sys.set_element_type("coord_sys")
         self.z_coord_sys.set_element_type("coord_sys")
 
-        algo.object.show_stl(self.x_coord_sys)
+        functions.object.show_stl(self.x_coord_sys)
         self.viewer.addItem(self.x_coord_sys)
-        algo.object.show_stl(self.y_coord_sys)
+        functions.object.show_stl(self.y_coord_sys)
         self.viewer.addItem(self.y_coord_sys)
-        algo.object.show_stl(self.z_coord_sys)
+        functions.object.show_stl(self.z_coord_sys)
         self.viewer.addItem(self.z_coord_sys)
 
         self.y_coord_sys.rotate(90, 0, 0, 1)
@@ -347,6 +368,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot.remove(False)
         self.second_robot = element.Robot(self.save_data, self, False)
+        del self.vinyl
+        self.vinyl = element.Vinyl(self, self.save_data)
         del self.list_widget
         self.list_widget = widget.ListWidget()
         self.list_widget.add_content(self.grid)
@@ -354,6 +377,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_connections()
 
         self.new_board()
+        self.new_vinyl()
         self.new_main_robot()
         self.new_second_robot()
         self.time = time()
@@ -378,6 +402,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            del self.board
             self.board = element.Board(self.save_data, self)
             if '.' + extension in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
@@ -385,7 +410,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.board.setColor(self.init_data.get_board('color'))
                 self.board.set_edge_color(self.init_data.get_board('edge_color'))
                 self.board.set_name(self.init_data.get_board('name'))
-                algo.object.show_stl(self.board)
+                functions.object.show_stl(self.board)
                 self.viewer.addItem(self.board)
                 self.board.translate(self.init_data.get_board('appearance_translation_x'),
                                      self.init_data.get_board('appearance_translation_y'),
@@ -398,6 +423,31 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.x_coord_sys.setVisible(True)
                 self.y_coord_sys.setVisible(True)
                 self.z_coord_sys.setVisible(True)
+
+    def new_vinyl(self, message=True, file=""):
+        """
+        Slot pour creer un nouveau tapis.
+        :param message: bool: Si True, affiche un message
+        :param file: str: Nom du fichier
+        :return: None
+        """
+        if message:
+            QtWidgets.QMessageBox(self.init_data.get_vinyl('vinyl_message_box_type'),
+                                  self.init_data.get_vinyl('vinyl_message_box_title'),
+                                  self.init_data.get_vinyl('vinyl_message_box_message')).exec()
+
+        if file == "":
+            file = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                         self.init_data.get_vinyl('vinyl_dialog_open_title'),
+                                                         self.save_data.get_window('directory'),
+                                                         self.init_data.get_vinyl('vinyl_dialog_open_extensions'))[0]
+        if file:
+            del self.vinyl
+            self.vinyl = element.Vinyl(self, self.save_data)
+            self.vinyl.set_file(file)
+            functions.object.show_vinyl(self.vinyl)
+            self.viewer.addItem(self.vinyl)
+            self.list_widget.add_content(self.vinyl)
 
     def new_main_robot(self, message=True, file=""):
         """
@@ -420,6 +470,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            del self.main_robot
             self.main_robot = element.Robot(self.save_data, self, True)
             self.running.set_main_robot(self.main_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
@@ -428,7 +479,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.setColor(self.init_data.get_main_robot('color'))
                 self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                algo.object.show_stl(self.main_robot)
+                functions.object.show_stl(self.main_robot)
                 self.viewer.addItem(self.main_robot)
                 self.list_widget.add_content(self.main_robot)
                 self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
@@ -473,6 +524,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            del self.second_robot
             self.second_robot = element.Robot(self.save_data, self, False)
             self.running.set_second_robot(self.second_robot)
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
@@ -481,7 +533,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.setColor(self.init_data.get_second_robot('color'))
                 self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
-                algo.object.show_stl(self.second_robot)
+                functions.object.show_stl(self.second_robot)
                 self.viewer.addItem(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
                 self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
@@ -516,6 +568,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.grid.reset()
                 del self.board
                 self.board = element.Board(self.save_data, self)
+                del self.vinyl
+                self.vinyl = element.Vinyl(self, self.save_data)
                 del self.main_robot
                 self.main_robot = element.Robot(self.save_data, self, True)
                 del self.second_robot
@@ -591,6 +645,16 @@ class MainWindow(QtWidgets.QMainWindow):
                                 except (IndexError, SyntaxError, NameError):
                                     self.save_data.set_gcrubs(param.split(' = ')[0],
                                                               eval(param.split(' = ')[1][:-1].replace("PySide6.", "")))
+                        elif param.find(self.init_data.get_window('vinyl_first_line')[1:-1]) != -1:
+                            for _ in range(self.save_data.get_len('vinyl')):
+                                param = file.readline()
+                                try:
+                                    self.save_data.set_vinyl(param.split(' = ')[0],
+                                                             eval(param.split(' = ')[1][1:-2]))
+                                except (IndexError, SyntaxError, NameError):
+                                    self.save_data.set_vinyl(param.split(' = ')[0],
+                                                             eval(param.split(' = ')[1][:-1]))
+                            self.list_widget.add_content(self.vinyl)
                         param = file.readline()
             except FileNotFoundError:
                 QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
@@ -648,6 +712,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 file.write(self.save_data.save('main_robot'))
                 file.write(self.save_data.save('second_robot'))
                 file.write(self.save_data.save('gcrubs'))
+                file.write(self.save_data.save('vinyl'))
         except FileNotFoundError:
             QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                   self.init_data.get_window('error_open_file_title'),
@@ -660,16 +725,20 @@ class MainWindow(QtWidgets.QMainWindow):
         :param file: str: Nom du ficher a importer
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('import_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
         dialog.setMinimumSize(self.init_data.get_window('import_width'), self.init_data.get_window('import_height'))
 
         radio_board = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_board_name'), dialog)
+        radio_vinyl = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_vinyl_name'), dialog)
         radio_main_robot = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_main_robot_name'), dialog)
         radio_second_robot = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_second_robot_name'), dialog)
 
         radio_board.setChecked(self.init_data.get_window('import_radio_board_checked'))
+        radio_vinyl.setChecked(self.init_data.get_window('import_radio_vinyl_checked'))
         radio_main_robot.setChecked(self.init_data.get_window('import_radio_main_robot_checked'))
         radio_second_robot.setChecked(self.init_data.get_window('import_radio_second_robot_checked'))
 
@@ -680,10 +749,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         layout = QtWidgets.QGridLayout(dialog)
         layout.addWidget(radio_board, 0, 0)
-        layout.addWidget(radio_main_robot, 1, 0)
-        layout.addWidget(radio_second_robot, 2, 0)
-        layout.addWidget(cancel_btn, 3, 0)
-        layout.addWidget(ok_btn, 3, 1)
+        layout.addWidget(radio_vinyl, 1, 0)
+        layout.addWidget(radio_main_robot, 2, 0)
+        layout.addWidget(radio_second_robot, 3, 0)
+        layout.addWidget(cancel_btn, 4, 0)
+        layout.addWidget(ok_btn, 4, 1)
         dialog.setLayout(layout)
 
         def cancel_btn_clicked():
@@ -696,6 +766,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.new_main_robot(False, file)
             elif radio_second_robot.isChecked() and self.save_data.get_second_robot('file') == '':
                 self.new_second_robot(False, file)
+            elif radio_vinyl.isChecked() and self.save_data.get_vinyl('file') == '':
+                self.new_vinyl(False, file)
             else:
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
                                       self.init_data.get_window('import_message_box_title'),
@@ -706,6 +778,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ok_btn.clicked.connect(ok_btn_clicked)
 
         dialog.show()
+        self.time = time()
 
     def export_component(self):
         """
@@ -1069,11 +1142,21 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.grid.update_()
         self.board.update_()
+        self.vinyl.update_()
         self.main_robot.update_()
         self.second_robot.update_()
         self.z_coord_sys.update_()
         self.y_coord_sys.update_()
         self.x_coord_sys.update_()
+
+        if self.board.get_file() != "":
+            self.viewer.addItem(self.board)
+        if self.vinyl.get_file() != "":
+            self.viewer.addItem(self.vinyl)
+        if self.main_robot.get_file() != "":
+            self.viewer.addItem(self.main_robot)
+        if self.second_robot.get_file() != "":
+            self.viewer.addItem(self.second_robot)
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
         """
@@ -1092,7 +1175,9 @@ class MainWindow(QtWidgets.QMainWindow):
             filename = filename.replace("file:///", "/").replace("\r\n", "").replace("%20", " ")
 
         # Si l'extension est utilisable
-        if filename != "" and '.' + filename.split('.')[-1] in self.init_data.get_extension('value'):
+        if filename != "" and ('.' + filename.split('.')[-1] in self.init_data.get_extension('value') or
+                               '.' + filename.split('.')[-1] in self.init_data.get_extension('vinyl') or
+                               '.' + filename.split('.')[-1] in self.init_data.get_extension('3d_file')):
             event.accept()
             self.dropped_filename = filename
         else:
@@ -1165,6 +1250,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox(self.init_data.get_window('import_message_box_type'),
                                       self.init_data.get_window('import_message_box_title'),
                                       self.init_data.get_window('drop_message_box_message')).exec()
+
+        elif extension in self.init_data.get_extension('vinyl'):
+            self.new_vinyl(False, self.dropped_filename)
 
         elif extension == self.init_data.get_extension('sequence'):  # Si c'est un fichier sequentiel
             pass

@@ -19,10 +19,10 @@ L'utilisation principale prevue est la coupe de **France de robotique**.
 **OS** : Linux, MacOS, Windows
 
 **Python 3** :  
-* PySide6 --> sudo pip3 install PySide6
-* Numpy-stl --> sudo pip3 install stl
-* PyQtGraph --> sudo pip3 install pyqtgraph
-* OpenGL --> sudo pip3 install pyopengl
+* PySide6 --> pip3 install PySide6
+* Numpy-stl --> pip3 install stl
+* PyQtGraph --> pip3 install pyqtgraph
+* OpenGL --> pip3 install pyopengl
 
 ## Installation
 

@@ -66,6 +66,9 @@ class ViewWidget(gl.GLViewWidget):
         :param event: QtGui.QKeyEvent: Evenement
         :return: None
         """
+        if self.parent.running.is_ongoing():
+            return
+
         if self.getting_key:  # S'il faut renvoyer une touche
             self.key.setText(self.text + widget.KeyDialog.ret_key(event))
             self.write_key.set_key(event.key())

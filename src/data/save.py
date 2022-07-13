@@ -37,6 +37,12 @@ class Save:
             'edge_color': self.init_data.get_board('edge_color')
         }
 
+        self.vinyl = {
+            'file': "",
+            'pixel_height': 0,
+            'pixel_width': 0
+        }
+
         self.main_robot = {  # Donnees du robot principal
             'file': "",
             'color': self.init_data.get_main_robot('color'),
@@ -128,6 +134,23 @@ class Save:
         """
         self.board[key] = value
 
+    def get_vinyl(self, key: str):
+        """
+        Renvoie la donnee du tapis qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
+        return self.vinyl.get(key)
+
+    def set_vinyl(self, key: str, value):
+        """
+        Definit la valeur value a la cle key pour ce qui concerne le tapis.
+        :param key: str: Cle a laquelle definir la valeur
+        :param value: any: Definit la valeur correspondant a la cle
+        :return: None
+        """
+        self.vinyl[key] = value
+
     def get_main_robot(self, key: str):
         """
         Renvoie la donnee du robot principal qui correspond a la cle.
@@ -207,7 +230,7 @@ class Save:
         Si to_save n'est pas dans la liste des dictionnaires, renvoie "".
 
         Liste des dictionnaires :
-            window, board, main_robot, second_robot, grid, gcrubs
+            window, board, main_robot, second_robot, grid, gcrubs, vinyl
 
         :param to_save: str: Dictionnaire que l'on veut sous format str
         :return: str: Dictionnaire sous format str
@@ -243,6 +266,11 @@ class Save:
             for key, value in zip(self.gcrubs.keys(), self.gcrubs.values()):
                 ans += str(key) + " = " + str(value) + "\n"
 
+        elif to_save == 'vinyl':
+            ans = self.init_data.get_window('vinyl_first_line')
+            for key, value in zip(self.vinyl.keys(), self.vinyl.values()):
+                ans += str(key) + " = '" + str(value) + "'\n"
+
         return ans
 
     def get_len_cmd(self) -> int:
@@ -258,7 +286,7 @@ class Save:
         Renvoie 0 si ce n'est pas un des dictionnaires.
 
         Liste des dictionnaires :
-            window, board, main_robot, second_robot, grid, gcrubs
+            window, board, main_robot, second_robot, grid, gcrubs, vinyl
 
         :param dictionary: str: Dictionnaire dont on veut le nombre d'elements
         :return: int : Nombre d'element du dictionnaire
@@ -275,5 +303,7 @@ class Save:
             return len(self.grid)
         elif dictionary == 'gcrubs':
             return len(self.gcrubs)
+        elif dictionary == 'vinyl':
+            return len(self.vinyl)
         else:
             return 0

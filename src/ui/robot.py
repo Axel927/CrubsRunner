@@ -393,11 +393,13 @@ class Robot:
         :return: None
         """
         self.robot.translate(0, 0, -self.robot.get_offset())  # Retour a la position de depart
-        self.robot.rotate(self.angle_rotation_sb.value() - self.axis_angle, int(self.axis_rotation_rb_x.isChecked()),
-                          int(self.axis_rotation_rb_y.isChecked()), int(self.axis_rotation_rb_z.isChecked()),
+        self.robot.rotate(self.angle_rotation_sb.value() - self.robot.get_axis_angle(),
+                          int(self.axis_rotation_rb_x.isChecked()),
+                          int(self.axis_rotation_rb_y.isChecked()),
+                          int(self.axis_rotation_rb_z.isChecked()),
                           local=True)
 
-        self.axis_angle = self.angle_rotation_sb.value()
+        self.robot.set_axis_angle(self.angle_rotation_sb.value())
         if self.robot.is_main_robot():
             if self.axis_rotation_rb_x.isChecked():
                 self.save_data.set_main_robot('axis_rotation', 'x')
@@ -436,25 +438,25 @@ class Robot:
         :return: float: Distance a parcourir
         """
         if axis == 'x':
-            if self.axis_angle == 90:
+            if self.robot.get_axis_angle() == 90:
                 return -self.robot.get_min_max()[1][0]
-            elif self.axis_angle == 180 or self.axis_angle == -180:
+            elif self.robot.get_axis_angle() == 180 or self.robot.get_axis_angle() == -180:
                 return self.robot.get_min_max()[2][1]
-            elif self.axis_angle == -90:
+            elif self.robot.get_axis_angle() == -90:
                 return self.robot.get_min_max()[1][1]
-            elif self.axis_angle == 0:
+            elif self.robot.get_axis_angle() == 0:
                 return -self.robot.get_min_max()[2][0]
             else:
                 return self.robot.get_offset()
 
         elif axis == 'y':
-            if self.axis_angle == 90:
+            if self.robot.get_axis_angle() == 90:
                 return self.robot.get_min_max()[0][1]
-            elif self.axis_angle == 180 or self.axis_angle == -180:
+            elif self.robot.get_axis_angle() == 180 or self.robot.get_axis_angle() == -180:
                 return self.robot.get_min_max()[2][1]
-            elif self.axis_angle == -90:
+            elif self.robot.get_axis_angle() == -90:
                 return -self.robot.get_min_max()[0][0]
-            elif self.axis_angle == 0:
+            elif self.robot.get_axis_angle() == 0:
                 return -self.robot.get_min_max()[2][0]
             else:
                 return self.robot.get_offset()
@@ -469,7 +471,7 @@ class Robot:
         Slot si l'axe x est selectionne.
         :return: None
         """
-        self.axis_angle = 0
+        self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
@@ -502,7 +504,7 @@ class Robot:
         Slot si l'axe y est selectionne.
         :return: None
         """
-        self.axis_angle = 0
+        self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'x':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
@@ -535,7 +537,7 @@ class Robot:
         Slot si l'axe z est selectionne.
         :return: None
         """
-        self.axis_angle = 0
+        self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
                 self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
@@ -618,6 +620,7 @@ class Robot:
         self.sequence_save_btn.setVisible(False)
         self.sequence_cancel_btn.setVisible(False)
         self.parent.board.setVisible(False)
+        self.parent.vinyl.setVisible(False)
 
         self.sequence_origin_btn.setVisible(True)
         self.sequence_origin_lbl.setVisible(True)
@@ -788,4 +791,5 @@ class Robot:
                                                                                 angle=self.robot.get_angle()))
                 self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text_start'))
                 self.parent.board.setVisible(True)
+                self.parent.vinyl.setVisible(True)
                 self.time = time()

@@ -49,6 +49,7 @@ class Init:
             'main_robot_first_line': "\n## Main robot\n",
             'second_robot_first_line': "\n## Second robot\n",
             'gcrubs_first_line': "\n## gcrubs\n",
+            'vinyl_first_line': "\n## vinyl\n",
 
             'import_name': "Importer",
             'import_shortcut': QtGui.QKeySequence.Italic,  # Ctrl + I
@@ -57,10 +58,12 @@ class Init:
             'import_dialog_title': "Choisir le composant a importer",
             'import_dialog_modal': True,
             'import_radio_board_name': "Plateau",
+            'import_radio_vinyl_name': "Tapis",
             'import_radio_main_robot_name': "Robot principal",
             'import_radio_second_robot_name': "Robot secondaire",
             'import_radio_main_robot_checked': False,
             'import_radio_board_checked': True,
+            'import_radio_vinyl_checked': False,
             'import_radio_second_robot_checked': False,
             'import_cancel_btn_name': "Annuler",
             'import_ok_btn_name': "Valider",
@@ -104,6 +107,10 @@ class Init:
             'key_action_name': "Choisir les touches",
             'key_action_status_tip': "Choisir les touches",
             'key_action_icon': QtGui.QIcon("icon/icon_key.png"),
+
+            'speed_simulation_btn_name': "x {multi}",
+            'speed_simulation_btn_tip': "Vitesse de la simulation", 
+            'speed_simulation_btn_values': [0.25, 0.5, 1, 2, 4],
 
             'window_title': "CrubsRunner",
             'accept_drops': True,
@@ -166,6 +173,7 @@ class Init:
             'new_message_box_message': "Choisir le plateau",
             'file_dialog_open_title': "Choisir le plateau",
             'file_dialog_open_extensions': "All files (*.stl *.crb) ;; STL (*.stl) ;; CrubsRunner board (*.crb)",
+
             'save_extension': "CrubsRunner board (*.crb)",
             'color': (255 / 255, 211 / 255, 133 / 255, 1),  # de 0 a 1
             'edge_color': (105 / 255, 105 / 255, 105 / 255, 1),  # de 0 a 1
@@ -173,7 +181,7 @@ class Init:
             'element_name': "Plateau",
             'appearance_translation_x': -1500,
             'appearance_translation_y': 1000,
-            'appearance_translation_z': 0,
+            'appearance_translation_z': -1,
 
             'window_title': "Proprietes du plateau",
 
@@ -201,6 +209,20 @@ class Init:
                                           "Cette action est irreversible.",
             'remove_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
         }  # end self.board
+
+        self.vinyl = {  # Contient toutes les donnees pour le vinyl
+            'vinyl_message_box_type': QtWidgets.QMessageBox.Information,
+            'vinyl_message_box_title': "Information",
+            'vinyl_message_box_message': "Choisir le tapis du plateau",
+            'vinyl_dialog_open_title': "Choisir le tapis du plateau",
+            'vinyl_dialog_open_extensions': "All files (*.png *.jpg *.jpeg *.gif) ;; PNG (*.png) ;; JPEG (*.jpeg *.jpg)"
+                                            " ;; GIF (*.gif)",
+            'remove_message_box_type': QtWidgets.QMessageBox.Question,
+            'remove_message_box_title': "Suppression d'element",
+            'remove_message_box_message': "Etes-vous sur de vouloir supprimer le tapis ?\n"
+                                          "Cette action est irreversible.",
+            'remove_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
+        }  # end self.vinyl
 
         # Contient toutes les donnees pour le robot principal et les donnees communes aux deux robots
         self.main_robot = {
@@ -457,7 +479,8 @@ class Init:
             'board': ".crb",
             'robot': ".crr",
             'sequence': ".gcrubs",
-            '3d_file': ".stl"
+            '3d_file': ".stl",
+            'vinyl': (".png", ".jpg", ".jpeg", ".gif")
         }  # End self.extensions
 
     def get_window(self, key: str):
@@ -475,6 +498,14 @@ class Init:
         :return: Valeur correspondant a la cle
         """
         return self.board.get(key)
+
+    def get_vinyl(self, key: str):
+        """
+        Renvoie la donnee du tapis qui correspond a la cle.
+        :param key: Cle pour obtenir la valeur correspondante
+        :return: Valeur correspondant a la cle
+        """
+        return self.vinyl.get(key)
 
     def get_main_robot(self, key: str):
         """
