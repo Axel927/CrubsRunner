@@ -38,10 +38,7 @@ class Robot(element.Board):
         self.invisible = False
         self.running = False
         self.gcrubs_file = ""
-        self.is_updated = False
         self.ready_sequence = False
-        self.axis_angle = 0
-        self.offset = 0
 
         if self.main_robot:
             self.speed = self.save_data.get_main_robot('speed')
@@ -74,21 +71,6 @@ class Robot(element.Board):
         :return: bool: main_robot
         """
         return self.main_robot
-
-    def set_offset(self, value: float):
-        """
-        Definit la valeur de l'offset pour la hauteur au dessus du plateau a laquelle doit etre le robot.
-        :param value: float: Valeur de l'offset
-        :return: None
-        """
-        self.offset = value
-
-    def get_offset(self) -> float:
-        """
-        Renvoie la valeur de l'offset.
-        :return: float: Valeur de l'offset
-        """
-        return self.offset
 
     def is_origined(self) -> bool:
         """
@@ -161,21 +143,6 @@ class Robot(element.Board):
         """
         return self.window
 
-    def get_axis_angle(self) -> int:
-        """
-        Renvoie l'angle de rotation autour de l'axe (lors de la mise en place)
-        :return: int: angle
-        """
-        return self.axis_angle
-
-    def set_axis_angle(self, angle: int):
-        """
-        Definit l'angle de rotation autour de l'axe (lors de la mise en place)
-        :param angle: int: angle
-        :return: None
-        """
-        self.axis_angle = angle
-
     def set_moving(self, dx=0., dy=0., rz=0.):
         """
         Fait bouger le robot selon dx, dy et rz dans le repere local.
@@ -199,6 +166,7 @@ class Robot(element.Board):
             else:
                 self.file = self.save_data.get_second_robot('file')
             functions.object.show_stl(self)
+
             if self.is_invisible():  # Si le robot est minuscule
                 coef = self.init_data.get_main_robot('invisible_coef')
                 self.scale(coef, coef, coef)  # Agrandit le robot

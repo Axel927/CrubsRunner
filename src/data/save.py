@@ -34,7 +34,10 @@ class Save:
         self.board = {  # Donnees du plateau
             'file': "",
             'color': self.init_data.get_board('color'),
-            'edge_color': self.init_data.get_board('edge_color')
+            'edge_color': self.init_data.get_board('edge_color'),
+            'angle_rotation': 0,
+            'axis_rotation': 'x',
+            'offset': 0
         }
 
         self.vinyl = {

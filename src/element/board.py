@@ -28,6 +28,9 @@ class Board(element.CoordSys):
         self.file = self.init_data.get_board('file')
         self.name = self.init_data.get_board('name')
         self.window = ui.Board(self.parent, self.save_data, self)
+        self.axis_angle = 0
+        self.offset = 0
+        self.is_updated = False
 
     def properties(self):
         """
@@ -47,8 +50,32 @@ class Board(element.CoordSys):
 
         self.setColor(self.save_data.get_board('color'))
         self.set_edge_color(self.save_data.get_board('edge_color'))
+
+        self.offset = self.save_data.get_board('offset')
+        self.translate(0, 0, self.offset)
+
+        self.axis_angle = self.save_data.get_board('angle_rotation')
+        if self.save_data.get_board('axis_rotation') == 'x':
+            self.window.axis_rotation_rb_x.setChecked(True)
+            self.window.axis_rotation_rb_y.setChecked(False)
+            self.window.axis_rotation_rb_z.setChecked(False)
+        elif self.save_data.get_board('axis_rotation') == 'y':
+            self.window.axis_rotation_rb_x.setChecked(False)
+            self.window.axis_rotation_rb_y.setChecked(True)
+            self.window.axis_rotation_rb_z.setChecked(False)
+        elif self.save_data.get_board('axis_rotation') == 'z':
+            self.window.axis_rotation_rb_x.setChecked(False)
+            self.window.axis_rotation_rb_y.setChecked(False)
+            self.window.axis_rotation_rb_z.setChecked(True)
+
         if self.file == "":
             self.remove(False)
+
+        if not self.is_updated:  # Si le plateau n'a pas deja ete mis a jour
+            self.is_updated = True
+            self.rotate(self.axis_angle, int(self.window.axis_rotation_rb_x.isChecked()),
+                        int(self.window.axis_rotation_rb_y.isChecked()),
+                        int(self.window.axis_rotation_rb_z.isChecked()), local=True)
 
     def remove(self, message: bool):
         """
@@ -57,3 +84,33 @@ class Board(element.CoordSys):
         :return: None
         """
         self.window.remove(message)
+
+    def get_axis_angle(self) -> int:
+        """
+        Renvoie l'angle de rotation autour de l'axe (lors de la mise en place)
+        :return: int: angle
+        """
+        return self.axis_angle
+
+    def set_axis_angle(self, angle: int):
+        """
+        Definit l'angle de rotation autour de l'axe (lors de la mise en place)
+        :param angle: int: angle
+        :return: None
+        """
+        self.axis_angle = angle
+
+    def set_offset(self, value: float):
+        """
+        Definit la valeur de l'offset pour la hauteur au dessus du plateau a laquelle doit etre le robot.
+        :param value: float: Valeur de l'offset
+        :return: None
+        """
+        self.offset = value
+
+    def get_offset(self) -> float:
+        """
+        Renvoie la valeur de l'offset.
+        :return: float: Valeur de l'offset
+        """
+        return self.offset

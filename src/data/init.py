@@ -193,6 +193,19 @@ class Init:
             'edge_color_default': False,
             'edge_color_dialog_title': "Couleur des arretes du plateau",
 
+            'axis_rotation_x_name': "x",
+            'axis_rotation_y_name': "y",
+            'axis_rotation_z_name': "z",
+            'angle_rotation_min': -180,
+            'angle_rotation_max': 180,
+            'gb_name': "Mise en place du plateau",
+            'angle_lbl_name': "Angle : ",
+            'axis_lbl_name': "Axe de rotation : ",
+
+            'offset_lbl_name': "Hauteur : ",
+            'offset_sb_min': -3000,
+            'offset_sb_max': 3000,
+
             'close_btn_name': "Fermer",
             'close_cursor': QtCore.Qt.PointingHandCursor,
             'close_default': True,

@@ -33,8 +33,21 @@ class Board:
         self.edge_color_btn = QtWidgets.QPushButton(self.init_data.get_board('edge_color_name'), self.window)
         self.close_btn = QtWidgets.QPushButton(self.init_data.get_board('close_btn_name'), self.window)
         self.reset_btn = QtWidgets.QPushButton(self.init_data.get_board('reset_btn_name'), self.window)
-        self.layout = QtWidgets.QGridLayout(self.window)
+        self.layout = QtWidgets.QVBoxLayout(self.window)
         self.remove_btn = QtWidgets.QPushButton(self.init_data.get_board('remove_btn_name'), self.window)
+        self.angle_rotation_sb = QtWidgets.QSpinBox(self.window)
+
+        self.axis_rotation_rb_x = QtWidgets.QRadioButton(self.init_data.get_board('axis_rotation_x_name'),
+                                                         self.window)
+        self.axis_rotation_rb_y = QtWidgets.QRadioButton(self.init_data.get_board('axis_rotation_y_name'),
+                                                         self.window)
+        self.axis_rotation_rb_z = QtWidgets.QRadioButton(self.init_data.get_board('axis_rotation_z_name'),
+                                                         self.window)
+        self.angle_lbl = QtWidgets.QLabel(self.init_data.get_board('angle_lbl_name'))
+        self.axis_lbl = QtWidgets.QLabel(self.init_data.get_board('axis_lbl_name'))
+
+        self.offset_sb = QtWidgets.QSpinBox(self.window)
+        self.offset_lbl = QtWidgets.QLabel(self.init_data.get_board('offset_lbl_name'))
 
     def properties_window(self):
         """
@@ -49,7 +62,6 @@ class Board:
 
         self.edge_color_btn.setCursor(self.init_data.get_board('color_cursor'))
         self.edge_color_btn.setDefault(self.init_data.get_board('edge_color_default'))
-        self.color_dialog.setVisible(False)
 
         self.close_btn.setCursor(self.init_data.get_board('close_cursor'))
         self.close_btn.setDefault(self.init_data.get_board('close_default'))
@@ -58,11 +70,45 @@ class Board:
         self.remove_btn.setCursor(self.init_data.get_board('remove_cursor'))
         self.remove_btn.setDefault(self.init_data.get_board('remove_default'))
 
-        self.layout.addWidget(self.color_btn, 0, 0)
-        self.layout.addWidget(self.edge_color_btn, 1, 0)
-        self.layout.addWidget(self.close_btn, 2, 0)
-        self.layout.addWidget(self.reset_btn, 3, 0)
-        self.layout.addWidget(self.remove_btn, 4, 0)
+        self.angle_rotation_sb.setMinimum(self.init_data.get_board('angle_rotation_min'))
+        self.angle_rotation_sb.setMaximum(self.init_data.get_board('angle_rotation_max'))
+        self.angle_rotation_sb.setValue(self.save_data.get_board('angle_rotation'))
+
+        self.offset_sb.setMinimum(self.init_data.get_board('offset_sb_min'))
+        self.offset_sb.setMaximum(self.init_data.get_board('offset_sb_max'))
+        self.offset_sb.setValue(self.board.get_offset())
+
+        if self.save_data.get_board('axis_rotation') == 'x':
+            self.axis_rotation_rb_x.setChecked(True)
+            self.axis_rotation_rb_y.setChecked(False)
+            self.axis_rotation_rb_z.setChecked(False)
+        elif self.save_data.get_board('axis_rotation') == 'y':
+            self.axis_rotation_rb_x.setChecked(False)
+            self.axis_rotation_rb_y.setChecked(True)
+            self.axis_rotation_rb_z.setChecked(False)
+        elif self.save_data.get_board('axis_rotation') == 'z':
+            self.axis_rotation_rb_x.setChecked(False)
+            self.axis_rotation_rb_y.setChecked(False)
+            self.axis_rotation_rb_z.setChecked(True)
+
+        gb_layout = QtWidgets.QGridLayout()
+        gb_layout.addWidget(self.angle_lbl, 0, 0)
+        gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
+        gb_layout.addWidget(self.axis_lbl, 1, 0)
+        gb_layout.addWidget(self.axis_rotation_rb_x, 1, 1)
+        gb_layout.addWidget(self.axis_rotation_rb_y, 2, 1)
+        gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
+        gb_layout.addWidget(self.offset_lbl, 4, 0)
+        gb_layout.addWidget(self.offset_sb, 4, 1)
+        group_box = QtWidgets.QGroupBox(self.init_data.get_board('gb_name'), self.window)
+        group_box.setLayout(gb_layout)
+
+        self.layout.addWidget(self.color_btn)
+        self.layout.addWidget(self.edge_color_btn)
+        self.layout.addWidget(group_box)
+        self.layout.addWidget(self.close_btn)
+        self.layout.addWidget(self.reset_btn)
+        self.layout.addWidget(self.remove_btn)
 
         self._connections()
         self.window.show()
@@ -77,6 +123,11 @@ class Board:
         self.close_btn.clicked.connect(self._close)
         self.reset_btn.clicked.connect(self.reset)
         self.remove_btn.clicked.connect(self._remove)
+        self.angle_rotation_sb.valueChanged.connect(self._rotate)
+        self.axis_rotation_rb_x.clicked.connect(self._axis_x)
+        self.axis_rotation_rb_y.clicked.connect(self._axis_y)
+        self.axis_rotation_rb_z.clicked.connect(self._axis_z)
+        self.offset_sb.valueChanged.connect(self._offset)
 
     def _color_board(self):
         """
@@ -142,6 +193,8 @@ class Board:
         Remet le plateau selon la configuration initiale.
         :return: None
         """
+        self.board.set_axis_angle(0)
+        self.board.set_offset(0)
         self.board.setColor(self.init_data.get_board('color'))
         self.board.set_edge_color(self.init_data.get_board('edge_color'))
         self.window.close()
@@ -181,3 +234,82 @@ class Board:
         :return: None
         """
         self.remove(True)
+
+    def _rotate(self):
+        """
+        Slot pour faire tourner le plateau autour d'un axe.
+        :return: None
+        """
+        self.board.rotate(self.angle_rotation_sb.value() - self.board.get_axis_angle(),
+                          int(self.axis_rotation_rb_x.isChecked()),
+                          int(self.axis_rotation_rb_y.isChecked()),
+                          int(self.axis_rotation_rb_z.isChecked()),
+                          local=True)
+
+        self.board.set_axis_angle(self.angle_rotation_sb.value())
+        if self.axis_rotation_rb_x.isChecked():
+            self.save_data.set_board('axis_rotation', 'x')
+            self.save_data.set_board('angle_rotation', self.angle_rotation_sb.value())
+        elif self.axis_rotation_rb_y.isChecked():
+            self.save_data.set_board('axis_rotation', 'y')
+            self.save_data.set_board('angle_rotation', self.angle_rotation_sb.value())
+        else:
+            self.save_data.set_board('axis_rotation', 'z')
+            self.save_data.set_board('angle_rotation', self.angle_rotation_sb.value())
+
+    def _axis_x(self):
+        """
+        Slot si l'axe x est selectionne.
+        :return: None
+        """
+        self.board.set_axis_angle(0)
+        if self.save_data.get_board('axis_rotation') == 'y':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'z':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'x':
+            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+
+        self.save_data.set_board('angle_rotation', 0)
+        self.angle_rotation_sb.setValue(0)
+
+    def _axis_y(self):
+        """
+        Slot si l'axe y est selectionne.
+        :return: None
+        """
+        self.board.set_axis_angle(0)
+        if self.save_data.get_board('axis_rotation') == 'x':
+            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'z':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'y':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+
+        self.save_data.set_board('angle_rotation', 0)
+        self.angle_rotation_sb.setValue(0)
+
+    def _axis_z(self):
+        """
+        Slot si l'axe z est selectionne.
+        :return: None
+        """
+        self.board.set_axis_angle(0)
+        if self.save_data.get_board('axis_rotation') == 'y':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'x':
+            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+        elif self.save_data.get_board('axis_rotation') == 'z':
+            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+
+        self.save_data.set_board('angle_rotation', 0)
+        self.angle_rotation_sb.setValue(0)
+
+    def _offset(self):
+        """
+        Slot pour deplacer le robot selon la valeur de l'offset
+        :return: None
+        """
+        self.board.translate(0, 0, self.offset_sb.value() - self.board.get_offset())
+        self.board.set_offset(self.offset_sb.value())
+        self.save_data.set_main_robot('offset', self.board.get_offset())
