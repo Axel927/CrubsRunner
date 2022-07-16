@@ -54,7 +54,7 @@ class Init:
             'import_name': "Importer",
             'import_shortcut': QtGui.QKeySequence.Italic,  # Ctrl + I
             'import_status_tip': "Importer un composant",
-            'import_icon': QtGui.QIcon("icon/icon_import"),
+            'import_icon': QtGui.QIcon("icon/icon_import.png"),
             'import_dialog_title': "Choisir le composant a importer",
             'import_dialog_modal': True,
             'import_radio_board_name': "Plateau",
@@ -75,7 +75,7 @@ class Init:
             'export_name': "Exporter",
             'export_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_E),
             'export_status_tip': "Exporter un composant",
-            'export_icon': QtGui.QIcon("icon/icon_export"),
+            'export_icon': QtGui.QIcon("icon/icon_export.png"),
             "export_dialog_title": "Exporter un composant",  # Other parameters : same as import
 
             'top_view_action_name': "Vue de dessus",
@@ -228,8 +228,7 @@ class Init:
             'vinyl_message_box_title': "Information",
             'vinyl_message_box_message': "Choisir le tapis du plateau",
             'vinyl_dialog_open_title': "Choisir le tapis du plateau",
-            'vinyl_dialog_open_extensions': "All files (*.png *.jpg *.jpeg *.gif) ;; PNG (*.png) ;; JPEG (*.jpeg *.jpg)"
-                                            " ;; GIF (*.gif)",
+            'vinyl_dialog_open_extensions': "All files (*.png) ;; PNG (*.png)",
             'remove_message_box_type': QtWidgets.QMessageBox.Question,
             'remove_message_box_title': "Suppression d'element",
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le tapis ?\n"
@@ -285,6 +284,8 @@ class Init:
             'rotation_min':  1,
             'rotation_max': 360,
             'gb_speed_name': "Vitesses",
+            'track_visible_cb_name': "Voir la trace",
+            'track_visible_cb_checked': True,
 
             'sequence_btn_name': "Creer la sequence du robot",
             'sequence_btn_default': False,
@@ -318,6 +319,10 @@ class Init:
             'sequence_origin_btn_name': "Fait",
             'sequence_origin_btn_default': True,
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,
+
+            'track_file': "3d_files/track.stl",
+            'track_name': "track",
+            'track_width': 30  # mm
         }   # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
@@ -364,7 +369,7 @@ class Init:
             'moving_view2': QtCore.Qt.MouseButton.RightButton,
 
             'coord_sys_name': "Repere",
-            'coord_sys_file': "coord_sys.stl",
+            'coord_sys_file': "3d_files/coord_sys.stl",
             'coord_sys_visible': True,
             'coord_sys_x_color': (1., 0., 0., 1.),
             'coord_sys_y_color': (0., 1., 0., 1.),
@@ -493,7 +498,7 @@ class Init:
             'robot': ".crr",
             'sequence': ".gcrubs",
             '3d_file': ".stl",
-            'vinyl': (".png", ".jpg", ".jpeg", ".gif")
+            'vinyl': ".png"
         }  # End self.extensions
 
     def get_window(self, key: str):

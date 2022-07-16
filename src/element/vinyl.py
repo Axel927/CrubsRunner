@@ -56,7 +56,7 @@ class Vinyl(gl.GLImageItem):
     def set_file(self, file: str):
         """
         Definit le fichier du tapis.
-        :param file: str: Nom du fichier. Extensions autorisees: .png, .jpg, .jpeg, .gif
+        :param file: str: Nom du fichier. Extensions autorisees: .png
         :return: None
         """
         if file.split('.')[-1] in ['png', 'jpg', 'jpeg', 'gif']:

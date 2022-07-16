@@ -441,7 +441,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                          self.init_data.get_vinyl('vinyl_dialog_open_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_vinyl('vinyl_dialog_open_extensions'))[0]
-        if file:
+        if file and '.' + file.split('.')[-1] in self.init_data.get_extension('vinyl'):
             del self.vinyl
             self.vinyl = element.Vinyl(self, self.save_data)
             self.vinyl.set_file(file)
@@ -1234,6 +1234,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.init_data.get_window('error_open_file_title'),
                                       self.init_data.get_window('error_open_file_message').format(
                                           filename=self.dropped_filename)).exec()
+                return
 
             if self.save_data.get_main_robot('file') == "" and \
                     param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
@@ -1252,7 +1253,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.init_data.get_window('drop_message_box_message')).exec()
 
         elif extension in self.init_data.get_extension('vinyl'):
-            self.new_vinyl(False, self.dropped_filename)
+            if self.vinyl.get_file() == "":
+                self.new_vinyl(False, self.dropped_filename)
 
         elif extension == self.init_data.get_extension('sequence'):  # Si c'est un fichier sequentiel
             pass

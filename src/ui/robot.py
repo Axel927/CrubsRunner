@@ -9,13 +9,16 @@ Fichier contenant la partie interface de la classe Robot.
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
 import data
+import functions.object
 import widget
+import element
 
 
 class Robot:
     """
     Classe pour l'interface des robots.
     """
+
     def __init__(self, parent, save_data: data.Save, robot):
         """
         Constructeur de Robot.
@@ -28,6 +31,7 @@ class Robot:
         self.robot = robot
         self.init_data = data.Init()
         self.time = 0.
+        self.track = list()
 
         self.window = QtWidgets.QDialog(self.parent)
         self.color_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('color_name'), self.window)
@@ -35,9 +39,13 @@ class Robot:
         self.edge_color_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('edge_color_name'), self.window)
         self.close_btn = QtWidgets.QPushButton(self.init_data.get_board('close_btn_name'), self.window)
         self.reset_btn = QtWidgets.QPushButton(self.init_data.get_board('reset_btn_name'), self.window)
-        self.layout = QtWidgets.QGridLayout(self.window)
+        self.layout = QtWidgets.QVBoxLayout(self.window)
         self.remove_btn = QtWidgets.QPushButton(self.init_data.get_board('remove_btn_name'), self.window)
         self.angle_rotation_sb = QtWidgets.QSpinBox(self.window)
+        self.gb_layout = QtWidgets.QGridLayout()
+        self.group_box = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_name'))
+        self.speed_gb = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_speed_name'))
+        self.speed_layout = QtWidgets.QGridLayout()
 
         self.axis_rotation_rb_x = QtWidgets.QRadioButton(self.init_data.get_main_robot('axis_rotation_x_name'),
                                                          self.window)
@@ -56,6 +64,7 @@ class Robot:
         self.speed_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('speed_lbl'))
         self.speed_rotation_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('speed_rotation_lbl'))
         self.speed_rotation_sb = QtWidgets.QSpinBox()
+        self.track_visible_cb = QtWidgets.QCheckBox(self.init_data.get_main_robot('track_visible_cb_name'))
 
         self.sequence_dialog = QtWidgets.QDialog(self.parent)
         self.sequence_text = QtWidgets.QTextEdit("", self.sequence_dialog)
@@ -107,6 +116,10 @@ class Robot:
         self.offset_sb.setMaximum(self.init_data.get_main_robot('offset_sb_max'))
         self.offset_sb.setValue(self.robot.get_offset())
 
+        self.track_visible_cb.setChecked(
+            self.track[0].visible() if len(self.track) != 0 else self.init_data.get_main_robot(
+                'track_visible_cb_checked'))
+
         if self.robot.is_main_robot():
             self.angle_rotation_sb.setValue(self.save_data.get_main_robot('angle_rotation'))
             if self.save_data.get_main_robot('axis_rotation') == 'x':
@@ -142,35 +155,32 @@ class Robot:
         self.import_gcrubs_btn.setCursor(self.init_data.get_main_robot('import_gcrubs_btn_cursor'))
         self.import_gcrubs_btn.setDefault(self.init_data.get_main_robot('import_gcrubs_btn_default'))
 
-        gb_layout = QtWidgets.QGridLayout()
-        gb_layout.addWidget(self.angle_lbl, 0, 0)
-        gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
-        gb_layout.addWidget(self.axis_lbl, 1, 0)
-        gb_layout.addWidget(self.axis_rotation_rb_x, 1, 1)
-        gb_layout.addWidget(self.axis_rotation_rb_y, 2, 1)
-        gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
-        gb_layout.addWidget(self.offset_lbl, 4, 0)
-        gb_layout.addWidget(self.offset_sb, 4, 1)
-        group_box = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_name'), self.window)
-        group_box.setLayout(gb_layout)
+        self.gb_layout.addWidget(self.angle_lbl, 0, 0)
+        self.gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
+        self.gb_layout.addWidget(self.axis_lbl, 1, 0)
+        self.gb_layout.addWidget(self.axis_rotation_rb_x, 1, 1)
+        self.gb_layout.addWidget(self.axis_rotation_rb_y, 2, 1)
+        self.gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
+        self.gb_layout.addWidget(self.offset_lbl, 4, 0)
+        self.gb_layout.addWidget(self.offset_sb, 4, 1)
+        self.group_box.setLayout(self.gb_layout)
 
-        speed_gb = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_speed_name'))
-        speed_layout = QtWidgets.QGridLayout()
-        speed_layout.addWidget(self.speed_lbl, 0, 0)
-        speed_layout.addWidget(self.speed_sb, 0, 1)
-        speed_layout.addWidget(self.speed_rotation_lbl, 1, 0)
-        speed_layout.addWidget(self.speed_rotation_sb, 1, 1)
-        speed_gb.setLayout(speed_layout)
+        self.speed_layout.addWidget(self.speed_lbl, 0, 0)
+        self.speed_layout.addWidget(self.speed_sb, 0, 1)
+        self.speed_layout.addWidget(self.speed_rotation_lbl, 1, 0)
+        self.speed_layout.addWidget(self.speed_rotation_sb, 1, 1)
+        self.speed_gb.setLayout(self.speed_layout)
 
-        self.layout.addWidget(self.color_btn, 0, 0)
-        self.layout.addWidget(self.edge_color_btn, 1, 0)
-        self.layout.addWidget(speed_gb, 2, 0)
-        self.layout.addWidget(group_box, 3, 0)
-        self.layout.addWidget(self.close_btn, 4, 0)
-        self.layout.addWidget(self.reset_btn, 5, 0)
-        self.layout.addWidget(self.remove_btn, 6, 0)
-        self.layout.addWidget(self.import_gcrubs_btn, 7, 0)
-        self.layout.addWidget(self.create_sequence_btn, 8, 0)
+        self.layout.addWidget(self.color_btn)
+        self.layout.addWidget(self.edge_color_btn)
+        self.layout.addWidget(self.speed_gb)
+        self.layout.addWidget(self.group_box)
+        self.layout.addWidget(self.track_visible_cb)
+        self.layout.addWidget(self.close_btn)
+        self.layout.addWidget(self.reset_btn)
+        self.layout.addWidget(self.remove_btn)
+        self.layout.addWidget(self.import_gcrubs_btn)
+        self.layout.addWidget(self.create_sequence_btn)
 
         self._connections()
         self.window.show()
@@ -194,6 +204,7 @@ class Robot:
         self.import_gcrubs_btn.clicked.connect(self.import_gcrubs)
         self.speed_sb.valueChanged.connect(self._speed)
         self.speed_rotation_sb.valueChanged.connect(self._speed_rotation)
+        self.track_visible_cb.clicked.connect(self.track_visible)
 
         self.sequence_save_btn.clicked.connect(self.save_sequence)
         self.sequence_cancel_btn.clicked.connect(self._cancel_sequence)
@@ -584,6 +595,7 @@ class Robot:
         """
         self._close()
         self.robot.set_origined(False)
+        self.track.clear()
 
         if self.robot.is_main_robot():
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_main_robot('sequence_dialog_title'))
@@ -653,7 +665,8 @@ class Robot:
         self.sequence_text.clear()
         self.sequence_dialog.close()
         self.sequence_list.setVisible(False)
-        self.ready_sequence = False
+        self.robot.set_ready_sequence(False)
+        self.robot.set_key(None)
 
     def save_sequence(self):
         """
@@ -702,6 +715,7 @@ class Robot:
         self.sequence_text.append(self.save_data.get_gcrubs("cmd_name").get(
             self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
 
+        self.add_track()
         self.key = None
         self.time = time()
 
@@ -793,3 +807,34 @@ class Robot:
                 self.parent.board.setVisible(True)
                 self.parent.vinyl.setVisible(True)
                 self.time = time()
+
+    def add_track(self):
+        """
+        Ajoute un element de chemin a la position du robot.
+        :return: None
+        """
+        self.track.append(element.CoordSys(self.save_data))
+        self.track[-1].set_file(self.init_data.get_main_robot('track_file'))
+        self.track[-1].set_name(self.init_data.get_main_robot('track_name'))
+        self.track[-1].set_element_type('track')
+
+        functions.object.show_stl(self.track[-1])
+        self.parent.viewer.addItem(self.track[-1])
+        if self.robot.is_main_robot():
+            self.track[-1].setColor(self.save_data.get_main_robot('color'))
+            self.track[-1].set_edge_color(self.save_data.get_main_robot('edge_color'))
+        else:
+            self.track[-1].setColor(self.save_data.get_second_robot('color'))
+            self.track[-1].set_edge_color(self.save_data.get_second_robot('edge_color'))
+
+        self.track[-1].translate(self.robot.get_coord()[0], self.robot.get_coord()[1], 0)
+        if not self.track_visible_cb.isChecked():
+            self.track[-1].setVisible(False)
+
+    def track_visible(self):
+        """
+        Rend la trace visible ou non selon si la check box est est checkee ou non
+        :return: None
+        """
+        for track in self.track:
+            track.setVisible(self.track_visible_cb.isChecked())

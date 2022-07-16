@@ -8,6 +8,7 @@ Fichier contenant la classe ViewWidget.
 
 from PySide6 import QtCore, QtGui
 import pyqtgraph.opengl as gl
+from math import cos, sin, radians
 import data
 import widget
 
@@ -16,6 +17,7 @@ class ViewWidget(gl.GLViewWidget):
     """
     Classe qui gere les evenements dans la partie centrale.
     """
+
     def __init__(self, parent, save_data: data.Save):
         """
         Constructeur de ViewWidget.
@@ -87,18 +89,17 @@ class ViewWidget(gl.GLViewWidget):
             return
 
         speed = self.save_data.get_grid('moving_speed')
-        mvt = self.parent.main_robot.robot_movement(axis, angle)
+        mvt = elem.robot_movement(axis, angle)
 
         for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                             self.save_data.get_gcrubs('cmd_key').values()):
             # Si c'est une touche pour la sequence mais pas une touche de mouvement
-            if event.key() == cmd and event.key() != self.save_data.get_gcrubs('keys').get('go_right') and\
+            if event.key() == cmd and event.key() != self.save_data.get_gcrubs('keys').get('go_right') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_left') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_down') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_up') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_left'):
-
                 elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                 elem.set_key(None)
                 return
@@ -161,7 +162,11 @@ class ViewWidget(gl.GLViewWidget):
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
+                        elem.get_window().add_track()
+                        elem.get_window().track[-1].rotate(elem.get_angle() + speed, 0, 0, 1, local=True)
 
+                    if len(elem.get_window().track) != 0:
+                        elem.get_window().track[-1].rotate(-speed, 0, 0, 1, local=True)
                     self.angle += speed
                     self.angle %= 360
                     self.parent.updo([elem, 0, 0, self.angle])
@@ -200,10 +205,14 @@ class ViewWidget(gl.GLViewWidget):
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
+                        elem.get_window().add_track()
+                        elem.get_window().track[-1].rotate(elem.get_angle() - speed, 0, 0, 1, local=True)
+
                     self.angle += speed
                     self.angle %= 360
                     self.parent.updo([elem, 0, 0, -self.angle])
-
+                    if len(elem.get_window().track) != 0:
+                        elem.get_window().track[-1].rotate(speed, 0, 0, 1, local=True)
                     elem.get_window().set_sequence_text(self.sequence_text)
                     try:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key).format(
@@ -227,11 +236,25 @@ class ViewWidget(gl.GLViewWidget):
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
-                    if elem.get_key() != event.key():
+                    track_scale = 2 * self.init_data.get_main_robot('track_width')
+                    if elem.get_key() != event.key():  # Si la touche actuelle est differente de la precedente
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
+                        if elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
+                                elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+                            elem.get_window().add_track()
+                            elem.get_window().track[-1].rotate(elem.get_angle(), 0, 0, 1, local=True)
+                            elem.get_window().track[-1].scale(1, 1 + speed / track_scale, 1)
+                    if len(elem.get_window().track) == 0:
+                        self.dist += speed
+                    else:
+                        elem.get_window().track[-1].scale(1, 1 / (1 + self.dist / track_scale), 1)
+                        self.dist += speed
+                        elem.get_window().track[-1].scale(1, 1 + self.dist / track_scale, 1)
+                        elem.get_window().track[-1].translate(-speed / 2 * sin(radians(elem.get_angle())),
+                                                              speed / 2 * cos(radians(elem.get_angle())), 0,
+                                                              local=False)
                     elem.get_window().set_sequence_text(self.sequence_text)
                     self.parent.updo([elem, 0, -self.dist, 0])
                     try:
@@ -256,11 +279,25 @@ class ViewWidget(gl.GLViewWidget):
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
+                    track_scale = 2 * self.init_data.get_main_robot('track_width')
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
+                        if elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
+                                elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+                            elem.get_window().add_track()
+                            elem.get_window().track[-1].rotate(elem.get_angle(), 0, 0, 1, local=True)
+                            elem.get_window().track[-1].scale(1, 1 + speed / track_scale, 1)
+                    if len(elem.get_window().track) == 0:
+                        self.dist += speed
+                    else:
+                        elem.get_window().track[-1].scale(1, 1 / (1 + self.dist / track_scale), 1)
+                        self.dist += speed
+                        elem.get_window().track[-1].scale(1, 1 + self.dist / track_scale, 1)
+                        elem.get_window().track[-1].translate(speed / 2 * sin(radians(elem.get_angle())),
+                                                              -speed / 2 * cos(radians(elem.get_angle())), 0,
+                                                              local=False)
                     elem.get_window().set_sequence_text(self.sequence_text)
                     self.parent.updo([elem, 0, self.dist, 0])
                     try:
@@ -285,11 +322,26 @@ class ViewWidget(gl.GLViewWidget):
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
+                    track_scale = 2 * self.init_data.get_main_robot('track_width')
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
+                        if elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
+                                elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+                            elem.get_window().add_track()
+                            elem.get_window().track[-1].rotate(elem.get_angle(), 0, 0, 1, local=True)
+                            elem.get_window().track[-1].scale(1 + speed / track_scale, 1, 1)
+                    if len(elem.get_window().track) == 0:
+                        self.dist += speed
+                    else:
+                        elem.get_window().track[-1].scale(1 / (1 + self.dist / track_scale), 1, 1)
+                        self.dist += speed
+                        elem.get_window().track[-1].scale(1 + self.dist / track_scale, 1, 1)
+                        elem.get_window().track[-1].translate(-speed / 2 * cos(radians(elem.get_angle())),
+                                                              -speed / 2 * sin(radians(elem.get_angle())), 0,
+                                                              local=False)
+
                     elem.get_window().set_sequence_text(self.sequence_text)
                     self.parent.updo([elem, self.dist, 0, 0])
                     try:
@@ -314,11 +366,26 @@ class ViewWidget(gl.GLViewWidget):
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
+                    track_scale = 2 * self.init_data.get_main_robot('track_width')
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                    self.dist += speed
+                        if elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
+                                elem.get_key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+                            elem.get_window().add_track()
+                            elem.get_window().track[-1].rotate(elem.get_angle(), 0, 0, 1, local=True)
+                            elem.get_window().track[-1].scale(1 + speed / track_scale, 1, 1)
+                    if len(elem.get_window().track) == 0:
+                        self.dist += speed
+                    else:
+                        elem.get_window().track[-1].scale(1 / (1 + self.dist / track_scale), 1, 1)
+                        self.dist += speed
+                        elem.get_window().track[-1].scale(1 + self.dist / track_scale, 1, 1)
+                        elem.get_window().track[-1].translate(speed / 2 * cos(radians(elem.get_angle())),
+                                                              speed / 2 * sin(radians(elem.get_angle())), 0,
+                                                              local=False)
+
                     elem.get_window().set_sequence_text(self.sequence_text)
                     self.parent.updo([elem, -self.dist, 0, 0])
                     try:

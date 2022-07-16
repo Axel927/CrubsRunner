@@ -22,8 +22,8 @@ class CoordSys(gl.GLMeshItem):
         super(CoordSys, self).__init__(smooth=True, drawFaces=True, drawEdges=True)
         self.save_data = save_data
         self.init_data = data.Init()
-        self.file = self.init_data.get_view('file')
-        self.name = self.init_data.get_view('coord_sys_name')
+        self.file = ""
+        self.name = ""
         self.element_type = ""
         self.dimensions = [0., 0., 0.]
         self.min_max = [[0., 0.], [0., 0.], [0., 0.]]

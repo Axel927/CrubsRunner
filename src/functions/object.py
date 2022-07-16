@@ -72,7 +72,7 @@ def show_stl(elem: element.CoordSys):
 
 def show_vinyl(vinyl: element.Vinyl):
     """
-    Fonction pour ouvrir un tapis. board est modifie durant la fonction.
+    Fonction pour ouvrir un tapis. vinyl est modifie durant la fonction.
     :param vinyl: widget.ImageItem: Tapis
     :return: None
     """
