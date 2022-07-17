@@ -14,9 +14,10 @@ import data
 class Save:
     def __init__(self):
         self.init_data = data.Init()
+        self.settings = QtCore.QSettings('Crubs', 'CrubsRunner')
 
         self.window = {  # Donnees du projet
-            'directory': "",
+            'directory': self.settings.value('directory', ''),
             'project_file': ""
         }
 
@@ -310,3 +311,12 @@ class Save:
             return len(self.vinyl)
         else:
             return 0
+
+    def set_settings(self, key: str, value):
+        """
+        Enregistre value a key
+        :param key: str: Cle de la sauvegarde
+        :param value: any: Objet a enregistrer
+        :return: None
+        """
+        self.settings.setValue(key, value)

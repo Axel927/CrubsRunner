@@ -42,6 +42,8 @@ class Init:
             'save_as_project_icon': QtGui.QIcon("icon/icon_save_as.png"),
             'save_as_project_dialog_title': "Enregistrer le projet",
             'project_extension': "CrubsRunner project (*.crp)",
+            'project_default_name': "SansNom",
+
             'saving_file_first_line': "## Fichier de sauvegarde de projet CrubsRunner du {date}\n",
             'window_first_line': "\n## Window\n",
             'grid_first_line': "\n## Grid\n",

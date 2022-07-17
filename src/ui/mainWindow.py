@@ -164,7 +164,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.speed_sb.setValue(self.save_data.get_grid('moving_speed'))
         self.speed_sb.setStatusTip(self.init_data.get_window('speed_tip'))
-        
+
         self.speed_simulation_btn.setToolTip(self.init_data.get_window('speed_simulation_btn_tip'))
 
         self.toolBar.setMovable(self.init_data.get_window('tool_bar_movable'))
@@ -687,11 +687,15 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         file = \
             QtWidgets.QFileDialog.getSaveFileName(self, self.init_data.get_window('save_as_project_dialog_title'),
-                                                  self.save_data.get_window('directory'),
+                                                  self.save_data.get_window(
+                                                      'directory') + '/' + self.init_data.get_window(
+                                                      'project_default_name') + self.init_data.get_extension('project'),
                                                   self.save_data.get_window('project_extension'))[0]
 
         if file:
-            file += self.init_data.get_extension('project')
+            if file.split('.')[-1] != self.init_data.get_extension('project')[1:]:
+                file = file.split('.')[0] + self.init_data.get_extension('project')
+
             self.save_data.set_window('project_file', file)
             self.save_data.set_window('directory', file.rpartition('/')[0])
             self.write_file(file)
@@ -828,10 +832,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
                                                                  'import_radio_board_name'),
-                                                             self.save_data.get_window('directory'),
+                                                             self.save_data.get_window('directory') + '/' +
+                                                             self.init_data.get_window('project_default_name') +
+                                                             self.init_data.get_extension('board'),
                                                              self.save_data.get_board('save_extension'))[0]
                 if file:
-                    file += self.init_data.get_extension('board')
+                    if file.split('.')[-1] != self.init_data.get_extension('board')[1:]:
+                        file = file.split('.')[0] + self.init_data.get_extension('board')
+
                     self.save_data.set_window('directory', file.rpartition('/')[0])
                     try:
                         with open(file, 'w') as file_name:
@@ -848,11 +856,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
                                                                  'import_radio_main_robot_name'),
-                                                             self.save_data.get_window('directory'),
+                                                             self.save_data.get_window('directory') + '/' +
+                                                             self.init_data.get_window('project_default_name') +
+                                                             self.init_data.get_extension('robot'),
                                                              self.save_data.get_main_robot('save_extension'))[0]
 
                 if file:
-                    file += self.init_data.get_extension('robot')
+                    if file.split('.')[-1] != self.init_data.get_extension('robot')[1:]:
+                        file = file.split('.')[0] + self.init_data.get_extension('robot')
+
                     self.save_data.set_window('directory', file.rpartition('/')[0])
                     try:
                         with open(file, 'w') as file_name:
@@ -869,11 +881,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 file = QtWidgets.QFileDialog.getSaveFileName(self,
                                                              "Enregistrer " + self.init_data.get_window(
                                                                  'import_radio_second_robot_name'),
-                                                             self.save_data.get_window('directory'),
+                                                             self.save_data.get_window('directory') + '/' +
+                                                             self.init_data.get_window('project_default_name') +
+                                                             self.init_data.get_extension('robot'),
                                                              self.save_data.get_second_robot('save_extension'))[0]
 
                 if file:
-                    file += self.init_data.get_extension('robot')
+                    if file.split('.')[-1] != self.init_data.get_extension('robot')[1:]:
+                        file = file.split('.')[0] + self.init_data.get_extension('robot')
+
                     self.save_data.set_window('directory', file.rpartition('/')[0])
                     try:
                         with open(file, 'w') as file_name:
@@ -1157,6 +1173,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.viewer.addItem(self.main_robot)
         if self.second_robot.get_file() != "":
             self.viewer.addItem(self.second_robot)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Fonction appelee a la fermeture.
+        :param event: QtGui.QCloseEvent: Evenement
+        :return: None
+        """
+        self.save_data.set_settings('directory', self.save_data.get_window('directory'))
+        event.accept()
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
         """

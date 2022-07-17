@@ -678,7 +678,9 @@ class Robot:
                 filename = \
                     QtWidgets.QFileDialog.getSaveFileName(self.parent,
                                                           self.init_data.get_main_robot('save_sequence_title'),
-                                                          self.save_data.get_window('directory'),
+                                                          self.save_data.get_window('directory') + '/' +
+                                                          self.init_data.get_window('project_default_name') +
+                                                          self.init_data.get_extension('sequence'),
                                                           self.save_data.get_gcrubs('extension'))[0]
             else:
                 filename = self.save_data.get_main_robot('gcrubs_file')
@@ -687,13 +689,17 @@ class Robot:
                 filename = \
                     QtWidgets.QFileDialog.getSaveFileName(self.parent,
                                                           self.init_data.get_main_robot('save_sequence_title'),
-                                                          self.save_data.get_window('directory'),
+                                                          self.save_data.get_window('directory') + '/' +
+                                                          self.init_data.get_window('project_default_name') +
+                                                          self.init_data.get_extension('sequence'),
                                                           self.save_data.get_gcrubs('extension'))[0]
             else:
                 filename = self.save_data.get_second_robot('gcrubs_file')
 
         if filename:
-            filename += self.init_data.get_extension('sequence')
+            if filename.split('.')[-1] != self.init_data.get_extension('sequence')[1:]:
+                filename = filename.split('.')[0] + self.init_data.get_extension('sequence')
+
             with open(filename, 'w') as file:
                 file.write(self.sequence_text.document().toPlainText())
                 file.write('\n')
