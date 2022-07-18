@@ -16,28 +16,18 @@ from PIL import Image
 import element
 import data
 
+# stl plus rapide que obj
 
-def show_stl(elem: element.CoordSys):
+
+def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     """
-    Fonction pour ouvrir un fichier stl. elem est modifie durant la fonction.
-    :param elem: element.CoordSys: Element a afficher.
+    Fonction qui cree un maillage a partir des points et des faces et l'enregistre dans elem.
+    :param elem: gl.GLMeshItem: Element dans lequel enregistrer le maillage
+    :param points: np.array: Tableau des points
+    :param faces: np.array: Tableau des faces
     :return: None
     """
-    if elem.get_file() == "":
-        return
-
     init_data = data.Init()
-
-    try:
-        points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)  # Recuperation des points
-    except FileNotFoundError:
-        QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
-                              init_data.get_window('error_open_file_title'),
-                              init_data.get_window('error_open_file_message').format(
-                                  filename=elem.get_file())).exec()
-        return
-
-    faces = np.arange(points.shape[0]).reshape(-1, 3)  # Creation des faces
     meshdata = gl.MeshData(vertexes=points, faces=faces)
 
     elem.setMeshData(meshdata=meshdata)
@@ -66,8 +56,69 @@ def show_stl(elem: element.CoordSys):
         except AttributeError:
             pass
 
-    elem.set_dimensions(dim)
-    elem.set_min_max(min_max)
+    try:
+        elem.set_dimensions(dim)
+        elem.set_min_max(min_max)
+    except AttributeError:
+        pass
+
+
+def show_obj(elem: gl.GLMeshItem):
+    """
+    Fonction pour charger un fichier .obj.
+    :param elem: gl.GLMeshItem: Element
+    :return: None
+    """
+    if elem.get_file() == "":
+        return
+
+    init_data = data.Init()
+    try:
+        with open(elem.get_file(), 'r') as file:
+            facets = list()
+            points = list()
+            for line in file:
+                if line[:2] == 'v ':
+                    facets.append([float(point) for point in line[2:].split()])
+                elif line[:2] == 'f ':
+                    point = list()
+                    for i in line[2:].split():
+                        point.append(facets[int(i.split("/")[0]) - 1])
+                    points.append(point)
+    except FileNotFoundError:
+        QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
+                              init_data.get_window('error_open_file_title'),
+                              init_data.get_window('error_open_file_message').format(
+                                  filename=elem.get_file())).exec()
+        return
+
+    points = np.array(points).reshape(-1, 3)
+    faces = np.arange(points.shape[0]).reshape(-1, 3)  # Creation des faces
+    make_mesh(elem, points, faces)
+
+
+def show_stl(elem: gl.GLMeshItem):
+    """
+    Fonction pour ouvrir un fichier stl. elem est modifie durant la fonction.
+    :param elem: gl.GLMeshItem: Element a afficher.
+    :return: None
+    """
+    if elem.get_file() == "":
+        return
+
+    init_data = data.Init()
+
+    try:
+        points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)  # Recuperation des points
+    except FileNotFoundError:
+        QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
+                              init_data.get_window('error_open_file_title'),
+                              init_data.get_window('error_open_file_message').format(
+                                  filename=elem.get_file())).exec()
+        return
+
+    faces = np.arange(points.shape[0]).reshape(-1, 3)  # Creation des faces
+    make_mesh(elem, points, faces)
 
 
 def show_vinyl(vinyl: element.Vinyl):

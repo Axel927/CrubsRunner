@@ -174,7 +174,8 @@ class Init:
             'new_message_box_title': "Information",
             'new_message_box_message': "Choisir le plateau",
             'file_dialog_open_title': "Choisir le plateau",
-            'file_dialog_open_extensions': "All files (*.stl *.crb) ;; STL (*.stl) ;; CrubsRunner board (*.crb)",
+            'file_dialog_open_extensions': "All files (*.stl *.obj *.crb) ;; STL (*.stl) ;; OBJ (*.obj)"
+                                           "CrubsRunner board (*.crb)",
 
             'save_extension': "CrubsRunner board (*.crb)",
             'color': (255 / 255, 211 / 255, 133 / 255, 1),  # de 0 a 1
@@ -248,7 +249,8 @@ class Init:
             'new_message_box_title': "Information",
             'new_message_box_message': "Choisir le robot principal",
             'file_dialog_open_title': "Choisir le robot principal",
-            'file_dialog_open_extensions': "All files (*.stl *.crr) ;; STL (*.stl) ;; CrubsRunner robot (*.crr)",
+            'file_dialog_open_extensions': "All files (*.stl *.obj *.crr) ;; STL (*.stl) ;; OBJ (*.obj) ;; "
+                                           "CrubsRunner robot (*.crr)",
             'color': (29 / 255, 144 / 255, 18 / 255, 1),  # de 0 a 1
             'edge_color': (12 / 255, 73 / 255, 10 / 255, 1),  # de 0 a 1
             'save_extension': "CrubsRunner robot (*.crr)",
@@ -337,7 +339,6 @@ class Init:
             'new_message_box_message': "Y a-t-il un second robot ?",
             'new_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
             'file_dialog_open_title': "Choisir le robot secondaire",
-            'file_dialog_open_extensions': "All files (*.stl *.crr) ;; STL (*.stl) ;; CrubsRunner robot (*.crr)",
             'color': (40 / 255, 49 / 255, 255 / 255, 1),  # de 0 a 1
             'edge_color': (11 / 255, 33 / 255, 180 / 255, 1),  # de 0 a 1
             'save_extension': "CrubsRunner robot (*.crr)",
@@ -499,7 +500,7 @@ class Init:
             'board': ".crb",
             'robot': ".crr",
             'sequence': ".gcrubs",
-            '3d_file': ".stl",
+            '3d_file': (".stl", ".obj"),
             'vinyl': ".png"
         }  # End self.extensions
 

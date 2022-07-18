@@ -410,7 +410,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.board.setColor(self.init_data.get_board('color'))
                 self.board.set_edge_color(self.init_data.get_board('edge_color'))
                 self.board.set_name(self.init_data.get_board('name'))
-                functions.object.show_stl(self.board)
+                if extension == 'stl':
+                    functions.object.show_stl(self.board)
+                elif extension == 'obj':
+                    functions.object.show_obj(self.board)
                 self.viewer.addItem(self.board)
                 self.board.translate(self.init_data.get_board('appearance_translation_x'),
                                      self.init_data.get_board('appearance_translation_y'),
@@ -479,7 +482,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.main_robot.setColor(self.init_data.get_main_robot('color'))
                 self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                functions.object.show_stl(self.main_robot)
+                if extension == 'stl':
+                    functions.object.show_stl(self.main_robot)
+                elif extension == 'obj':
+                    functions.object.show_obj(self.main_robot)
                 self.viewer.addItem(self.main_robot)
                 self.list_widget.add_content(self.main_robot)
                 self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
@@ -519,7 +525,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                          self.init_data.get_second_robot(
                                                              'new_message_box_title'),
                                                          self.save_data.get_window('directory'),
-                                                         self.init_data.get_second_robot(
+                                                         self.init_data.get_main_robot(
                                                              'file_dialog_open_extensions'))[0]
         extension = file.split('.')[-1]
 
@@ -533,7 +539,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.second_robot.setColor(self.init_data.get_second_robot('color'))
                 self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
-                functions.object.show_stl(self.second_robot)
+                if extension == 'stl':
+                    functions.object.show_stl(self.second_robot)
+                elif extension == 'obj':
+                    functions.object.show_obj(self.second_robot)
                 self.viewer.addItem(self.second_robot)
                 self.list_widget.add_content(self.second_robot)
                 self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
