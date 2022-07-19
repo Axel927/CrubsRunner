@@ -8,7 +8,6 @@ Fichier contenant des fonctions concernant les objets 3D.
 
 from stl import mesh
 from PySide6 import QtWidgets
-from sys import float_info
 import numpy as np
 import pyqtgraph.opengl as gl
 from PIL import Image
@@ -33,32 +32,21 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     elem.setMeshData(meshdata=meshdata)
 
     # Obtention des dimensions
-    min_coord = [float_info.max] * 3  # 1.7976931348623157e+308
-    max_coord = [float_info.min] * 3  # 2.2250738585072014e-308
-    for point in points:
-        for i in range(len(point)):
-            min_coord[i] = min(min_coord[i], point[i])
-            max_coord[i] = max(max_coord[i], point[i])
+    min_coord = np.amin(points, 0)
+    max_coord = np.amax(points, 0)
+    dim = max_coord - min_coord
+    min_max = np.ravel([min_coord, max_coord])
 
-    dim = list()
-    min_max = list()
-    for i in range(len(min_coord)):
-        dim.append(max_coord[i] - min_coord[i])
-        min_max.append([min_coord[i], max_coord[i]])
-
-    if max(dim) < 1.:  # Si les dimensions sont inferieures a 1 mm
+    if np.amax(dim, 0) < 1.:  # Si les dimensions sont inferieures a 1 mm
         try:
             elem.set_invisible(True)
-            for i in range(len(dim)):
-                dim[i] *= init_data.get_main_robot('invisible_coef')  # On augmente les dimensions
-                for j in range(len(min_max[i])):
-                    min_max[i][j] *= init_data.get_main_robot('invisible_coef')
+            dim *= init_data.get_main_robot('invisible_coef')  # On augmente les dimensions
+            min_max *= init_data.get_main_robot('invisible_coef')
         except AttributeError:
             pass
-
     try:
         elem.set_dimensions(dim)
-        elem.set_min_max(min_max)
+        elem.set_min_max(np.reshape(min_max, (3, 2), order='F'))
     except AttributeError:
         pass
 
