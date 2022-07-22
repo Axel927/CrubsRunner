@@ -75,7 +75,7 @@ class Vinyl(gl.GLImageItem):
         :param array: numpy.array: Tableau 3D
         :return: None
         """
-        if array.shape[2] == 3:  # Si pas de canal alpha, on l'ajoute initialise a 255
+        if array.shape[2] == 3:  # Si pas de canal alpha, on l'ajoute et l'initialise a 255
             array = np.concatenate((array, np.full((array.shape[0], array.shape[1], 1), 255)), axis=2)
 
         self.setData(array)

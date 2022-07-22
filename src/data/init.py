@@ -179,7 +179,7 @@ class Init:
             'new_message_box_message': "Choisir le plateau",
             'file_dialog_open_title': "Choisir le plateau",
             'file_dialog_open_extensions': "All files (*.stl *.obj *.3mf *.crb) ;; STL (*.stl) ;; OBJ (*.obj)"
-                                           ";; 3MF (*.3MF) ;; CrubsRunner board (*.crb)",
+                                           ";; 3MF (*.3mf) ;; CrubsRunner board (*.crb)",
 
             'save_extension': "CrubsRunner board (*.crb)",
             'color': (255 / 255, 211 / 255, 133 / 255, 1),  # de 0 a 1
@@ -235,8 +235,8 @@ class Init:
             'vinyl_message_box_title': "Information",
             'vinyl_message_box_message': "Choisir le tapis du plateau",
             'vinyl_dialog_open_title': "Choisir le tapis du plateau",
-            'vinyl_dialog_open_extensions': "All files (*.png *.pdf *.jpg) ;; PNG (*.png) ;; PDF (*.pdf)"
-                                            ";; JPEG (*.jpg)",
+            'vinyl_dialog_open_extensions': "All files (*.png *.pdf *.jpg *.jpeg) ;; PNG (*.png) ;; PDF (*.pdf)"
+                                            ";; JPEG (*.jpg *.jpeg)",
             'remove_message_box_type': QtWidgets.QMessageBox.Question,
             'remove_message_box_title': "Suppression d'element",
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le tapis ?\n"
@@ -255,7 +255,7 @@ class Init:
             'new_message_box_message': "Choisir le robot principal",
             'file_dialog_open_title': "Choisir le robot principal",
             'file_dialog_open_extensions': "All files (*.stl *.obj *.3mf *.crr) ;; STL (*.stl) ;; OBJ (*.obj) ;; "
-                                           ";; 3MF (*.3MF) ;; CrubsRunner robot (*.crr)",
+                                           ";; 3MF (*.3mf) ;; CrubsRunner robot (*.crr)",
             'color': (29 / 255, 144 / 255, 18 / 255, 1),  # de 0 a 1
             'edge_color': (12 / 255, 73 / 255, 10 / 255, 1),  # de 0 a 1
             'save_extension': "CrubsRunner robot (*.crr)",
@@ -506,7 +506,7 @@ class Init:
             'robot': ".crr",
             'sequence': ".gcrubs",
             '3d_file': (".stl", ".obj", ".3mf"),
-            'vinyl': (".png", ".pdf", ".jpg")
+            'vinyl': (".png", ".pdf", ".jpg", ".jpeg")
         }  # End self.extensions
 
     def get_window(self, key: str):

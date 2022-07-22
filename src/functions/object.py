@@ -31,10 +31,10 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     elem.setMeshData(meshdata=meshdata)
 
     # Obtention des dimensions
-    min_coord = np.amin(points, 0)
-    max_coord = np.amax(points, 0)
-    dim = max_coord - min_coord
-    min_max = np.ravel([min_coord, max_coord])
+    min_coord = np.amin(points, 0)  # Minimum selon chaque axe
+    max_coord = np.amax(points, 0)  # Maximum selon chaque axe
+    dim = max_coord - min_coord  # Calcul des dimensions dans tous les axes
+    min_max = np.ravel([min_coord, max_coord])  # Aligne les coordonnees
 
     if np.amax(dim, 0) < 1.:  # Si les dimensions sont inferieures a 1 mm
         try:
@@ -45,7 +45,7 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
             pass
     try:
         elem.set_dimensions(dim)
-        elem.set_min_max(np.reshape(min_max, (3, 2), order='F'))
+        elem.set_min_max(min_max.reshape((3, 2), order='F'))
     except AttributeError:
         pass
 
@@ -63,9 +63,9 @@ def show_mesh(elem: gl.GLMeshItem):
     init_data = data.Init()
     try:
         if '.' + elem.get_file().split('.')[-1] in init_data.get_extension('3d_file'):
-            obj = trimesh.load(elem.get_file(), force='mesh')
-            points = np.array(obj.vertices).reshape(-1, 3)
-            faces = np.array(obj.faces).reshape(-1, 3)
+            mesh = trimesh.load(elem.get_file(), force='mesh')
+            points = mesh.vertices
+            faces = mesh.faces
         else:
             QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
                                   init_data.get_window('error_format_file_title'),
