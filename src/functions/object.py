@@ -11,6 +11,7 @@ from PySide6 import QtWidgets
 import numpy as np
 import pyqtgraph.opengl as gl
 from PIL import Image
+import fitz
 
 import element
 import data
@@ -51,41 +52,28 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
         pass
 
 
-def show_obj(elem: gl.GLMeshItem):
+def load_obj(file: str) -> np.array:
     """
-    Fonction pour charger un fichier .obj.
-    :param elem: gl.GLMeshItem: Element
-    :return: None
+    Charge le fichier obj et renvoie le tableau numpy 2D des points.
+    :param file: str: Chemin du fichier
+    :return: np.array: Tableau numpy
     """
-    if elem.get_file() == "":
-        return
+    with open(file, 'r') as file:
+        facets = list()
+        points = list()
+        for line in file:
+            if line[:2] == 'v ':
+                facets.append([float(point) for point in line[2:].split()])
+            elif line[:2] == 'f ':
+                point = list()
+                for i in line[2:].split():
+                    point.append(facets[int(i.split("/")[0]) - 1])
+                points.append(point)
 
-    init_data = data.Init()
-    try:
-        with open(elem.get_file(), 'r') as file:
-            facets = list()
-            points = list()
-            for line in file:
-                if line[:2] == 'v ':
-                    facets.append([float(point) for point in line[2:].split()])
-                elif line[:2] == 'f ':
-                    point = list()
-                    for i in line[2:].split():
-                        point.append(facets[int(i.split("/")[0]) - 1])
-                    points.append(point)
-    except FileNotFoundError:
-        QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
-                              init_data.get_window('error_open_file_title'),
-                              init_data.get_window('error_open_file_message').format(
-                                  filename=elem.get_file())).exec()
-        return
-
-    points = np.array(points).reshape(-1, 3)
-    faces = np.arange(points.shape[0]).reshape(-1, 3)  # Creation des faces
-    make_mesh(elem, points, faces)
+    return np.array(points)
 
 
-def show_stl(elem: gl.GLMeshItem):
+def show_mesh(elem: gl.GLMeshItem):
     """
     Fonction pour ouvrir un fichier stl. elem est modifie durant la fonction.
     :param elem: gl.GLMeshItem: Element a afficher.
@@ -97,7 +85,16 @@ def show_stl(elem: gl.GLMeshItem):
     init_data = data.Init()
 
     try:
-        points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)  # Recuperation des points
+        if elem.get_file().split('.')[-1] == 'stl':
+            points = mesh.Mesh.from_file(elem.get_file()).points.reshape(-1, 3)  # Recuperation des points
+        elif elem.get_file().split('.')[-1] == 'obj':
+            points = load_obj(elem.get_file()).reshape(-1, 3)
+        else:
+            QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
+                                  init_data.get_window('error_format_file_title'),
+                                  init_data.get_window('error_format_file_message').format(
+                                      filename=vinyl.get_file())).exec()
+            return
     except FileNotFoundError:
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
                               init_data.get_window('error_open_file_title'),
@@ -122,7 +119,16 @@ def show_vinyl(vinyl: element.Vinyl):
     width = init_data.get_grid('width')  # Longueur du plateau
 
     try:
-        vinyl.set_array(np.array(Image.open(vinyl.get_file())))
+        if vinyl.get_file().split('.')[-1] == 'pdf':
+            vinyl.set_array(load_pdf(vinyl.get_file()))
+        elif vinyl.get_file().split('.')[-1] in ('png', 'jpg'):
+            vinyl.set_array(np.array(Image.open(vinyl.get_file())))
+        else:
+            QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
+                                  init_data.get_window('error_format_file_title'),
+                                  init_data.get_window('error_format_file_message').format(
+                                      filename=vinyl.get_file())).exec()
+            return
     except FileNotFoundError:
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
                               init_data.get_window('error_open_file_title'),
@@ -137,3 +143,17 @@ def show_vinyl(vinyl: element.Vinyl):
     vinyl.rotate(90, 0, 0, 1)
     vinyl.rotate(180, 1, 0, 0)
     vinyl.translate(width / 2, init_data.get_grid('height') / 2, 0)
+
+
+def load_pdf(file: str) -> np.array:
+    """
+    Charge une image pdf et renvoie un tableau numpy 3D.
+    :param file: str: Chemin du fichier
+    :return: np.array: Tableau 3D
+    """
+    pdf = fitz.open(file)
+    pix = pdf.get_page_pixmap(0)  # Conversion en pixmap
+    if pix.alpha:  # S'il y a un canal alpha
+        return np.array(Image.frombytes("RGBA", (pix.width, pix.height), bytes(pix.samples_mv)))
+    else:
+        return np.array(Image.frombytes("RGB", (pix.width, pix.height), bytes(pix.samples_mv)))

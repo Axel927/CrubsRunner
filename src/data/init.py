@@ -148,6 +148,10 @@ class Init:
             'error_open_file_title': "Fichier non trouve",
             'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve.'",
 
+            'error_format_file_type': QtWidgets.QMessageBox.Critical,
+            'error_format_file_title': "Format non supporte",
+            'error_format_file_message': "Le format du fichier '{filename}' n'est pas supporte.'",
+
             'keys_modal': True,
             'keys_title': "Choix des touches",
             'keys_lbl_0': "Aller a droite : ",
@@ -231,7 +235,8 @@ class Init:
             'vinyl_message_box_title': "Information",
             'vinyl_message_box_message': "Choisir le tapis du plateau",
             'vinyl_dialog_open_title': "Choisir le tapis du plateau",
-            'vinyl_dialog_open_extensions': "All files (*.png) ;; PNG (*.png)",
+            'vinyl_dialog_open_extensions': "All files (*.png *.pdf *.jpg) ;; PNG (*.png) ;; PDF (*.pdf)"
+                                            ";; JPEG (*.jpg)",
             'remove_message_box_type': QtWidgets.QMessageBox.Question,
             'remove_message_box_title': "Suppression d'element",
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le tapis ?\n"
@@ -501,7 +506,7 @@ class Init:
             'robot': ".crr",
             'sequence': ".gcrubs",
             '3d_file': (".stl", ".obj"),
-            'vinyl': ".png"
+            'vinyl': (".png", ".pdf", ".jpg")
         }  # End self.extensions
 
     def get_window(self, key: str):

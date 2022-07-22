@@ -20,9 +20,11 @@ L'utilisation principale prevue est la coupe de **France de robotique**.
 
 **Python 3** :  
 * PySide6 --> pip3 install PySide6
-* Numpy-stl --> pip3 install stl
+* Numpy-stl --> pip3 install numpy-stl
 * PyQtGraph --> pip3 install pyqtgraph
-* OpenGL --> pip3 install pyopengl
+* OpenGL --> pip3 install PyOpengl
+* PyMu --> pip3 install PyMU
+* Pillow --> pip3 install Pillow
 
 ## Installation
 

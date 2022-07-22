@@ -56,12 +56,11 @@ class Vinyl(gl.GLImageItem):
     def set_file(self, file: str):
         """
         Definit le fichier du tapis.
-        :param file: str: Nom du fichier. Extensions autorisees: .png
+        :param file: str: Nom du fichier.
         :return: None
         """
-        if file.split('.')[-1] in ['png', 'jpg', 'jpeg', 'gif']:
-            self.file = file
-            self.save_data.set_vinyl('file', self.file)
+        self.file = file
+        self.save_data.set_vinyl('file', self.file)
 
     def get_file(self) -> str:
         """
@@ -76,6 +75,9 @@ class Vinyl(gl.GLImageItem):
         :param array: numpy.array: Tableau 3D
         :return: None
         """
+        if array.shape[2] == 3:  # Si pas de canal alpha, on l'ajoute initialise a 255
+            array = np.concatenate((array, np.full((array.shape[0], array.shape[1], 1), 255)), axis=2)
+
         self.setData(array)
         self.array = array
         self.pixel_height = len(array)
