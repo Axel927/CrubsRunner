@@ -31,7 +31,6 @@ class Vinyl(gl.GLImageItem):
         self.pixel_height = len(array) if array is not None else 0
         self.pixel_width = len(array[0]) if array is not None else 0
         self.file = file
-        self.array = array
         self.save_data = save_data
         self.parent = parent
         self.name = "Tapis"
@@ -79,7 +78,6 @@ class Vinyl(gl.GLImageItem):
             array = np.concatenate((array, np.full((array.shape[0], array.shape[1], 1), 255)), axis=2)
 
         self.setData(array)
-        self.array = array
         self.pixel_height = len(array)
         self.pixel_width = len(array[0])
         self.save_data.set_vinyl('pixel_height', self.pixel_height)
