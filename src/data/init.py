@@ -178,8 +178,8 @@ class Init:
             'new_message_box_title': "Information",
             'new_message_box_message': "Choisir le plateau",
             'file_dialog_open_title': "Choisir le plateau",
-            'file_dialog_open_extensions': "All files (*.stl *.obj *.crb) ;; STL (*.stl) ;; OBJ (*.obj)"
-                                           "CrubsRunner board (*.crb)",
+            'file_dialog_open_extensions': "All files (*.stl *.obj *.3mf *.crb) ;; STL (*.stl) ;; OBJ (*.obj)"
+                                           ";; 3MF (*.3MF) ;; CrubsRunner board (*.crb)",
 
             'save_extension': "CrubsRunner board (*.crb)",
             'color': (255 / 255, 211 / 255, 133 / 255, 1),  # de 0 a 1
@@ -254,8 +254,8 @@ class Init:
             'new_message_box_title': "Information",
             'new_message_box_message': "Choisir le robot principal",
             'file_dialog_open_title': "Choisir le robot principal",
-            'file_dialog_open_extensions': "All files (*.stl *.obj *.crr) ;; STL (*.stl) ;; OBJ (*.obj) ;; "
-                                           "CrubsRunner robot (*.crr)",
+            'file_dialog_open_extensions': "All files (*.stl *.obj *.3mf *.crr) ;; STL (*.stl) ;; OBJ (*.obj) ;; "
+                                           ";; 3MF (*.3MF) ;; CrubsRunner robot (*.crr)",
             'color': (29 / 255, 144 / 255, 18 / 255, 1),  # de 0 a 1
             'edge_color': (12 / 255, 73 / 255, 10 / 255, 1),  # de 0 a 1
             'save_extension': "CrubsRunner robot (*.crr)",
@@ -505,7 +505,7 @@ class Init:
             'board': ".crb",
             'robot': ".crr",
             'sequence': ".gcrubs",
-            '3d_file': (".stl", ".obj"),
+            '3d_file': (".stl", ".obj", ".3mf"),
             'vinyl': (".png", ".pdf", ".jpg")
         }  # End self.extensions
 
