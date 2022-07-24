@@ -239,28 +239,30 @@ class Robot(element.Board):
         if self.invisible:
             self.scale(1 / coef, 1 / coef, 1 / coef)
 
-        if self.main_robot:
-            mvt = self.robot_movement(self.save_data.get_main_robot('axis_rotation'),
-                                      self.save_data.get_main_robot('angle_rotation'))
-        else:
-            mvt = self.robot_movement(self.save_data.get_second_robot('axis_rotation'),
-                                      self.save_data.get_second_robot('angle_rotation'))
+        if dx != 0 or dy != 0:
+            if self.main_robot:
+                mvt = self.robot_movement(self.save_data.get_main_robot('axis_rotation'),
+                                          self.save_data.get_main_robot('angle_rotation'))
+            else:
+                mvt = self.robot_movement(self.save_data.get_second_robot('axis_rotation'),
+                                          self.save_data.get_second_robot('angle_rotation'))
 
-        self.translate(dx * mvt[0][0] + dy * mvt[1][0], dx * mvt[0][1] + dy * mvt[1][1],
-                       dx * mvt[0][2] + dy * mvt[1][2], local=True)
-        self.move(dx, dy)
+            self.translate(dx * mvt[0][0] + dy * mvt[1][0], dx * mvt[0][1] + dy * mvt[1][1],
+                           dx * mvt[0][2] + dy * mvt[1][2], local=True)
+            self.move(dx, dy)
 
-        self.translate(-self.get_coord()[0], -self.get_coord()[1], 0, local=False)
-        self.rotate(rz % 360, 0, 0, 1, local=False)
-        self.turn(rz % 360)
-        self.translate(self.get_coord()[0], self.get_coord()[1], 0, local=False)
+        if rz != 0:
+            self.translate(-self.get_coord()[0], -self.get_coord()[1], 0, local=False)  # Deplace au centre
+            self.rotate(rz % 360, 0, 0, 1, local=False)
+            self.turn(rz % 360)
+            self.translate(self.get_coord()[0], self.get_coord()[1], 0, local=False)  # Replace a la bonne position
 
         if self.invisible:  # Seconde partie de ce qu'il ne faut pas enlever
             self.scale(coef, coef, coef)
 
         self.parent.status_bar.showMessage(
-            self.init_data.get_window('position_status_message').format(x=int(self.get_coord()[0]),
-                                                                        y=int(self.get_coord()[1]),
+            self.init_data.get_window('position_status_message').format(x=round(self.get_coord()[0]),
+                                                                        y=round(self.get_coord()[1]),
                                                                         angle=round(self.get_angle())))
 
     def set_invisible(self, invisible: bool):

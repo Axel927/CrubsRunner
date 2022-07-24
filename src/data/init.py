@@ -112,7 +112,7 @@ class Init:
 
             'speed_simulation_btn_name': "x {multi}",
             'speed_simulation_btn_tip': "Vitesse de la simulation", 
-            'speed_simulation_btn_values': [0.25, 0.5, 1, 2, 4],
+            'speed_simulation_btn_values': (0.25, 0.5, 1, 2, 4),
 
             'window_title': "CrubsRunner",
             'accept_drops': True,

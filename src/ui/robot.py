@@ -674,16 +674,13 @@ class Robot:
         :return: None
         """
         if self.robot.is_main_robot():
-            if self.save_data.get_main_robot('gcrubs_file') == '':
-                filename = \
-                    QtWidgets.QFileDialog.getSaveFileName(self.parent,
-                                                          self.init_data.get_main_robot('save_sequence_title'),
-                                                          self.save_data.get_window('directory') + '/' +
-                                                          self.init_data.get_window('project_default_name') +
-                                                          self.init_data.get_extension('sequence'),
-                                                          self.save_data.get_gcrubs('extension'))[0]
-            else:
-                filename = self.save_data.get_main_robot('gcrubs_file')
+            filename = \
+                QtWidgets.QFileDialog.getSaveFileName(self.parent,
+                                                      self.init_data.get_main_robot('save_sequence_title'),
+                                                      self.save_data.get_window('directory') + '/' +
+                                                      self.init_data.get_window('project_default_name') +
+                                                      self.init_data.get_extension('sequence'),
+                                                      self.save_data.get_gcrubs('extension'))[0]
         else:
             if self.save_data.get_second_robot('gcrubs_file') == '':
                 filename = \

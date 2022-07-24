@@ -250,7 +250,7 @@ class Run:
             self._stop()
             return
 
-        if not self.timing_mr:
+        if not self.timing_mr:  # Si une commande qui prend du temps n'est pas en cours
             self.next_command_mr()
 
     def _stop(self):
@@ -313,7 +313,7 @@ class Run:
     def _sleep_mr(self, time: float):
         """
         Le robot principal ne fait plus rien pendant time secondes.
-        :param time: float: Duree
+        :param time: float: Duree en secondes
         :return: None
         """
         self.sleep_mr.start(
@@ -330,12 +330,11 @@ class Run:
     def _sleep_sr(self, time: float):
         """
         Le robot secondaire ne fait plus rien pendant time secondes.
-        :param time: float: Duree
+        :param time: float: Duree en secondes
         :return: None
         """
         self.sleep_sr.start(time * 1000 / self.init_data.get_window('speed_simulation_btn_values')[
             self.parent.speed_simulation_btn_nb])
-        self.next_command_sr()
 
     def _stop_sleep_sr(self):
         """

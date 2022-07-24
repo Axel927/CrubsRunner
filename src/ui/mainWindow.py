@@ -307,7 +307,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.speed_simulation_btn.clicked.connect(self.speed_simulation)
 
     def speed_simulation(self):
-        if time() - self.time < 0.2:
+        if time() - self.time < 0.1:
             return
 
         self.speed_simulation_btn_nb += 1
