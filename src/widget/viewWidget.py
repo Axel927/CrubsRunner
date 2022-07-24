@@ -39,7 +39,7 @@ class ViewWidget(gl.GLViewWidget):
 
     def mouseMoveEvent(self, ev):
         """
-        Lorsque la souris est deplacee.
+        Lorsque la souris est deplacee, change la vue.
         :param ev: Evenement
         :return: None
         """
@@ -68,7 +68,7 @@ class ViewWidget(gl.GLViewWidget):
         :param event: QtGui.QKeyEvent: Evenement
         :return: None
         """
-        if self.parent.running.is_ongoing():
+        if self.parent.running.is_ongoing():  # Si une simulation est en cours, impossible de déplacer un robot
             return
 
         if self.getting_key:  # S'il faut renvoyer une touche
@@ -126,26 +126,25 @@ class ViewWidget(gl.GLViewWidget):
         elif event.key() == self.save_data.get_gcrubs('keys').get('turn_right'):
             self._turn_right(event, elem, mvt, speed)
 
-        if invisible:  # Seconde partie du a ne pas virer
+        if invisible:  # Seconde partie du "a ne pas virer"
             elem.scale(coef, coef, coef)
 
         self.parent.status_bar.showMessage(
             self.init_data.get_window('position_status_message').format(x=int(elem.get_coord()[0]),
                                                                         y=int(elem.get_coord()[1]),
                                                                         angle=round(elem.get_angle())))
-
         elem.set_key(event.key())
 
     def _turn_right(self, event, elem, mvt: list, speed: int):
         """
-        Fait tourner le robot sur la droite
+        Fait tourner le robot sur la droite.
         :param event: QtGui.QKeyEvent: Evenement
         :param elem: element.Robot: Robot qui doit tourner
         :param mvt: Deplacements calcules
         :param speed: Vitesse de deplacement
         :return: None
         """
-        if elem.is_origined():
+        if elem.is_origined():  # Si l'origine du robot a ete choisie, rotation autour du repere global
             elem.translate(-elem.get_coord()[0], -elem.get_coord()[1], 0, local=False)
             elem.rotate(-speed, 0, 0, 1, local=False)
             elem.translate(elem.get_coord()[0], elem.get_coord()[1], 0, local=False)
@@ -154,7 +153,7 @@ class ViewWidget(gl.GLViewWidget):
             elem.rotate(-speed, mvt[2][0], mvt[2][1], mvt[2][2], local=True)
 
         elem.turn(-speed)
-        if elem.is_ready_sequence():
+        if elem.is_ready_sequence():  # Si on enregistre une sequence
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
@@ -181,14 +180,14 @@ class ViewWidget(gl.GLViewWidget):
 
     def _turn_left(self, event, elem, mvt: list, speed: int):
         """
-        Fait tourner le robot sur la gauche
+        Fait tourner le robot sur la gauche.
         :param event: QtGui.QKeyEvent: Evenement
         :param elem: element.Robot: Robot qui doit tourner
         :param mvt: Deplacements calcules
         :param speed: Vitesse de deplacement
         :return: None
         """
-        if elem.is_origined():
+        if elem.is_origined():  # Si l'origine du robot a ete choisie, rotation autour du repere global
             elem.translate(-elem.get_coord()[0], -elem.get_coord()[1], 0, local=False)
             elem.rotate(speed, 0, 0, 1, local=False)
             elem.translate(elem.get_coord()[0], elem.get_coord()[1], 0, local=False)
@@ -197,7 +196,7 @@ class ViewWidget(gl.GLViewWidget):
             elem.rotate(speed, mvt[2][0], mvt[2][1], mvt[2][2], local=True)
 
         elem.turn(speed)
-        if elem.is_ready_sequence():
+        if elem.is_ready_sequence():  # Si on enregistre une sequence
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
@@ -223,7 +222,7 @@ class ViewWidget(gl.GLViewWidget):
 
     def _go_up(self, event, elem, mvt: list, speed: int):
         """
-        Fait avancer le robot en haut
+        Fait avancer le robot en haut.
         :param event: QtGui.QKeyEvent: Evenement
         :param elem: element.Robot: Robot qui doit avancer
         :param mvt: Deplacements calcules
@@ -232,7 +231,7 @@ class ViewWidget(gl.GLViewWidget):
         """
         elem.translate(mvt[1][0] * speed, mvt[1][1] * speed, mvt[1][2] * speed, local=True)
         elem.move(0, speed)
-        if elem.is_ready_sequence():
+        if elem.is_ready_sequence():  # Si on enregistre une sequence
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
                 if cmd == event.key():
@@ -246,11 +245,14 @@ class ViewWidget(gl.GLViewWidget):
                             elem.get_window().add_track()
                             elem.get_window().track[-1].rotate(elem.get_angle(), 0, 0, 1, local=True)
                             elem.get_window().track[-1].scale(1, 1 + speed / track_scale, 1)
+
                     if len(elem.get_window().track) == 0:
                         self.dist += speed
                     else:
+                        # Retour aux dimensions initiales
                         elem.get_window().track[-1].scale(1, 1 / (1 + self.dist / track_scale), 1)
                         self.dist += speed
+                        # Nouvelles dimensions
                         elem.get_window().track[-1].scale(1, 1 + self.dist / track_scale, 1)
                         elem.get_window().track[-1].translate(-speed / 2 * sin(radians(elem.get_angle())),
                                                               speed / 2 * cos(radians(elem.get_angle())), 0,

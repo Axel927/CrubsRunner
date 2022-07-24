@@ -824,7 +824,7 @@ class Robot:
         self.track[-1].set_name(self.init_data.get_main_robot('track_name'))
         self.track[-1].set_element_type('track')
 
-        functions.object.show_stl(self.track[-1])
+        functions.object.show_mesh(self.track[-1])
         self.parent.viewer.addItem(self.track[-1])
         if self.robot.is_main_robot():
             self.track[-1].setColor(self.save_data.get_main_robot('color'))

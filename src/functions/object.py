@@ -92,7 +92,6 @@ def show_vinyl(vinyl: element.Vinyl):
         return
 
     init_data = data.Init()
-    width = init_data.get_grid('width')  # Longueur du plateau
 
     try:
         if vinyl.get_file().split('.')[-1] == 'pdf':
@@ -112,6 +111,7 @@ def show_vinyl(vinyl: element.Vinyl):
                                   filename=vinyl.get_file())).exec()
         return
 
+    width = init_data.get_grid('width')  # Longueur du plateau
     # Met a la bonne taille
     vinyl.scale(width / vinyl.get_pixel_width(), width / vinyl.get_pixel_width(), width / vinyl.get_pixel_width())
 
