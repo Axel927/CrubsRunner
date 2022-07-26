@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Definition des attributs
         self.save_data = data.Save()
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
 
         self.doing = list()
         self.undoing = list()
@@ -583,9 +583,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if file:
             try:
                 with open(file, 'r') as file:
-                    file.readline()
-                    param = file.readline()
-                    while param != "":
+                    for param in file:
                         if param.find(self.init_data.get_window('window_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('window')):
                                 param = file.readline()
@@ -655,7 +653,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.save_data.set_vinyl(param.split(' = ')[0],
                                                              eval(param.split(' = ')[1][:-1]))
                             self.list_widget.add_content(self.vinyl)
-                        param = file.readline()
             except FileNotFoundError:
                 QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                       self.init_data.get_window('error_open_file_title'),
@@ -792,7 +789,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('export_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
-        dialog.setMinimumSize(280, 150)
+        dialog.setMinimumSize(*self.init_data.get_window('export_component_dialog_min_size'))
 
         radio_board = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_board_name'), dialog)
         radio_main_robot = QtWidgets.QRadioButton(self.init_data.get_window('import_radio_main_robot_name'), dialog)
@@ -919,9 +916,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.undoing.append(self.doing.pop(-1))
             self.undoing[-1][0].move_robot(self.undoing[-1][1], self.undoing[-1][2], self.undoing[-1][3])
             self.status_bar.showMessage(
-                self.init_data.get_window('position_status_message').format(x=int(self.undoing[-1][0].get_coord()[0]),
-                                                                            y=int(self.undoing[-1][0].get_coord()[1]),
+                self.init_data.get_window('position_status_message').format(x=round(self.undoing[-1][0].get_coord()[0]),
+                                                                            y=round(self.undoing[-1][0].get_coord()[1]),
                                                                             angle=self.undoing[-1][0].get_angle()))
+            if self.undoing[-1][3] == 0:
+                self.undoing[-1][0].get_window().remove_last_track()
 
     def redo(self):
         """
@@ -933,9 +932,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.doing.pop(0)
             self.doing.append(self.undoing.pop(-1))
             self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
+
             self.status_bar.showMessage(
-                self.init_data.get_window('position_status_message').format(x=int(self.doing[-1][0].get_coord()[0]),
-                                                                            y=int(self.doing[-1][0].get_coord()[1]),
+                self.init_data.get_window('position_status_message').format(x=round(self.doing[-1][0].get_coord()[0]),
+                                                                            y=round(self.doing[-1][0].get_coord()[1]),
                                                                             angle=self.doing[-1][0].get_angle()))
 
     def do(self, action):

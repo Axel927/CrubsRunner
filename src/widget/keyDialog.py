@@ -7,14 +7,13 @@ Fichier contenant la classe KeyDialog.
 """
 
 from PySide6 import QtWidgets, QtGui, QtCore
-import data
 
 
 class KeyDialog(QtWidgets.QDialog):
     """
     Classe qui redefinit PySide6.QtWidgets.QDialog.
     """
-    def __init__(self, save_data: data.Save, parent=None):
+    def __init__(self, save_data, parent=None):
         """
         Constructeur de KeyDialog.
         :param save_data: data.Save: Donnees de sauvegarde
@@ -22,7 +21,7 @@ class KeyDialog(QtWidgets.QDialog):
         """
         super(KeyDialog, self).__init__(parent)
         self.save_data = save_data
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.movement = ''
         self.key = None
         self.to_write = None

@@ -7,9 +7,9 @@ Fichier contenant la classe Run.
 """
 
 from PySide6 import QtCore, QtWidgets
+import numpy as np
 
 import ui
-import data
 import element
 
 
@@ -21,7 +21,7 @@ class Run:
     Classe pour la simulation des deplacements des robots.
     """
 
-    def __init__(self, save_data: data.Save, main_robot: element.Robot, second_robot: element.Robot, parent=None):
+    def __init__(self, save_data, main_robot: element.Robot, second_robot: element.Robot, parent=None):
         """
         Constructeur de Run.
         :param save_data: data.Save: Les donnees de sauvegarde y sont recuperees et ecrites
@@ -31,7 +31,7 @@ class Run:
         """
 
         self.save_data = save_data
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.main_robot = main_robot
         self.second_robot = second_robot
         self.ongoing = False
@@ -49,7 +49,7 @@ class Run:
         self.start_time_move_mr.timeout.connect(self._start_time_mr)
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._timer)
-        self.time = -2.
+        self.time = -self.init_data.get_run("time_before_start") / 1000  # Conversion en secondes
         self.time_move_sr = QtCore.QTimer()
         self.time_move_sr.timeout.connect(self._time_move_sr)
         self.start_time_move_sr = QtCore.QTimer()
@@ -225,11 +225,11 @@ class Run:
         """
         self.timing_mr = True
         if self.nb_time_mr > 0:
-            eval(self.move_cmd_mr)
+            self.main_robot.move_robot(*self.move_cmd_mr)
             self.nb_time_mr -= 1
         elif self.nb_time_mr == 0:
             self.nb_time_mr -= 1
-            eval(self.last_move_mr)
+            self.main_robot.move_robot(*self.last_move_mr)
         else:
             self.time_move_mr.stop()
             self.next_command_mr()
@@ -282,11 +282,11 @@ class Run:
         """
         self.timing_sr = True
         if self.nb_time_sr > 0:
-            eval(self.move_cmd_sr)
+            self.second_robot.move_robot(*self.move_cmd_sr)
             self.nb_time_sr -= 1
         elif self.nb_time_sr == 0:
             self.nb_time_sr -= 1
-            eval(self.last_move_sr)
+            self.second_robot.move_robot(*self.last_move_sr)
         else:
             self.time_move_sr.stop()
             self.next_command_sr()
@@ -351,34 +351,15 @@ class Run:
         :param rbt: Robot auquel correspond la commande
         :return: None
         """
+        # Si la vitesse de simulation a ete modifiee on change la vitesse d'affichage du temps
         if self.timer.interval() != self.init_data.get_run('timer_refresh') / \
                 self.init_data.get_window('speed_simulation_btn_values')[self.parent.speed_simulation_btn_nb]:
             self.timer.stop()
             self.timer.start(self.init_data.get_run('timer_refresh') /
                              self.init_data.get_window('speed_simulation_btn_values')[
                                  self.parent.speed_simulation_btn_nb])
+
         name = self.save_data.get_gcrubs('cmd_name')  # On recupere les commandes
-        if cmd == "\n":  # Si ligne vide
-            return
-
-        if name.get('Commentaire') == cmd[:len(name.get('Commentaire'))]:  # Si c'est un commentaire
-            return
-
-        sep = name.get('Pause').find('{')
-        if cmd[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
-            end_sep = sep
-            for char in cmd[sep:]:
-                if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
-                    break
-                end_sep += 1
-
-            if rbt.is_main_robot():
-                self._sleep_mr(float(cmd[sep:end_sep]))
-                self.timing_mr = True
-            else:
-                self._sleep_sr(float(cmd[sep:end_sep]))
-                self.timing_sr = True
-            return
 
         sep = name.get('Se deplacer en avant').find('{')
         if cmd[:sep] == name.get('Se deplacer en avant')[:sep]:
@@ -433,6 +414,22 @@ class Run:
                     self.move(rbt, cmd, key, sep)
                     return
 
+        sep = name.get('Pause').find('{')
+        if cmd[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
+            end_sep = sep
+            for char in cmd[sep:]:
+                if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
+                    break
+                end_sep += 1
+
+            if rbt.is_main_robot():
+                self._sleep_mr(float(cmd[sep:end_sep]))
+                self.timing_mr = True
+            else:
+                self._sleep_sr(float(cmd[sep:end_sep]))
+                self.timing_sr = True
+            return
+
     def move(self, rbt: element.Robot, cmd: str, key: str, sep: int):
         """
         Deplace le robot.
@@ -448,25 +445,19 @@ class Run:
         rotation = False
 
         if cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_up'):
-            move_cmd = ".move_robot(0, {dist_per_time}, 0)"
-            last_move = ".move_robot(0, {rest}, 0)"
+            move = np.array([0, 1, 0])
         elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_down'):
-            move_cmd = ".move_robot(0, -{dist_per_time}, 0)"
-            last_move = ".move_robot(0, -{rest}, 0)"
+            move = np.array([0, -1, 0])
         elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_right'):
-            move_cmd = ".move_robot({dist_per_time}, 0, 0)"
-            last_move = ".move_robot({rest}, 0, 0)"
+            move = np.array([1, 0, 0])
         elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('go_left'):
-            move_cmd = ".move_robot(-{dist_per_time}, 0, 0)"
-            last_move = ".move_robot(-{rest}, 0, 0)"
+            move = np.array([-1, 0, 0])
         elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('turn_right'):
             rotation = True
-            move_cmd = ".move_robot(0, 0, -{dist_per_time})"
-            last_move = ".move_robot(0, 0, -{rest})"
+            move = np.array([0, 0, -1])
         elif cmd_key.get(key) == self.save_data.get_gcrubs('keys').get('turn_left'):
             rotation = True
-            move_cmd = ".move_robot(0, 0, {dist_per_time})"
-            last_move = ".move_robot(0, 0, {rest})"
+            move = np.array([0, 0, 1])
         else:
             if rbt.is_main_robot():
                 self.timing_mr = False
@@ -492,17 +483,14 @@ class Run:
                                             self.parent.speed_simulation_btn_nb]
 
             # Calcul du nombre d'appel a _time_move_mr
-            if self.dist_per_time_mr != 0:
-                self.nb_time_mr = int(cmd[sep:end_sep]) // self.dist_per_time_mr
-            else:
-                self.nb_time_mr = 0
+            self.nb_time_mr = int(cmd[sep:end_sep]) // self.dist_per_time_mr
 
             # Calcul du reste a parcourir
             self.rest_mr = int(cmd[sep:end_sep]) - self.nb_time_mr * self.dist_per_time_mr
 
             self.time_move_mr.start(self.init_data.get_gcrubs('period'))
-            self.move_cmd_mr = "self.main_robot" + move_cmd.format(dist_per_time="self.dist_per_time_mr")
-            self.last_move_mr = "self.main_robot" + last_move.format(rest="self.rest_mr")
+            self.move_cmd_mr = move * self.dist_per_time_mr
+            self.last_move_mr = move * self.rest_mr
         else:
             # Calcul de la distance a parcourir a chaque appel de _time_move_sr
             if rotation:
@@ -515,17 +503,14 @@ class Run:
                                             self.parent.speed_simulation_btn_nb]
 
             # Calcul du nombre d'appel a _time_move_sr
-            if self.dist_per_time_sr != 0:
-                self.nb_time_sr = int(cmd[sep:end_sep]) // self.dist_per_time_sr
-            else:
-                self.nb_time_sr = 0
+            self.nb_time_sr = int(cmd[sep:end_sep]) // self.dist_per_time_sr
 
             # Calcul du reste a parcourir
             self.rest_sr = int(cmd[sep:end_sep]) - self.nb_time_sr * self.dist_per_time_sr
 
             self.time_move_sr.start(self.init_data.get_gcrubs('period'))
-            self.move_cmd_sr = "self.second_robot" + move_cmd.format(dist_per_time="self.dist_per_time_sr")
-            self.last_move_sr = "self.second_robot" + last_move.format(rest="self.rest_sr")
+            self.move_cmd_sr = move * self.dist_per_time_sr
+            self.last_move_sr = move * self.rest_sr
 
     def go_to_start(self, rbt: element.Robot):
         """
@@ -535,27 +520,27 @@ class Run:
         """
         try:
             with open(rbt.get_gcrubs_file(), 'r') as file:
-                line = file.readline()
-                while line.find(" Position de depart : ") == -1:
-                    line = file.readline()
+                for line in file:
+                    if self.init_data.get_main_robot('position_text') in line:
+                        coord = [0., 0., 0]  # [x, y, angle]
+
+                        coord[0] = float(line[line.find("x = ") + 4:line.find(" mm")])  # Obtention de x
+                        line = line[line.find(" mm") + 4:]
+
+                        coord[1] = float(line[line.find("y = ") + 4:line.find(" mm")])  # Obtention de y
+                        line = line[line.find(" mm") + 4:]
+
+                        coord[2] = float(line[line.find("angle = ") + 8:line.find(" degres")])  # Obtention de l'angle
+
+                        # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
+                        rbt.move_robot(0, 0, -rbt.get_angle())
+                        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1],
+                                       coord[2] - rbt.get_angle())
+                        return
+
         except FileNotFoundError:
             QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                   self.init_data.get_window('error_open_file_title'),
                                   self.init_data.get_window('error_open_file_message').format(
                                       filename=file)).exec()
             self.finish()
-            return
-
-        coord = [0., 0., 0]  # [x, y, angle]
-
-        coord[0] = float(line[line.find("x = ") + 4:line.find(" mm")])  # Obtention de x
-        line = line[line.find(" mm") + 4:]
-
-        coord[1] = float(line[line.find("y = ") + 4:line.find(" mm")])  # Obtention de y
-        line = line[line.find(" mm") + 4:]
-
-        coord[2] = float(line[line.find("angle = ") + 8:line.find(" degres")])  # Obtention de l'angle
-
-        # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
-        rbt.move_robot(0, 0, -rbt.get_angle())
-        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1], coord[2] - rbt.get_angle())

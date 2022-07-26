@@ -8,7 +8,6 @@ Fichier contenant la classe Board, partie objet.
 
 import functions
 import element
-import data
 import ui
 
 
@@ -16,7 +15,7 @@ class Board(element.CoordSys):
     """
     Classe qui gere la partie 3D du plateau.
     """
-    def __init__(self, save_data: data.Save, parent):
+    def __init__(self, save_data, parent):
         """
         Constructeur de Board.
         :param save_data: data.Save: Les donnees de sauvegarde y sont recuperees et ecrites
@@ -46,7 +45,7 @@ class Board(element.CoordSys):
         """
         if self.file == '':
             self.file = self.save_data.get_board('file')
-            functions.object.show_stl(self)
+            functions.object.show_mesh(self)
 
         self.setColor(self.save_data.get_board('color'))
         self.set_edge_color(self.save_data.get_board('edge_color'))

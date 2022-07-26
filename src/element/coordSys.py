@@ -7,26 +7,26 @@ Fichier contenant la classe CoordSys.
 """
 
 import pyqtgraph.opengl as gl
-import data
+import numpy as np
 
 
 class CoordSys(gl.GLMeshItem):
     """
     Classe qui gere la partie systeme de coordonnees
     """
-    def __init__(self, save_data: data.Save):
+    def __init__(self, save_data):
         """
         Constructeur de CoordSys.
         :param save_data: data.Save: Les donnees de sauvegarde y sont recuperees et ecrites
         """
         super(CoordSys, self).__init__(smooth=True, drawFaces=True, drawEdges=True)
         self.save_data = save_data
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.file = ""
         self.name = ""
         self.element_type = ""
-        self.dimensions = [0., 0., 0.]
-        self.min_max = [[0., 0.], [0., 0.], [0., 0.]]
+        self.dimensions = np.zeros(shape=3, dtype="float")
+        self.min_max = np.zeros(shape=(3, 2), dtype="float")
 
     def set_file(self, file: str):
         """
@@ -43,32 +43,32 @@ class CoordSys(gl.GLMeshItem):
         """
         return self.file
 
-    def get_dimensions(self) -> list:
+    def get_dimensions(self) -> np.array:
         """
         Renvoie les dimensions de l'objet.
-        :return: list: Dimensions [x, y, z] contient des flottants
+        :return: np.array: Dimensions [x, y, z] contient des flottants
         """
         return self.dimensions
 
-    def set_dimensions(self, dimensions: list):
+    def set_dimensions(self, dimensions: np.array):
         """
         Definit les dimensions de l'objet.
-        :param dimensions:  list: Dimensions [x, y, z] contient des flottants
+        :param dimensions:  np.array: Dimensions [x, y, z] contient des flottants
         :return: None
         """
         self.dimensions = dimensions
 
-    def get_min_max(self) -> list:
+    def get_min_max(self) -> np.array:
         """
         Renvoie les coordonnees minimales et maximales de l'objet selon chaque axe.
-        :return: list: [[min x, max x], [min y, max y], [min z, max z]] contient des flottants
+        :return: np.array: [[min x, max x], [min y, max y], [min z, max z]] contient des flottants
         """
         return self.min_max
 
-    def set_min_max(self, min_max: list):
+    def set_min_max(self, min_max: np.array):
         """
         Definit les coordonnees minimales et maximales de l'objet selon chaque axe
-        :param min_max: list: [[min x, max x], [min y, max y], [min z, max z]] contient des flottants
+        :param min_max: np.array: [[min x, max x], [min y, max y], [min z, max z]] contient des flottants
         :return: None
         """
         self.min_max = min_max

@@ -8,8 +8,8 @@ Fichier contenant la partie interface de la classe Robot.
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
-import data
-import functions.object
+from math import cos, sin, radians
+import functions
 import widget
 import element
 
@@ -19,7 +19,7 @@ class Robot:
     Classe pour l'interface des robots.
     """
 
-    def __init__(self, parent, save_data: data.Save, robot):
+    def __init__(self, parent, save_data, robot: element):
         """
         Constructeur de Robot.
         :param parent: ui.MainWindow: Fenetre principale.
@@ -29,7 +29,7 @@ class Robot:
         self.parent = parent
         self.save_data = save_data
         self.robot = robot
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.time = 0.
         self.track = list()
 
@@ -71,6 +71,7 @@ class Robot:
         self.sequence_layout = QtWidgets.QVBoxLayout()
         self.sequence_save_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_save_btn_name'))
         self.sequence_cancel_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_cancel_btn_name'))
+        self.sequence_new_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_new_btn_name'))
         self.sequence_list = widget.ListWidget()
         self.sequence_origin_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('sequence_origin_lbl_text'))
         self.sequence_origin_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_origin_btn_name'))
@@ -209,6 +210,7 @@ class Robot:
         self.sequence_save_btn.clicked.connect(self.save_sequence)
         self.sequence_cancel_btn.clicked.connect(self._cancel_sequence)
         self.sequence_origin_btn.clicked.connect(self._set_origin)
+        self.sequence_new_btn.clicked.connect(self._new_sequence)
 
     def _color_robot(self):
         """
@@ -226,7 +228,7 @@ class Robot:
 
         else:
             color = self.save_data.get_second_robot('color')
-        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
+        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(*color))
 
         color = self.color_dialog.getColor()
         if self.robot.is_main_robot():
@@ -260,7 +262,7 @@ class Robot:
 
         else:
             color = self.save_data.get_second_robot('edge_color')
-        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
+        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(*color))
 
         color = self.color_dialog.getColor()
         if self.robot.is_main_robot():
@@ -302,7 +304,7 @@ class Robot:
 
     def import_gcrubs(self):
         """
-        fonction pour importer un fichier sequentiel.
+        Fonction pour importer un fichier sequentiel.
         :return: None
         """
         if time() - self.time < 0.2:
@@ -314,11 +316,12 @@ class Robot:
                                                      self.init_data.get_main_robot('import_gcrubs_extension'))[0]
         self.robot.set_gcrubs_file(file)
         self.sequence_text.clear()
+        self.track_visible(False)
+        self.track.clear()
 
         try:
             with open(file, 'r') as f:
-                lines = f.readlines()
-                for line in lines:
+                for line in f:
                     self.sequence_text.append(line.replace('\n', '', 1))
         except FileNotFoundError:
             QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
@@ -595,7 +598,6 @@ class Robot:
         """
         self._close()
         self.robot.set_origined(False)
-        self.track.clear()
 
         if self.robot.is_main_robot():
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_main_robot('sequence_dialog_title'))
@@ -611,6 +613,8 @@ class Robot:
         self.sequence_save_btn.setDefault(self.init_data.get_main_robot('sequence_save_btn_default'))
         self.sequence_cancel_btn.setCursor(self.init_data.get_main_robot('sequence_cancel_btn_cursor'))
         self.sequence_cancel_btn.setDefault(self.init_data.get_main_robot('sequence_cancel_btn_default'))
+        self.sequence_new_btn.setCursor(self.init_data.get_main_robot('sequence_new_btn_cursor'))
+        self.sequence_new_btn.setDefault(self.init_data.get_main_robot('sequence_new_btn_default'))
 
         self.sequence_origin_btn.setCursor(self.init_data.get_main_robot('sequence_origin_btn_cursor'))
         self.sequence_origin_btn.setDefault(self.init_data.get_main_robot('sequence_origin_btn_default'))
@@ -621,6 +625,7 @@ class Robot:
         self.sequence_layout.addWidget(self.sequence_list)
         self.sequence_layout.addWidget(self.sequence_save_btn)
         self.sequence_layout.addWidget(self.sequence_cancel_btn)
+        self.sequence_layout.addWidget(self.sequence_new_btn)
         self.sequence_layout.addWidget(self.sequence_origin_btn)
 
         self.sequence_dialog.setLayout(self.sequence_layout)
@@ -631,6 +636,7 @@ class Robot:
         self.sequence_text.setVisible(False)
         self.sequence_save_btn.setVisible(False)
         self.sequence_cancel_btn.setVisible(False)
+        self.sequence_new_btn.setVisible(False)
         self.parent.board.setVisible(False)
         self.parent.vinyl.setVisible(False)
 
@@ -658,15 +664,37 @@ class Robot:
         Slot pour annuler la sequence.
         :return: None
         """
-        if self.robot.is_main_robot():
-            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
-        else:
-            self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+        self.save_data.set_main_robot('sequence',
+                                      self.sequence_text.document().toPlainText()) if self.robot.is_main_robot() \
+            else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+
         self.sequence_text.clear()
         self.sequence_dialog.close()
         self.sequence_list.setVisible(False)
         self.robot.set_ready_sequence(False)
         self.robot.set_key(None)
+
+    def _new_sequence(self):
+        """
+        Cree une nouvelle sequence.
+        :return: None
+        """
+        self.track_visible(False)
+        self.track.clear()
+        self.robot.set_key(None)
+        self.save_data.set_main_robot('sequence', '') if self.robot.is_main_robot else self.save_data.set_second_robot(
+            'sequence', '')
+        self.sequence_list.setVisible(False)
+        self.sequence_text.setVisible(False)
+        self.sequence_save_btn.setVisible(False)
+        self.sequence_cancel_btn.setVisible(False)
+        self.sequence_new_btn.setVisible(False)
+
+        self.sequence_origin_btn.setVisible(True)
+        self.sequence_origin_lbl.setVisible(True)
+        self.robot.set_origined(False)
+        self.robot.set_ready_sequence(False)
+        self._set_origin()
 
     def save_sequence(self):
         """
@@ -702,9 +730,9 @@ class Robot:
                 file.write('\n')
 
             if self.robot.is_main_robot():
-                self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
-            else:
-                self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+                self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
+                    if self.robot.is_main_robot() \
+                    else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
             self.robot.set_gcrubs_file(filename)
 
@@ -762,6 +790,7 @@ class Robot:
             self.sequence_text.setVisible(True)
             self.sequence_save_btn.setVisible(True)
             self.sequence_cancel_btn.setVisible(True)
+            self.sequence_new_btn.setVisible(True)
 
             if not self.save_data.get_grid('coord_sys_visible'):
                 self.parent.x_coord_sys.setVisible(False)
@@ -775,8 +804,8 @@ class Robot:
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
                     self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
-                        x=int(self.robot.get_coord()[0]),
-                        y=int(self.robot.get_coord()[1]),
+                        x=round(self.robot.get_coord()[0]),
+                        y=round(self.robot.get_coord()[1]),
                         angle=self.robot.get_angle()))
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
@@ -788,8 +817,8 @@ class Robot:
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
                     self.sequence_text.append(self.init_data.get_main_robot('start_sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
-                        x=int(self.robot.get_coord()[0]),
-                        y=int(self.robot.get_coord()[1]),
+                        x=round(self.robot.get_coord()[0]),
+                        y=round(self.robot.get_coord()[1]),
                         angle=self.robot.get_angle()))
                 else:
                     self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
@@ -803,8 +832,8 @@ class Robot:
                 self._cancel_sequence()
             else:
                 self.parent.status_bar.showMessage(
-                    self.init_data.get_window('position_status_message').format(x=int(self.robot.get_coord()[0]),
-                                                                                y=int(self.robot.get_coord()[1]),
+                    self.init_data.get_window('position_status_message').format(x=round(self.robot.get_coord()[0]),
+                                                                                y=round(self.robot.get_coord()[1]),
                                                                                 angle=self.robot.get_angle()))
                 self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text_start'))
                 self.parent.board.setVisible(True)
@@ -831,13 +860,28 @@ class Robot:
             self.track[-1].set_edge_color(self.save_data.get_second_robot('edge_color'))
 
         self.track[-1].translate(self.robot.get_coord()[0], self.robot.get_coord()[1], 0)
+
         if not self.track_visible_cb.isChecked():
             self.track[-1].setVisible(False)
 
-    def track_visible(self):
+    def track_visible(self, visible=None):
         """
-        Rend la trace visible ou non selon si la check box est est checkee ou non
+        Rend la trace visible ou non selon si la check box est est checkee ou non ou force la visibilite si visible
+        True ou False.
+        :param visible: bool: Trace visible
         :return: None
         """
-        for track in self.track:
-            track.setVisible(self.track_visible_cb.isChecked())
+        if visible is None:
+            for track in self.track:
+                track.setVisible(self.track_visible_cb.isChecked())
+        else:
+            for track in self.track:
+                track.setVisible(visible)
+
+    def remove_last_track(self):
+        """
+        Supprime la derniere trace.
+        :return: None
+        """
+        self.track[-1].setVisible(False)
+        self.track.pop(-1)

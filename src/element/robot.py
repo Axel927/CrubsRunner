@@ -5,11 +5,10 @@
 """
 Fichier de la classe Robot.
 """
-
+import numpy as np
 from PySide6 import QtCore
 from math import cos, sin, radians
 
-import data
 import element
 import functions
 import ui
@@ -19,7 +18,7 @@ class Robot(element.Board):
     """
     Classe qui gere la partie 3D des robots.
     """
-    def __init__(self, save_data: data.Save, parent, main_robot: bool):
+    def __init__(self, save_data, parent, main_robot: bool):
         """
         Constructeur de Robot.
         :param save_data: data.Save: Les donnees de sauvegarde y sont recuperees et ecrites
@@ -31,10 +30,10 @@ class Robot(element.Board):
         self.main_robot = main_robot
         self.selected = False
         self.origined = False
-        self.coord = [0., 0.]
+        self.coord = np.zeros(shape=2, dtype='float')
         self.angle = 0
         self.key = None
-        self.moving = [0., 0., 0]
+        self.moving = np.zeros(shape=3, dtype='float')
         self.invisible = False
         self.running = False
         self.gcrubs_file = ""
@@ -87,10 +86,10 @@ class Robot(element.Board):
         """
         self.origined = origined
 
-    def get_coord(self) -> list:
+    def get_coord(self) -> np.array:
         """
         Renvoie les coordonnees du robot dans le repere global.
-        :return: list: [x, y] contient des flottants
+        :return: np.array: [x, y] contient des flottants
         """
         return self.coord
 
@@ -165,7 +164,7 @@ class Robot(element.Board):
                 self.file = self.save_data.get_main_robot('file')
             else:
                 self.file = self.save_data.get_second_robot('file')
-            functions.object.show_stl(self)
+            functions.object.show_mesh(self)
 
             if self.is_invisible():  # Si le robot est minuscule
                 coef = self.init_data.get_main_robot('invisible_coef')

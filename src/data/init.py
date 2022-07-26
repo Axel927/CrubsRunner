@@ -79,6 +79,7 @@ class Init:
             'export_status_tip': "Exporter un composant",
             'export_icon': QtGui.QIcon("icon/icon_export.png"),
             "export_dialog_title": "Exporter un composant",  # Other parameters : same as import
+            'export_component_dialog_min_size': (280, 150),
 
             'top_view_action_name': "Vue de dessus",
             'top_view_action_shortcut': QtGui.QKeySequence.AddTab,  # Ctrl + T
@@ -314,6 +315,9 @@ class Init:
             'sequence_cancel_btn_name': "Fermer",
             'sequence_cancel_btn_default': False,
             'sequence_cancel_btn_cursor': QtCore.Qt.PointingHandCursor,
+            'sequence_new_btn_name': "Nouveau fichier",
+            'sequence_new_btn_default': False,
+            'sequence_new_btn_cursor': QtCore.Qt.PointingHandCursor,
             'save_sequence_title': "Sauvegarder le fichier genere",
             'date_format': "dd/MM/yy",
 
@@ -325,6 +329,7 @@ class Init:
                                         "l'axe de rotation).",
             'sequence_origin_lbl_text_start': "Placer le robot en position de depart.",
             'start_sequence_text': "{comment} Position de depart : x = {x} mm, y = {y} mm, angle = {angle} degres\n",
+            'position_text': "Position de depart :",
             'sequence_origin_btn_name': "Fait",
             'sequence_origin_btn_default': True,
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,

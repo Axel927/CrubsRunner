@@ -8,6 +8,7 @@ Ces valeurs sont celles qui sont ecrites dans les fichiers de sauvegarde.
 """
 
 from PySide6 import QtCore
+import numpy as np
 import data
 
 
@@ -58,7 +59,7 @@ class Save:
             'speed_rotation': 45,
             'gcrubs_file': "",
             'sequence': "",
-            'start_position': (0, 0, 0)  # x, y, angle
+            'start_position': np.zeros(shape=3, dtype='float')  # x, y, angle
         }
 
         self.second_robot = {  # Donnees du robot secondaire
@@ -72,7 +73,7 @@ class Save:
             'speed_rotation': 45,
             'gcrubs_file': "",
             'sequence': "",
-            'start_position': (0, 0, 0)  # x, y, angle
+            'start_position': np.zeros(shape=3, dtype='float')  # x, y, angle
         }
 
         self.gcrubs = {  # Donnees concernant la sequence
@@ -205,8 +206,7 @@ class Save:
         :return: None
         """
         if key == 'transparency':
-            self.grid['color'] = (
-                self.grid.get('color')[0], self.grid.get('color')[1], self.grid.get('color')[2], value)
+            self.grid['color'] = (*self.grid.get('color')[:3], value)
 
         self.grid[key] = value
 
@@ -320,3 +320,6 @@ class Save:
         :return: None
         """
         self.settings.setValue(key, value)
+
+    def get_init_data(self) -> data.Init:
+        return self.init_data

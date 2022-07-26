@@ -8,14 +8,13 @@ Fichier contenant la class Board, partie interface graphique.
 
 from PySide6 import QtWidgets, QtGui
 from time import time
-import data
 
 
 class Board:
     """
     Classe qui gere la partie graphique du plateau.
     """
-    def __init__(self, parent, save_data: data.Save, board):
+    def __init__(self, parent, save_data, board):
         """
         Constructeur de Board.
         :param parent: ui.MainWindow: Fenetre principale
@@ -23,8 +22,8 @@ class Board:
         :param board: element.Board: Plateau
         """
         self.parent = parent
-        self.init_data = data.Init()
         self.save_data = save_data
+        self.init_data = self.save_data.get_init_data()
         self.board = board
         self.time = 0.
         self.window = QtWidgets.QDialog(self.parent)
@@ -141,7 +140,7 @@ class Board:
         self.color_dialog.setWindowTitle(self.init_data.get_board('color_dialog_title'))
 
         color = self.save_data.get_board('color')
-        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
+        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(*color))
 
         color = self.color_dialog.getColor()
 
@@ -166,7 +165,7 @@ class Board:
         self.color_dialog.setWindowTitle(self.init_data.get_board('edge_color_dialog_title'))
 
         color = self.save_data.get_board('edge_color')
-        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
+        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(*color))
         self.color_dialog.setVisible(True)
 
         color = self.color_dialog.getColor()
@@ -241,9 +240,9 @@ class Board:
         :return: None
         """
         self.board.rotate(self.angle_rotation_sb.value() - self.board.get_axis_angle(),
-                          int(self.axis_rotation_rb_x.isChecked()),
-                          int(self.axis_rotation_rb_y.isChecked()),
-                          int(self.axis_rotation_rb_z.isChecked()),
+                          round(self.axis_rotation_rb_x.isChecked()),
+                          round(self.axis_rotation_rb_y.isChecked()),
+                          round(self.axis_rotation_rb_z.isChecked()),
                           local=True)
 
         self.board.set_axis_angle(self.angle_rotation_sb.value())

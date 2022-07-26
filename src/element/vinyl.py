@@ -9,8 +9,7 @@ import numpy as np
 import pyqtgraph.opengl as gl
 from PySide6 import QtWidgets
 
-import data
-import functions.object
+import functions
 
 
 class Vinyl(gl.GLImageItem):
@@ -18,7 +17,7 @@ class Vinyl(gl.GLImageItem):
     Classe concernant le tapis du plateau.
     """
 
-    def __init__(self, parent, save_data: data.Save, array=None, file=""):
+    def __init__(self, parent, save_data, array=None, file=""):
         """
         Constructeur de ImageItem.
         :param parent: ui.MainWindow: Fenetre principale
@@ -113,7 +112,7 @@ class Vinyl(gl.GLImageItem):
         if self.parent.list_widget.get_len() < 2:  # Evite un bug qui fait que ca retire trop d'elements
             return
 
-        init_data = data.Init()
+        init_data = self.save_data.get_init_data()
         ans = QtWidgets.QMessageBox(init_data.get_vinyl('remove_message_box_type'),
                                     init_data.get_vinyl('remove_message_box_title'),
                                     init_data.get_vinyl('remove_message_box_message'),

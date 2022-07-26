@@ -8,7 +8,6 @@ Fichier contenant la classe GCrubs.
 
 from PySide6 import QtWidgets, QtCore
 
-import data
 import widget
 
 
@@ -16,14 +15,14 @@ class GCrubs:
     """
     Classe qui gere l'affichage pour  la creation des commandes.
     """
-    def __init__(self, save_data: data.Save, parent):
+    def __init__(self, save_data, parent):
         """
         Constructeur de GCrubs.
         :param save_data: data.Save: Donnees de sauvegarde.
         :param parent: ui.MainWindow: Fenetre principale
         """
         self.save_data = save_data
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.parent = parent
         self.cmd = list()
         self.cmd_size = 0

@@ -9,14 +9,13 @@ Fichier qui contient la classe GridItem.
 import pyqtgraph.opengl as gl
 from PySide6 import QtGui, QtWidgets
 from time import time
-import data
 
 
 class GridItem(gl.GLGridItem):
     """
     Classe qui s'occupe de la grille dans le widget central et de ses parametres.
     """
-    def __init__(self, save_data: data.Save, parent):
+    def __init__(self, save_data, parent):
         """
         Constructeur de GridItem.
         :param save_data: data.Save: Donnees de sauvegarde
@@ -24,7 +23,7 @@ class GridItem(gl.GLGridItem):
         """
         super(GridItem, self).__init__()
         self.save_data = save_data
-        self.init_data = data.Init()
+        self.init_data = self.save_data.get_init_data()
         self.parent = parent
         self.time = 0.
 
@@ -186,7 +185,7 @@ class GridItem(gl.GLGridItem):
         self.color_dialog.setWindowTitle(self.init_data.get_grid('color_dialog_name'))
 
         color = self.save_data.get_grid('color')
-        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(color[0], color[1], color[2], color[3]))
+        self.color_dialog.setCurrentColor(QtGui.QColor.fromRgb(*color))
 
         color = self.color_dialog.getColor()
 
