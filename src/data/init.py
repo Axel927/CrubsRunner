@@ -16,6 +16,10 @@ class Init:
     """
     def __init__(self):
         self.window = {  # Donnees pour la fenetre principale
+            'app_title': "CrubsRunner",
+            'app_icon': "icon/icon_app.png",
+            'organisation_name': "Crubs",
+
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
             'speed_tip': "Vitesse de deplacement du robot",
