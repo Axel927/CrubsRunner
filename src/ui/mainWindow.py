@@ -8,6 +8,7 @@ Fichier qui contient la classe MainWindow.
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
+import numpy as np
 from platform import system
 import warnings
 
@@ -407,22 +408,22 @@ class MainWindow(QtWidgets.QMainWindow):
             if '.' + extension in self.init_data.get_extension('3d_file'):
                 self.board.set_file(file)
                 self.save_data.set_board('file', file)
-                self.board.setColor(self.init_data.get_board('color'))
-                self.board.set_edge_color(self.init_data.get_board('edge_color'))
                 self.board.set_name(self.init_data.get_board('name'))
-                functions.object.show_mesh(self.board)
-                self.viewer.addItem(self.board)
-                self.board.translate(self.init_data.get_board('appearance_translation_x'),
-                                     self.init_data.get_board('appearance_translation_y'),
-                                     self.init_data.get_board('appearance_translation_z'))
-                self.list_widget.add_content(self.board)
+                if functions.object.show_mesh(self.board):
+                    self.viewer.addItem(self.board)
+                    self.board.setColor(self.init_data.get_board('color'))
+                    self.board.set_edge_color(self.init_data.get_board('edge_color'))
+                    self.board.translate(self.init_data.get_board('appearance_translation_x'),
+                                         self.init_data.get_board('appearance_translation_y'),
+                                         self.init_data.get_board('appearance_translation_z'))
+                    self.list_widget.add_content(self.board)
 
-            elif extension == self.init_data.get_extension('board')[1:] or \
-                    extension == self.init_data.get_extension('board')[1:]:
-                self.board.set_name(self.init_data.get_board('name'))
-                self.x_coord_sys.setVisible(True)
-                self.y_coord_sys.setVisible(True)
-                self.z_coord_sys.setVisible(True)
+            elif extension == self.init_data.get_extension('board')[1:]:
+                if self.open_project(file):
+                    self.board.set_name(self.init_data.get_board('name'))
+                    self.x_coord_sys.setVisible(True)
+                    self.y_coord_sys.setVisible(True)
+                    self.z_coord_sys.setVisible(True)
 
     def new_vinyl(self, message=True, file=""):
         """
@@ -445,9 +446,9 @@ class MainWindow(QtWidgets.QMainWindow):
             del self.vinyl
             self.vinyl = element.Vinyl(self, self.save_data)
             self.vinyl.set_file(file)
-            functions.object.show_vinyl(self.vinyl)
-            self.viewer.addItem(self.vinyl)
-            self.list_widget.add_content(self.vinyl)
+            if functions.object.show_vinyl(self.vinyl):
+                self.viewer.addItem(self.vinyl)
+                self.list_widget.add_content(self.vinyl)
 
     def new_main_robot(self, message=True, file=""):
         """
@@ -476,27 +477,23 @@ class MainWindow(QtWidgets.QMainWindow):
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.main_robot.set_file(file)
                 self.save_data.set_main_robot('file', file)
-                self.main_robot.setColor(self.init_data.get_main_robot('color'))
-                self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
                 self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                functions.object.show_mesh(self.main_robot)
-                self.viewer.addItem(self.main_robot)
-                self.list_widget.add_content(self.main_robot)
-                self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
-                self.main_robot.translate(0, 0, self.main_robot.get_offset())
-                self.save_data.set_main_robot('offset', self.main_robot.get_offset())
+                if functions.object.show_mesh(self.main_robot):
+                    self.viewer.addItem(self.main_robot)
+                    self.list_widget.add_content(self.main_robot)
+                    self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
+                    self.main_robot.translate(0, 0, self.main_robot.get_offset())
+                    self.save_data.set_main_robot('offset', self.main_robot.get_offset())
+                    self.main_robot.setColor(self.init_data.get_main_robot('color'))
+                    self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
 
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
-                self.open_project(file)
-                self.main_robot.set_name(self.init_data.get_main_robot('name'))
-                self.x_coord_sys.setVisible(True)
-                self.y_coord_sys.setVisible(True)
-                self.z_coord_sys.setVisible(True)
-
-            if self.main_robot.is_invisible():
-                coef = self.init_data.get_main_robot('invisible_coef')
-                self.main_robot.scale(coef, coef, coef)
+                if self.open_project(file):
+                    self.main_robot.set_name(self.init_data.get_main_robot('name'))
+                    self.x_coord_sys.setVisible(True)
+                    self.y_coord_sys.setVisible(True)
+                    self.z_coord_sys.setVisible(True)
 
     def new_second_robot(self, message=True, file=""):
         """
@@ -530,32 +527,28 @@ class MainWindow(QtWidgets.QMainWindow):
             if '.' + extension[:3] in self.init_data.get_extension('3d_file'):
                 self.save_data.set_second_robot('file', file)
                 self.second_robot.set_file(file)
-                self.second_robot.setColor(self.init_data.get_second_robot('color'))
-                self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
                 self.second_robot.set_name(self.init_data.get_second_robot('name'))
-                functions.object.show_mesh(self.second_robot)
-                self.viewer.addItem(self.second_robot)
-                self.list_widget.add_content(self.second_robot)
-                self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
-                self.second_robot.translate(0, 0, self.second_robot.get_offset())
-                self.save_data.set_second_robot('offset', self.second_robot.get_offset())
+                if functions.object.show_mesh(self.second_robot):
+                    self.viewer.addItem(self.second_robot)
+                    self.list_widget.add_content(self.second_robot)
+                    self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
+                    self.second_robot.translate(0, 0, self.second_robot.get_offset())
+                    self.save_data.set_second_robot('offset', self.second_robot.get_offset())
+                    self.second_robot.setColor(self.init_data.get_second_robot('color'))
+                    self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
-                self.open_project(file)
-                self.second_robot.set_name(self.init_data.get_second_robot('name'))
-                self.x_coord_sys.setVisible(True)
-                self.y_coord_sys.setVisible(True)
-                self.z_coord_sys.setVisible(True)
+                if self.open_project(file):
+                    self.second_robot.set_name(self.init_data.get_second_robot('name'))
+                    self.x_coord_sys.setVisible(True)
+                    self.y_coord_sys.setVisible(True)
+                    self.z_coord_sys.setVisible(True)
 
-            if self.second_robot.is_invisible():
-                coef = self.init_data.get_main_robot('invisible_coef')
-                self.second_robot.scale(coef, coef, coef)
-
-    def open_project(self, file=""):
+    def open_project(self, file="") -> bool:
         """
         Slot pour ouvrir un projet.
         :param file: str: Nom du fichier
-        :return: None
+        :return: bool: Renvoie True si tout s'est bien passe, False sinon
         """
         if time() - self.time < 0.2:
             return
@@ -658,8 +651,11 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.init_data.get_window('error_open_file_title'),
                                       self.init_data.get_window('error_open_file_message').format(
                                           filename=file)).exec()
+                self.time = time()
+                return False
             self.update_()
         self.time = time()
+        return True
 
     def save_project(self):
         """
@@ -786,6 +782,9 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour exporter un composant.
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
+
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('export_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))
@@ -841,11 +840,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     try:
                         with open(file, 'w') as file_name:
                             file_name.write(self.save_data.save('board'))
+                        self.time = time()
                     except FileNotFoundError:
                         QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                               self.init_data.get_window('error_open_file_title'),
                                               self.init_data.get_window('error_open_file_message').format(
                                                   filename=file_name)).exec()
+                        self.time = time()
                         return
 
             # Si on veut exporter le robot principal
@@ -866,11 +867,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     try:
                         with open(file, 'w') as file_name:
                             file_name.write(self.save_data.save('main_robot'))
+                        self.time = time()
                     except FileNotFoundError:
                         QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                               self.init_data.get_window('error_open_file_title'),
                                               self.init_data.get_window('error_open_file_message').format(
                                                   filename=file_name)).exec()
+                        self.time = time()
                         return
 
             # Si on veut exporter le robot secondaire
@@ -891,11 +894,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     try:
                         with open(file, 'w') as file_name:
                             file_name.write(self.save_data.save('second_robot'))
+                        self.time = time()
                     except FileNotFoundError:
                         QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                               self.init_data.get_window('error_open_file_title'),
                                               self.init_data.get_window('error_open_file_message').format(
                                                   filename=file_name)).exec()
+                        self.time = time()
                         return
 
             dialog.close()
@@ -998,6 +1003,9 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour lancer la simulation.
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
+
         if self.running.is_ongoing():  # Si la simulation est deja en cours
             if self.running.is_running():  # Si la simulation est en pause ou non
                 self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
@@ -1037,6 +1045,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 ok_btn.setEnabled(False)
 
             def ok():
+                self.time = time()
                 if main_robot_cb.isChecked():
                     self.main_robot.set_running(True)
                     if not self.main_robot.is_origined():
@@ -1057,6 +1066,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.running.run()
 
             def cancel():
+                self.time = time()
                 dialog.close()
 
             ok_btn.clicked.connect(ok)

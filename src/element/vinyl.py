@@ -6,6 +6,7 @@
 Fichier contenant la classe ImageItem.
 """
 import numpy as np
+from time import time
 import pyqtgraph.opengl as gl
 from PySide6 import QtWidgets
 
@@ -36,6 +37,7 @@ class Vinyl(gl.GLImageItem):
         self.save_data.set_vinyl('file', self.file)
         self.save_data.set_vinyl('pixel_height', self.pixel_height)
         self.save_data.set_vinyl('pixel_width', self.pixel_width)
+        self.time = 0.
 
     def get_pixel_height(self) -> int:
         """
@@ -109,7 +111,7 @@ class Vinyl(gl.GLImageItem):
         Retire le tapis de la fenetre.
         :return: None
         """
-        if self.parent.list_widget.get_len() < 2:  # Evite un bug qui fait que ca retire trop d'elements
+        if time() - self.time < 0.2:
             return
 
         init_data = self.save_data.get_init_data()
@@ -130,3 +132,4 @@ class Vinyl(gl.GLImageItem):
         self.set_file("")
         self.save_data.set_vinyl('file', '')
         self.setVisible(False)
+        self.time = time()

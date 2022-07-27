@@ -34,7 +34,6 @@ class Robot(element.Board):
         self.angle = 0
         self.key = None
         self.moving = np.zeros(shape=3, dtype='float')
-        self.invisible = False
         self.running = False
         self.gcrubs_file = ""
         self.ready_sequence = False
@@ -166,10 +165,6 @@ class Robot(element.Board):
                 self.file = self.save_data.get_second_robot('file')
             functions.object.show_mesh(self)
 
-            if self.is_invisible():  # Si le robot est minuscule
-                coef = self.init_data.get_main_robot('invisible_coef')
-                self.scale(coef, coef, coef)  # Agrandit le robot
-
         if self.main_robot:
             self.setColor(self.save_data.get_main_robot('color'))
             self.set_edge_color(self.save_data.get_main_robot('edge_color'))
@@ -232,12 +227,6 @@ class Robot(element.Board):
         :param rz: float: Rotation selon z
         :return: None
         """
-
-        coef = self.init_data.get_main_robot('invisible_coef')
-        # Ne pas chercher mais laisser meme si ca parait inutile, pb lors des deplacements sinon
-        if self.invisible:
-            self.scale(1 / coef, 1 / coef, 1 / coef)
-
         if dx != 0 or dy != 0:
             if self.main_robot:
                 mvt = self.robot_movement(self.save_data.get_main_robot('axis_rotation'),
@@ -256,32 +245,10 @@ class Robot(element.Board):
             self.turn(rz % 360)
             self.translate(self.get_coord()[0], self.get_coord()[1], 0, local=False)  # Replace a la bonne position
 
-        if self.invisible:  # Seconde partie de ce qu'il ne faut pas enlever
-            self.scale(coef, coef, coef)
-
         self.parent.status_bar.showMessage(
             self.init_data.get_window('position_status_message').format(x=round(self.get_coord()[0]),
                                                                         y=round(self.get_coord()[1]),
                                                                         angle=round(self.get_angle())))
-
-    def set_invisible(self, invisible: bool):
-        """
-        Definit si le robot est minuscule.
-        :param invisible: bool: invisible
-        :return: None
-        """
-        self.invisible = invisible
-        if self.main_robot:
-            self.save_data.set_main_robot('invisible', invisible)
-        else:
-            self.save_data.set_second_robot('invisible', invisible)
-
-    def is_invisible(self) -> bool:
-        """
-        Indique si le robot est minuscule a la creation.
-        :return: bool: invisible
-        """
-        return self.invisible
 
     def is_running(self) -> bool:
         """

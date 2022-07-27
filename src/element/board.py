@@ -5,6 +5,7 @@
 """
 Fichier contenant la classe Board, partie objet.
 """
+import numpy as np
 
 import functions
 import element

@@ -80,12 +80,10 @@ class ViewWidget(gl.GLViewWidget):
             elem = self.parent.main_robot
             axis = self.save_data.get_main_robot('axis_rotation')
             angle = self.save_data.get_main_robot('angle_rotation')
-            invisible = self.save_data.get_main_robot('invisible')
         elif self.parent.second_robot.is_selected():
             elem = self.parent.second_robot
             axis = self.save_data.get_second_robot('axis_rotation')
             angle = self.save_data.get_second_robot('angle_rotation')
-            invisible = self.save_data.get_second_robot('invisible')
         else:
             return
 
@@ -105,10 +103,6 @@ class ViewWidget(gl.GLViewWidget):
                 elem.set_key(None)
                 return
 
-        coef = self.init_data.get_main_robot('invisible_coef')
-        if invisible:  # Ne pas chercher mais laisser meme si ca parait inutile, pb lors des deplacements sinon
-            elem.scale(1 / coef, 1 / coef, 1 / coef)
-
         if event.key() == self.save_data.get_gcrubs('keys').get('go_right'):
             self._go_right(event, elem, mvt, speed)
 
@@ -126,9 +120,6 @@ class ViewWidget(gl.GLViewWidget):
 
         elif event.key() == self.save_data.get_gcrubs('keys').get('turn_right'):
             self._turn_right(event, elem, mvt, speed)
-
-        if invisible:  # Seconde partie du "a ne pas virer"
-            elem.scale(coef, coef, coef)
 
         self.parent.status_bar.showMessage(
             self.init_data.get_window('position_status_message').format(x=round(elem.get_coord()[0]),

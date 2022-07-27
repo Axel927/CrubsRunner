@@ -350,6 +350,9 @@ class Robot:
         :param message: bool: Si True, un message s'affiche
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
+
         if message:
             if self.robot.is_main_robot():
                 ans = QtWidgets.QMessageBox(self.init_data.get_board('remove_message_box_type'),
@@ -377,7 +380,7 @@ class Robot:
             self.save_data.set_second_robot('file', "")
         self.reset()
         self.robot.setVisible(False)
-        del self
+        self.time = time()
 
     def _speed(self):
         """

@@ -25,11 +25,6 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     :param faces: np.array: Tableau des faces
     :return: None
     """
-    init_data = data.Init()
-    meshdata = gl.MeshData(vertexes=points, faces=faces)
-
-    elem.setMeshData(meshdata=meshdata)
-
     # Obtention des dimensions
     min_coord = np.amin(points, 0)  # Minimum selon chaque axe
     max_coord = np.amax(points, 0)  # Maximum selon chaque axe
@@ -38,9 +33,10 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
 
     if np.amax(dim, 0) < 1.:  # Si les dimensions sont inferieures a 1 mm
         try:
-            elem.set_invisible(True)
+            init_data = data.Init()
             dim *= init_data.get_main_robot('invisible_coef')  # On augmente les dimensions
             min_max *= init_data.get_main_robot('invisible_coef')
+            points *= init_data.get_main_robot('invisible_coef')
         except AttributeError:
             pass
     try:
@@ -49,16 +45,20 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     except AttributeError:
         pass
 
+    meshdata = gl.MeshData(vertexes=points, faces=faces)
 
-def show_mesh(elem: gl.GLMeshItem):
+    elem.setMeshData(meshdata=meshdata)
+
+
+def show_mesh(elem: gl.GLMeshItem) -> bool:
     """
     Fonction pour ouvrir un fichier 3D. elem est modifie durant la fonction.
     Temps d'execution : stl < obj < 3mf
     :param elem: gl.GLMeshItem: Element a afficher.
-    :return: None
+    :return: bool: True si tout s'est bien passe, False sinon
     """
     if elem.get_file() == "":
-        return
+        return False
 
     init_data = data.Init()
     try:
@@ -71,25 +71,26 @@ def show_mesh(elem: gl.GLMeshItem):
                                   init_data.get_window('error_format_file_title'),
                                   init_data.get_window('error_format_file_message').format(
                                       filename=vinyl.get_file())).exec()
-            return
+            return False
     except FileNotFoundError:
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
                               init_data.get_window('error_open_file_title'),
                               init_data.get_window('error_open_file_message').format(
                                   filename=elem.get_file())).exec()
-        return
+        return False
 
     make_mesh(elem, points, faces)
+    return True
 
 
-def show_vinyl(vinyl: element.Vinyl):
+def show_vinyl(vinyl: element.Vinyl) -> bool:
     """
     Fonction pour ouvrir un tapis. vinyl est modifie durant la fonction.
     :param vinyl: widget.ImageItem: Tapis
-    :return: None
+    :return: bool: Renvoie True si tout s'est bien passe, False sinon
     """
     if vinyl.get_file() == "":
-        return
+        return False
 
     init_data = data.Init()
 
@@ -103,13 +104,13 @@ def show_vinyl(vinyl: element.Vinyl):
                                   init_data.get_window('error_format_file_title'),
                                   init_data.get_window('error_format_file_message').format(
                                       filename=vinyl.get_file())).exec()
-            return
+            return False
     except FileNotFoundError:
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
                               init_data.get_window('error_open_file_title'),
                               init_data.get_window('error_open_file_message').format(
                                   filename=vinyl.get_file())).exec()
-        return
+        return False
 
     width = init_data.get_grid('width')  # Longueur du plateau
     # Met a la bonne taille
@@ -119,6 +120,7 @@ def show_vinyl(vinyl: element.Vinyl):
     vinyl.rotate(90, 0, 0, 1)
     vinyl.rotate(180, 1, 0, 0)
     vinyl.translate(width / 2, init_data.get_grid('height') / 2, 0)
+    return True
 
 
 def load_pdf(file: str) -> np.array:

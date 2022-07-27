@@ -204,7 +204,7 @@ class Board:
         :param message: bool: Si True, affiche un message pour confirmer la suppression.
         :return: None
         """
-        if self.parent.list_widget.get_len() < 2:  # Evite un bug qui fait que ca retire trop d'elements
+        if time() - self.time < 0.2:
             return
 
         if message:
@@ -225,7 +225,7 @@ class Board:
         self.save_data.set_board('file', '')
         self.reset()
         self.board.setVisible(False)
-        del self
+        self.time = time()
 
     def _remove(self):
         """
