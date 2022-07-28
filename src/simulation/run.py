@@ -381,6 +381,22 @@ class Run:
             self.move(rbt, cmd, 'Tourner a gauche', sep)
             return
 
+        sep = name.get('Pause').find('{')
+        if cmd[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
+            end_sep = sep
+            for char in cmd[sep:]:
+                if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
+                    break
+                end_sep += 1
+
+            if rbt.is_main_robot():
+                self._sleep_mr(float(cmd[sep:end_sep]))
+                self.timing_mr = True
+            else:
+                self._sleep_sr(float(cmd[sep:end_sep]))
+                self.timing_sr = True
+            return
+
         # Pour toutes les autres commandes, on verifie que la touche correspondante n'est pas la meme
         # qu'une touche definie par un mouvement
         for key, value in zip(self.save_data.get_gcrubs('cmd_key').keys(),
@@ -413,22 +429,6 @@ class Run:
                 if cmd[:sep] == name.get(key)[:sep]:
                     self.move(rbt, cmd, key, sep)
                     return
-
-        sep = name.get('Pause').find('{')
-        if cmd[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
-            end_sep = sep
-            for char in cmd[sep:]:
-                if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
-                    break
-                end_sep += 1
-
-            if rbt.is_main_robot():
-                self._sleep_mr(float(cmd[sep:end_sep]))
-                self.timing_mr = True
-            else:
-                self._sleep_sr(float(cmd[sep:end_sep]))
-                self.timing_sr = True
-            return
 
     def move(self, rbt: element.Robot, cmd: str, key: str, sep: int):
         """
