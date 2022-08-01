@@ -923,8 +923,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.status_bar.showMessage(
                 self.init_data.get_window('position_status_message').format(x=round(self.undoing[-1][0].get_coord()[0]),
                                                                             y=round(self.undoing[-1][0].get_coord()[1]),
-                                                                            angle=self.undoing[-1][0].get_angle()))
-            if self.undoing[-1][3] == 0:
+                                                                            angle=round(self.undoing[-1][0].get_angle())
+                                                                            ))
+            if self.undoing[-1][3] == 0:  # Si pas de rotation
                 self.undoing[-1][0].get_window().remove_last_track()
 
     def redo(self):
@@ -937,11 +938,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.doing.pop(0)
             self.doing.append(self.undoing.pop(-1))
             self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
-
+            self.doing[-1][0].get_window().add_track()
+            self.doing[-1][0].get_window().update_last_track(self.doing[-1][1] + self.doing[-1][2], self.doing[-1][1],
+                                                             self.doing[-1][2])
             self.status_bar.showMessage(
                 self.init_data.get_window('position_status_message').format(x=round(self.doing[-1][0].get_coord()[0]),
                                                                             y=round(self.doing[-1][0].get_coord()[1]),
-                                                                            angle=self.doing[-1][0].get_angle()))
+                                                                            angle=round(self.doing[-1][0].get_angle())))
 
     def do(self, action):
         """
@@ -1003,7 +1006,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour lancer la simulation.
         :return: None
         """
-        if time() - self.time < 0.2:
+        if time() - self.time < 0.3:
             return
 
         if self.running.is_ongoing():  # Si la simulation est deja en cours
@@ -1081,6 +1084,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.running.finish()
         self.stop_run_action.setEnabled(False)
+        self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
 
     def element_properties(self):
         """

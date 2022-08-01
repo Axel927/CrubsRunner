@@ -25,7 +25,7 @@ class Board(element.CoordSys):
         super(Board, self).__init__(save_data)
 
         self.parent = parent
-        self.file = self.init_data.get_board('file')
+        self.file = str()
         self.name = self.init_data.get_board('name')
         self.window = ui.Board(self.parent, self.save_data, self)
         self.axis_angle = 0

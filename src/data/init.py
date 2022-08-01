@@ -177,7 +177,6 @@ class Init:
         self.board = {  # Contient toutes les donnees pour le plateau
             'type': "board",
             'name': "Plateau",
-            'file': "",
 
             'new_message_box_type': QtWidgets.QMessageBox.Information,
             'new_message_box_title': "Information",
@@ -253,7 +252,6 @@ class Init:
         self.main_robot = {
             'type': "robot",
             'name': "Robot principal",
-            'file': "",
 
             'new_message_box_type': QtWidgets.QMessageBox.Information,
             'new_message_box_title': "Information",
@@ -338,15 +336,12 @@ class Init:
             'sequence_origin_btn_default': True,
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,
 
-            'track_file': "3d_files/track.stl",
-            'track_name': "track",
-            'track_width': 30  # mm
+            'track_width': 20  # mm
         }   # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
             'type': "robot",
             'name': "Robot secondaire",
-            'file': "",
 
             'new_message_box_type': QtWidgets.QMessageBox.Question,
             'new_message_box_title': "Question",

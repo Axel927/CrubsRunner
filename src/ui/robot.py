@@ -9,6 +9,9 @@ Fichier contenant la partie interface de la classe Robot.
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
 from math import cos, sin, radians
+import pyqtgraph.opengl as gl
+import numpy as np
+
 import functions
 import widget
 import element
@@ -239,6 +242,9 @@ class Robot:
             self.save_data.set_second_robot('color', (
                 color.red() / 255, color.green() / 255, color.blue() / 255, 1.))
             self.robot.setColor(self.save_data.get_second_robot('color'))
+
+        for track in self.track:
+            track.setColor((color.red(), color.green(), color.blue(), 255))
 
         self.parent.status_bar.showMessage(self.init_data.get_window('color_status_message').format(r=color.red(),
                                                                                                     v=color.green(),
@@ -848,24 +854,47 @@ class Robot:
         Ajoute un element de chemin a la position du robot.
         :return: None
         """
-        self.track.append(element.CoordSys(self.save_data))
-        self.track[-1].set_file(self.init_data.get_main_robot('track_file'))
-        self.track[-1].set_name(self.init_data.get_main_robot('track_name'))
-        self.track[-1].set_element_type('track')
+        color = self.save_data.get_main_robot('color') if self.robot.is_main_robot() \
+            else self.save_data.get_second_robot('color')
+        track_width = self.init_data.get_main_robot('track_width')
 
-        functions.object.show_mesh(self.track[-1])
+        self.track.append(gl.GLSurfacePlotItem(x=np.append(-track_width / 2, track_width / 2),
+                                               y=np.append(-track_width / 2, track_width / 2),
+                                               z=np.full((2, 2), 1),  # Hauteur de 1 mm
+                                               colors=np.full((4, 4), color)))  # Couleur du robot
+
         self.parent.viewer.addItem(self.track[-1])
-        if self.robot.is_main_robot():
-            self.track[-1].setColor(self.save_data.get_main_robot('color'))
-            self.track[-1].set_edge_color(self.save_data.get_main_robot('edge_color'))
-        else:
-            self.track[-1].setColor(self.save_data.get_second_robot('color'))
-            self.track[-1].set_edge_color(self.save_data.get_second_robot('edge_color'))
-
-        self.track[-1].translate(self.robot.get_coord()[0], self.robot.get_coord()[1], 0)
+        self.track[-1].translate(*self.robot.get_coord(), 0)  # Place a la position du robot
+        self.track[-1].rotate(self.robot.get_angle(), 0, 0, 1, True)  # Met dans le sens du robot
 
         if not self.track_visible_cb.isChecked():
             self.track[-1].setVisible(False)
+
+    def update_last_track(self, speed: int, width=0, height=0):
+        """
+        Met a jour la position et les dimensions pour la derniere trace.
+        :param speed: int: Vitesse de deplacement du robot
+        :param width: int: Deplacement total de la commande gcrubs selon x
+        :param height: int: Deplacement total de la commande gcrubs selon y
+        :return: None
+        """
+        color = self.save_data.get_main_robot('color') if self.robot.is_main_robot() \
+            else self.save_data.get_second_robot('color')
+        track_width = self.init_data.get_main_robot('track_width')
+
+        if width == 0:
+            self.track[-1].setData(x=np.append(-track_width / 2, track_width / 2),
+                                   y=np.append(-height / 2, height / 2),
+                                   z=np.full((2, 2), 1),
+                                   colors=np.full((4, 4), color))
+            self.track[-1].translate(0, speed / 2, 0, True)
+
+        elif height == 0:
+            self.track[-1].setData(x=np.append(-width / 2, width / 2),
+                                   y=np.append(-track_width / 2, track_width / 2),
+                                   z=np.full((2, 2), 1),
+                                   colors=np.full((4, 4), color))
+            self.track[-1].translate(speed / 2, 0, 0, True)
 
     def track_visible(self, visible=None):
         """

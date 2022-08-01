@@ -37,6 +37,10 @@ class Robot(element.Board):
         self.running = False
         self.gcrubs_file = ""
         self.ready_sequence = False
+        self.file = str()
+        self.axis_angle = 0
+        self.offset = 0
+        self.is_updated = False
 
         if self.main_robot:
             self.speed = self.save_data.get_main_robot('speed')
@@ -99,7 +103,6 @@ class Robot(element.Board):
         :param dy: int: Deplacement selon y du repere du robot
         :return: None
         """
-
         self.coord[0] += dx * cos(radians(self.angle)) - dy * sin(radians(self.angle))
         self.coord[1] += dx * sin(radians(self.angle)) + dy * cos(radians(self.angle))
 
