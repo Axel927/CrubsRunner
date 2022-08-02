@@ -258,7 +258,7 @@ class Init:
             'new_message_box_message': "Choisir le robot principal",
             'file_dialog_open_title': "Choisir le robot principal",
             'file_dialog_open_extensions': "All files (*.stl *.obj *.3mf *.crr) ;; STL (*.stl) ;; OBJ (*.obj) ;; "
-                                           ";; 3MF (*.3mf) ;; CrubsRunner robot (*.crr)",
+                                           "3MF (*.3mf) ;; CrubsRunner robot (*.crr)",
             'color': (29 / 255, 144 / 255, 18 / 255, 1),  # de 0 a 1
             'edge_color': (12 / 255, 73 / 255, 10 / 255, 1),  # de 0 a 1
             'save_extension': "CrubsRunner robot (*.crr)",
@@ -469,7 +469,6 @@ class Init:
             'key_close_name': "Fermer",
             'key_close_cursor': QtCore.Qt.PointingHandCursor,
             'key_close_default': True,
-            'period': 100  # ms
         }  # End self.gcrubs
 
         self.run = {  # Contient les donnees pour la simulation
@@ -499,9 +498,13 @@ class Init:
             'cmd_lbl_main': "Commande robot principal : {cmd}",
             'cmd_lbl_second': "Commande robot secondaire : {cmd}",
             'time_lbl': "Chrono : {time} s",
-            'timer_refresh': 1000,  # ms
             'accuracy_timer': None,  # None pour ne pas voir les chiffres apres la virgule
-            'time_before_start': 2000  # ms
+            'time_before_start': 2000,  # ms
+            'timer_refresh': 1000,  # ms
+            'time_for_refresh_estimation': 2,  # s
+            # 15 parce que c'est ce qu'il fallait apres plusieurs tests, peut varier selon le pc
+            # mais aucun lien direct trouve avec le reste donc bon...
+            'added_time_refresh_time': 15  # ms
         }  # End self.run
 
         self.extensions = {  # Contient toutes les extensions ouvrables par l'application

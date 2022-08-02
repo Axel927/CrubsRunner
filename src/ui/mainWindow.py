@@ -369,9 +369,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main_robot = element.Robot(self.save_data, self, True)
         self.second_robot.remove(False)
         self.second_robot = element.Robot(self.save_data, self, False)
-        del self.vinyl
+        self.vinyl.setVisible(False)
         self.vinyl = element.Vinyl(self, self.save_data)
-        del self.list_widget
+
         self.list_widget = widget.ListWidget()
         self.list_widget.add_content(self.grid)
         self.component_dock.setWidget(self.list_widget)
@@ -381,6 +381,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_vinyl()
         self.new_main_robot()
         self.new_second_robot()
+
         self.time = time()
 
     def new_board(self, message=True, file=""):
@@ -559,15 +560,15 @@ class MainWindow(QtWidgets.QMainWindow):
                                                          self.init_data.get_window('project_extension'))[0]
             if file:  # On retire tout
                 self.grid.reset()
-                del self.board
+                self.board.remove(False)
                 self.board = element.Board(self.save_data, self)
-                del self.vinyl
-                self.vinyl = element.Vinyl(self, self.save_data)
-                del self.main_robot
+                self.main_robot.remove(False)
                 self.main_robot = element.Robot(self.save_data, self, True)
-                del self.second_robot
+                self.second_robot.remove(False)
                 self.second_robot = element.Robot(self.save_data, self, False)
-                del self.list_widget
+                self.vinyl.setVisible(False)
+                self.vinyl = element.Vinyl(self, self.save_data)
+
                 self.list_widget = widget.ListWidget()
                 self.list_widget.add_content(self.grid)
                 self.component_dock.setWidget(self.list_widget)
@@ -1006,7 +1007,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour lancer la simulation.
         :return: None
         """
-        if time() - self.time < 0.3:
+        if time() - self.time < 0.5:
             return
 
         if self.running.is_ongoing():  # Si la simulation est deja en cours

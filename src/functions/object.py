@@ -45,9 +45,7 @@ def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
     except AttributeError:
         pass
 
-    meshdata = gl.MeshData(vertexes=points, faces=faces)
-
-    elem.setMeshData(meshdata=meshdata)
+    elem.setMeshData(meshdata=gl.MeshData(vertexes=points, faces=faces))
 
 
 def show_mesh(elem: gl.GLMeshItem) -> bool:

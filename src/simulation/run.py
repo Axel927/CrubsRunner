@@ -75,6 +75,7 @@ class Run:
         self.last_move_sr = None
         self.timing_mr = False
         self.timing_sr = False
+        self.refresh_time = 100
 
     def set_main_robot(self, rbt: element.Robot):
         """
@@ -127,6 +128,48 @@ class Run:
             self.sr_active = "sleep"
         self.running = False
 
+    def set_refresh_time(self):
+        """
+        Calcule le temps de rafraichissement entre chaque action pour une simulation optimale. Affecte la valeur a
+        self.refresh_time
+        :return: None
+        """
+        from time import time
+
+        display_time = np.zeros(50)
+        begin = time()
+        i = 0
+
+        if self.main_robot.is_running():
+            # Tant que display_time n'est pas rempli ou que la condition de temps n'est pas passee
+            while time() - begin < self.init_data.get_run('time_for_refresh_estimation') and i < len(display_time):
+                start = time()
+                self.main_robot.move_robot(0, 0, -1)  # On fait tourner le robot de 1 degre sur la droite
+                self.parent.viewer.paintGL()  # On affiche la position
+                display_time[i] = time() - start
+
+                start = time()
+                self.main_robot.move_robot(0, 0, 1)
+                self.parent.viewer.paintGL()
+                display_time[i + 1] = time() - start
+                i += 2
+
+        elif self.second_robot.is_running():
+            while time() - begin < self.init_data.get_run('time_for_refresh_estimation') and i < len(display_time):
+                start = time()
+                self.second_robot.move_robot(0, 0, -1)
+                self.parent.viewer.paintGL()
+                display_time[i] = time() - start
+
+                start = time()
+                self.second_robot.move_robot(0, 0, 1)
+                self.parent.viewer.paintGL()
+                display_time[i + 1] = time() - start
+                i += 2
+
+        # Convertit la duree en ms et en ajoute encore un peu
+        self.refresh_time = np.ceil(display_time.max() * 1000 + self.init_data.get_run('added_time_refresh_time'))
+
     def resume(self):
         """
         Reprend la simulation ou elle en etait.
@@ -135,12 +178,12 @@ class Run:
         self.running = True
         self.timer.start()  # Relance le chrono
         if self.mr_active == "move":
-            self.time_move_mr.start(self.init_data.get_gcrubs('period'))
+            self.time_move_mr.start(self.refresh_time)
         elif self.mr_active == "sleep":
             self.sleep_mr.start()
 
         if self.sr_active == "move":
-            self.time_move_sr.start(self.init_data.get_gcrubs('period'))
+            self.time_move_sr.start(self.refresh_time)
         elif self.sr_active == "sleep":
             self.sleep_sr.start()
 
@@ -162,12 +205,17 @@ class Run:
         self.stop_robot = 0
         self.nb_robot = 0
         self.ongoing = True
+
         if self.main_robot.is_running():  # Si le robot principal fait la simulation
-            self.go_to_start(self.main_robot)  # Place le robot au point de depart
             self.nb_robot += 1
             try:
                 with open(self.main_robot.get_gcrubs_file(), 'r') as file:  # Lit les instructions
                     self.main_robot_file = file.readlines()
+                    for line in self.main_robot_file:
+                        if self.init_data.get_main_robot('position_text') in line:
+                            self.go_to_start(self.main_robot, line)  # Place le robot au point de depart
+                            break
+
             except FileNotFoundError:
                 QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                       self.init_data.get_window('error_open_file_title'),
@@ -177,11 +225,15 @@ class Run:
                 return
 
         if self.second_robot.is_running():  # Si le robot secondaire fait la simulation
-            self.go_to_start(self.second_robot)  # Place le robot au point de depart
             self.nb_robot += 1
             try:
                 with open(self.second_robot.get_gcrubs_file(), 'r') as file:  # Lit les instructions
                     self.second_robot_file = file.readlines()
+                    for line in self.second_robot_file:
+                        if self.init_data.get_main_robot('position_text') in line:
+                            self.go_to_start(self.second_robot, line)  # Place le robot au point de depart
+                            break
+
             except FileNotFoundError:
                 QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                       self.init_data.get_window('error_open_file_title'),
@@ -190,14 +242,14 @@ class Run:
                 self.finish()
                 return
 
+        self.running = True
+        self.set_refresh_time()
         self.start_time_move_mr.start(self.init_data.get_run('time_before_start') /
                                       self.init_data.get_window('speed_simulation_btn_values')[
                                           self.parent.speed_simulation_btn_nb])
         self.start_time_move_sr.start(self.init_data.get_run('time_before_start') /
                                       self.init_data.get_window('speed_simulation_btn_values')[
                                           self.parent.speed_simulation_btn_nb])
-
-        self.running = True
         self.timer.start(
             self.init_data.get_run('timer_refresh') / self.init_data.get_window('speed_simulation_btn_values')[
                 self.parent.speed_simulation_btn_nb])  # Demarre le chrono
@@ -474,11 +526,11 @@ class Run:
         if rbt.is_main_robot():
             # Calcul de la distance a parcourir a chaque appel de _time_move_mr
             if rotation:
-                self.dist_per_time_mr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000 * \
+                self.dist_per_time_mr = rbt.get_speed_rotation() * self.refresh_time / 1000 * \
                                         self.init_data.get_window('speed_simulation_btn_values')[
                                             self.parent.speed_simulation_btn_nb]
             else:
-                self.dist_per_time_mr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000 * \
+                self.dist_per_time_mr = rbt.get_speed() * self.refresh_time / 1000 * \
                                         self.init_data.get_window('speed_simulation_btn_values')[
                                             self.parent.speed_simulation_btn_nb]
 
@@ -488,17 +540,17 @@ class Run:
             # Calcul du reste a parcourir
             self.rest_mr = int(cmd[sep:end_sep]) - self.nb_time_mr * self.dist_per_time_mr
 
-            self.time_move_mr.start(self.init_data.get_gcrubs('period'))
+            self.time_move_mr.start(self.refresh_time)
             self.move_cmd_mr = move * self.dist_per_time_mr
             self.last_move_mr = move * self.rest_mr
         else:
             # Calcul de la distance a parcourir a chaque appel de _time_move_sr
             if rotation:
-                self.dist_per_time_sr = rbt.get_speed_rotation() * self.init_data.get_gcrubs('period') / 1000 * \
+                self.dist_per_time_sr = rbt.get_speed_rotation() * self.refresh_time / 1000 * \
                                         self.init_data.get_window('speed_simulation_btn_values')[
                                             self.parent.speed_simulation_btn_nb]
             else:
-                self.dist_per_time_sr = rbt.get_speed() * self.init_data.get_gcrubs('period') / 1000 * \
+                self.dist_per_time_sr = rbt.get_speed() * self.refresh_time / 1000 * \
                                         self.init_data.get_window('speed_simulation_btn_values')[
                                             self.parent.speed_simulation_btn_nb]
 
@@ -508,39 +560,28 @@ class Run:
             # Calcul du reste a parcourir
             self.rest_sr = int(cmd[sep:end_sep]) - self.nb_time_sr * self.dist_per_time_sr
 
-            self.time_move_sr.start(self.init_data.get_gcrubs('period'))
+            self.time_move_sr.start(self.refresh_time)
             self.move_cmd_sr = move * self.dist_per_time_sr
             self.last_move_sr = move * self.rest_sr
 
-    def go_to_start(self, rbt: element.Robot):
+    @staticmethod
+    def go_to_start(rbt: element.Robot, line: str):
         """
         Place le robot au point de depart
         :param rbt: element.Robot: Robot concerne
+        :param line: str: Ligne du fichier sequentiel contenant la position de depart
         :return: None
         """
-        try:
-            with open(rbt.get_gcrubs_file(), 'r') as file:
-                for line in file:
-                    if self.init_data.get_main_robot('position_text') in line:
-                        coord = [0., 0., 0]  # [x, y, angle]
+        coord = np.zeros(3, float)  # [x, y, angle]
 
-                        coord[0] = float(line[line.find("x = ") + 4:line.find(" mm")])  # Obtention de x
-                        line = line[line.find(" mm") + 4:]
+        coord[0] = float(line[line.find("x = ") + len("x = "):line.find(" mm")])  # Obtention de x
+        line = line[line.find(" mm") + len("x = "):]
 
-                        coord[1] = float(line[line.find("y = ") + 4:line.find(" mm")])  # Obtention de y
-                        line = line[line.find(" mm") + 4:]
+        coord[1] = float(line[line.find("y = ") + len("y = "):line.find(" mm")])  # Obtention de y
+        line = line[line.find(" mm") + len("y = "):]
 
-                        coord[2] = float(line[line.find("angle = ") + 8:line.find(" degres")])  # Obtention de l'angle
+        coord[2] = float(line[line.find("angle = ") + len("angle = "):line.find(" degres")])  # Obtention de l'angle
 
-                        # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
-                        rbt.move_robot(0, 0, -rbt.get_angle())
-                        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1],
-                                       coord[2] - rbt.get_angle())
-                        return
-
-        except FileNotFoundError:
-            QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
-                                  self.init_data.get_window('error_open_file_title'),
-                                  self.init_data.get_window('error_open_file_message').format(
-                                      filename=file)).exec()
-            self.finish()
+        # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
+        rbt.move_robot(0, 0, -rbt.get_angle())
+        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1],  coord[2] - rbt.get_angle())

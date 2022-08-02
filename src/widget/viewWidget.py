@@ -38,25 +38,6 @@ class ViewWidget(gl.GLViewWidget):
         self.dist = 0
         self.angle = 0
         self.sequence_text = ""
-        self.start = 0.
-        self.fps = 0
-        self.frameSwapped.connect(self.measure_fps)
-        self.measuring = False
-
-    def connect_fps(self):
-        self.measuring = True
-
-    def disconnect_fps(self):
-        self.measuring = False
-
-    def measure_fps(self):
-        if self.measuring:
-            self.paintGL()
-            self.fps = int(1 / (time() - self.start))
-            self.start = time()
-
-    def get_fps(self):
-        return self.fps
 
     def mouseMoveEvent(self, ev):
         """
@@ -113,12 +94,14 @@ class ViewWidget(gl.GLViewWidget):
         for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                             self.save_data.get_gcrubs('cmd_key').values()):
             # Si c'est une touche pour la sequence mais pas une touche de mouvement
-            if event.key() == cmd and event.key() != self.save_data.get_gcrubs('keys').get('go_right') and \
+            if event.key() == cmd and \
+                    event.key() != self.save_data.get_gcrubs('keys').get('go_right') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_left') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_down') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('go_up') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_left'):
+
                 elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                 elem.set_key(None)
                 return
@@ -163,7 +146,7 @@ class ViewWidget(gl.GLViewWidget):
             elem.translate(*elem.get_coord(), 0, local=False)
 
         else:
-            elem.rotate(-speed, *np.array(mvt[2]), local=True)
+            elem.rotate(-speed, *mvt[2], local=True)
 
         elem.turn(-speed)
         if elem.is_ready_sequence():  # Si on enregistre une sequence
@@ -202,7 +185,7 @@ class ViewWidget(gl.GLViewWidget):
             elem.translate(*elem.get_coord(), 0, local=False)
 
         else:
-            elem.rotate(speed, *np.array(mvt[2]), local=True)
+            elem.rotate(speed, *mvt[2], local=True)
 
         elem.turn(speed)
         if elem.is_ready_sequence():  # Si on enregistre une sequence
@@ -235,7 +218,7 @@ class ViewWidget(gl.GLViewWidget):
         :param speed: Vitesse de deplacement
         :return: None
         """
-        elem.translate(*np.array(mvt[1]) * speed, local=True)
+        elem.translate(*mvt[1] * speed, local=True)
         elem.move(0, speed)
         if elem.is_ready_sequence():  # Si on enregistre une sequence
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
@@ -269,7 +252,7 @@ class ViewWidget(gl.GLViewWidget):
         :param speed: Vitesse de deplacement
         :return: None
         """
-        elem.translate(*np.array(mvt[1]) * -speed, local=True)
+        elem.translate(*mvt[1] * -speed, local=True)
         elem.move(0, -speed)
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
@@ -303,7 +286,7 @@ class ViewWidget(gl.GLViewWidget):
         :param speed: Vitesse de deplacement
         :return: None
         """
-        elem.translate(*np.array(mvt[0]) * -speed, local=True)
+        elem.translate(*mvt[0] * -speed, local=True)
         elem.move(-speed, 0)
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
@@ -337,7 +320,7 @@ class ViewWidget(gl.GLViewWidget):
         :param speed: Vitesse de deplacement
         :return: None
         """
-        elem.translate(*np.array(mvt[0]) * speed, local=True)
+        elem.translate(*mvt[0] * speed, local=True)
         elem.move(speed, 0)
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),

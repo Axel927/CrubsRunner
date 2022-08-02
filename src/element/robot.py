@@ -18,6 +18,7 @@ class Robot(element.Board):
     """
     Classe qui gere la partie 3D des robots.
     """
+
     def __init__(self, save_data, parent, main_robot: bool):
         """
         Constructeur de Robot.
@@ -336,7 +337,7 @@ class Robot(element.Board):
         self.window.sequence_list_update()
 
     @staticmethod
-    def robot_movement(axis: str, angle: int) -> tuple:
+    def robot_movement(axis: str, angle: int) -> np.array:
         """
         Calcule le deplacement par rapport a l'angle de rotation pour rester dans le plan.
 
@@ -345,33 +346,24 @@ class Robot(element.Board):
 
         :param axis: str: Axe de rotation du robot lors de la mise en place
         :param angle: int: Angle de rotation du robot lors de la mise en place
-        :return: Le tuple des deplacements a effectuer (mvt vertical, mvt horizontal, rotation)
+        :return: np.array: Le tableau des deplacements a effectuer (mvt vertical, mvt horizontal, rotation)
                  Chacun contient un tuple (dx, dy, dz) pour les deplacements ou (rx, ry, rz) pour la rotation
         """
 
         if angle == 0:
-            return ((1, 0, 0),
-                    (0, 1, 0),
-                    (0, 0, 1)
-                    )
+            return np.eye(3)
 
         if axis == 'x':
-            return ((1, 0, 0),
-                    (0, cos(radians(angle)), -sin(radians(angle))),
-                    (0, sin(radians(angle)), cos(radians(angle)))
-                    )
-
+            return np.array(((1, 0, 0),
+                            (0, cos(radians(angle)), -sin(radians(angle))),
+                            (0, sin(radians(angle)), cos(radians(angle)))))
         elif axis == 'y':
-            return ((cos(radians(angle)), 0, sin(radians(angle))),
-                    (0, 1, 0),
-                    (-sin(radians(angle)), 0, cos(radians(angle)))
-                    )
-
+            return np.array(((cos(radians(angle)), 0, sin(radians(angle))),
+                            (0, 1, 0),
+                            (-sin(radians(angle)), 0, cos(radians(angle)))))
         elif axis == 'z':
-            return ((cos(radians(angle)), -sin(radians(angle)), 0),
-                    (sin(radians(angle)), cos(radians(angle)), 0),
-                    (0, 0, 1)
-                    )
-
+            return np.array(((cos(radians(angle)), -sin(radians(angle)), 0),
+                            (sin(radians(angle)), cos(radians(angle)), 0),
+                            (0, 0, 1)))
         else:
             return None

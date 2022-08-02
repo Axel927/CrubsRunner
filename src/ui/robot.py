@@ -96,7 +96,6 @@ class Robot:
 
         self.edge_color_btn.setCursor(self.init_data.get_board('color_cursor'))
         self.edge_color_btn.setDefault(self.init_data.get_board('edge_color_default'))
-        self.color_dialog.setVisible(False)
 
         self.close_btn.setCursor(self.init_data.get_board('close_cursor'))
         self.close_btn.setDefault(self.init_data.get_board('close_default'))
@@ -121,8 +120,8 @@ class Robot:
         self.offset_sb.setValue(self.robot.get_offset())
 
         self.track_visible_cb.setChecked(
-            self.track[0].visible() if len(self.track) != 0 else self.init_data.get_main_robot(
-                'track_visible_cb_checked'))
+            self.track[0].visible() if len(self.track) != 0
+            else self.init_data.get_main_robot('track_visible_cb_checked'))
 
         if self.robot.is_main_robot():
             self.angle_rotation_sb.setValue(self.save_data.get_main_robot('angle_rotation'))
@@ -320,26 +319,27 @@ class Robot:
                                                      self.init_data.get_main_robot('import_gcrubs_title'),
                                                      self.save_data.get_window('directory'),
                                                      self.init_data.get_main_robot('import_gcrubs_extension'))[0]
-        self.robot.set_gcrubs_file(file)
-        self.sequence_text.clear()
-        self.track_visible(False)
-        self.track.clear()
+        if file:
+            self.robot.set_gcrubs_file(file)
+            self.sequence_text.clear()
+            self.track_visible(False)
+            self.track.clear()
 
-        try:
-            with open(file, 'r') as f:
-                for line in f:
-                    self.sequence_text.append(line.replace('\n', '', 1))
-        except FileNotFoundError:
-            QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
-                                  self.init_data.get_window('error_open_file_title'),
-                                  self.init_data.get_window('error_open_file_message').format(
-                                      filename=file)).exec()
-        if self.robot.is_main_robot():
-            self.save_data.set_main_robot('gcrubs_file', file)
-            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
-        else:
-            self.save_data.set_second_robot('gcrubs_file', file)
-            self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+            try:
+                with open(file, 'r') as f:
+                    for line in f:
+                        self.sequence_text.append(line.replace('\n', '', 1))
+            except FileNotFoundError:
+                QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
+                                      self.init_data.get_window('error_open_file_title'),
+                                      self.init_data.get_window('error_open_file_message').format(
+                                          filename=file)).exec()
+            if self.robot.is_main_robot():
+                self.save_data.set_main_robot('gcrubs_file', file)
+                self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
+            else:
+                self.save_data.set_second_robot('gcrubs_file', file)
+                self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
         self.time = time()
 
@@ -382,8 +382,12 @@ class Robot:
         self.robot.set_file("")
         if self.robot.is_main_robot():
             self.save_data.set_main_robot('file', "")
+            self.save_data.set_main_robot('axis_rotation', 'x')
+            self.save_data.set_main_robot('angle_rotation', 0)
         else:
             self.save_data.set_second_robot('file', "")
+            self.save_data.set_second_robot('axis_rotation', 'x')
+            self.save_data.set_second_robot('angle_rotation', 0)
         self.reset()
         self.robot.setVisible(False)
         self.time = time()
@@ -673,8 +677,8 @@ class Robot:
         Slot pour annuler la sequence.
         :return: None
         """
-        self.save_data.set_main_robot('sequence',
-                                      self.sequence_text.document().toPlainText()) if self.robot.is_main_robot() \
+        self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
+            if self.robot.is_main_robot() \
             else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
         self.sequence_text.clear()
@@ -691,8 +695,9 @@ class Robot:
         self.track_visible(False)
         self.track.clear()
         self.robot.set_key(None)
-        self.save_data.set_main_robot('sequence', '') if self.robot.is_main_robot else self.save_data.set_second_robot(
-            'sequence', '')
+        self.save_data.set_main_robot('sequence', '') if self.robot.is_main_robot \
+            else self.save_data.set_second_robot('sequence', '')
+
         self.sequence_list.setVisible(False)
         self.sequence_text.setVisible(False)
         self.sequence_save_btn.setVisible(False)
@@ -711,13 +716,16 @@ class Robot:
         :return: None
         """
         if self.robot.is_main_robot():
-            filename = \
-                QtWidgets.QFileDialog.getSaveFileName(self.parent,
-                                                      self.init_data.get_main_robot('save_sequence_title'),
-                                                      self.save_data.get_window('directory') + '/' +
-                                                      self.init_data.get_window('project_default_name') +
-                                                      self.init_data.get_extension('sequence'),
-                                                      self.save_data.get_gcrubs('extension'))[0]
+            if self.save_data.get_main_robot('gcrubs_file') == '':
+                filename = \
+                    QtWidgets.QFileDialog.getSaveFileName(self.parent,
+                                                          self.init_data.get_main_robot('save_sequence_title'),
+                                                          self.save_data.get_window('directory') + '/' +
+                                                          self.init_data.get_window('project_default_name') +
+                                                          self.init_data.get_extension('sequence'),
+                                                          self.save_data.get_gcrubs('extension'))[0]
+            else:
+                filename = self.save_data.get_main_robot('gcrubs_file')
         else:
             if self.save_data.get_second_robot('gcrubs_file') == '':
                 filename = \
@@ -815,7 +823,7 @@ class Robot:
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         x=round(self.robot.get_coord()[0]),
                         y=round(self.robot.get_coord()[1]),
-                        angle=self.robot.get_angle()))
+                        angle=round(self.robot.get_angle())))
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
 
@@ -828,7 +836,7 @@ class Robot:
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         x=round(self.robot.get_coord()[0]),
                         y=round(self.robot.get_coord()[1]),
-                        angle=self.robot.get_angle()))
+                        angle=round(self.robot.get_angle())))
                 else:
                     self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
 
