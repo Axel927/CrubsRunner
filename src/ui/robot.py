@@ -647,6 +647,8 @@ class Robot:
         self.sequence_list.itemDoubleClicked.connect(self._set_sequence)
         self.sequence_dialog.show()
 
+        self.robot.go_to_origin()  # Place le robot a l'origine
+
         self.sequence_list.setVisible(False)
         self.sequence_text.setVisible(False)
         self.sequence_save_btn.setVisible(False)

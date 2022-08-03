@@ -350,6 +350,15 @@ class Robot(element.Board):
         """
         self.window.sequence_list_update()
 
+    def go_to_origin(self):
+        """
+        Place le robot a l'origine precedemment definie. Si elle n'a pas ete definie,
+        il s'agit de la position d'apparition.
+        :return: None
+        """
+        self.move_robot(0, 0, -self.get_angle())
+        self.move_robot(*self.get_coord() * -1, 0)
+
     @staticmethod
     def robot_movement(axis: str, angle: int) -> np.array:
         """
