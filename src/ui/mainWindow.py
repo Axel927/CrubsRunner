@@ -8,16 +8,15 @@ Fichier qui contient la classe MainWindow.
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
-import numpy as np
 from platform import system
 import warnings
 
-import functions
-import ui
-import element
-import data
-import widget
-import simulation
+from src import functions
+from src import ui
+from src import element
+from src import data
+from src import widget
+from src import simulation
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -669,10 +668,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.write_file(self.save_data.get_window('project_file'))
 
         if self.save_data.get_main_robot('gcrubs_file') != "":
-            self.main_robot.save_sequence()
+            self.main_robot.get_window().save_sequence()
 
         if self.save_data.get_second_robot('gcrubs_file') != "":
-            self.second_robot.save_sequence()
+            self.second_robot.get_window().save_sequence()
 
     def save_as_project(self):
         """
@@ -1007,7 +1006,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour lancer la simulation.
         :return: None
         """
-        if time() - self.time < 0.5:
+        if time() - self.time < 2.:
             return
 
         if self.running.is_ongoing():  # Si la simulation est deja en cours
@@ -1052,6 +1051,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.time = time()
                 if main_robot_cb.isChecked():
                     self.main_robot.set_running(True)
+
                     if not self.main_robot.is_origined():
                         self.main_robot.create_sequence()
                         dialog.close()
@@ -1066,8 +1066,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 dialog.close()
                 self.stop_run_action.setEnabled(True)
                 self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
+                self.time = time()
                 self.running = simulation.Run(self.save_data, self.main_robot, self.second_robot, self)
+                self.time = time()
                 self.running.run()
+                self.time = time()
 
             def cancel():
                 self.time = time()
@@ -1077,6 +1080,7 @@ class MainWindow(QtWidgets.QMainWindow):
             cancel_btn.clicked.connect(cancel)
 
             dialog.show()
+            self.time = time()
 
     def stop_run(self):
         """

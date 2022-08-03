@@ -8,11 +8,8 @@ Fichier contenant la classe ViewWidget.
 
 from PySide6 import QtCore, QtGui
 import pyqtgraph.opengl as gl
-from math import cos, sin, radians
-import numpy as np
-from time import time
 
-import widget
+from src import widget
 
 
 class ViewWidget(gl.GLViewWidget):
@@ -228,7 +225,7 @@ class ViewWidget(gl.GLViewWidget):
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track()
+                        elem.get_window().add_track(elem)
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
@@ -262,7 +259,7 @@ class ViewWidget(gl.GLViewWidget):
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track()
+                        elem.get_window().add_track(elem)
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
@@ -296,7 +293,7 @@ class ViewWidget(gl.GLViewWidget):
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track()
+                        elem.get_window().add_track(elem)
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
@@ -330,7 +327,7 @@ class ViewWidget(gl.GLViewWidget):
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
                         self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track()
+                        elem.get_window().add_track(elem)
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:

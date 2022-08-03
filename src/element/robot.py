@@ -9,9 +9,9 @@ import numpy as np
 from PySide6 import QtCore
 from math import cos, sin, radians
 
-import element
-import functions
-import ui
+from src import element
+from src import functions
+from src import ui
 
 
 class Robot(element.Board):
@@ -97,11 +97,18 @@ class Robot(element.Board):
         """
         return self.coord
 
-    def move(self, dx: int, dy: int):
+    def set_origin(self):
+        """
+        Definit les coordonnees du robot a 0
+        :return: None
+        """
+        self.coord = np.zeros(2)
+
+    def move(self, dx: float, dy: float):
         """
         Calcule les coordonnees du robot dans le repere global par rapport au deplacement.
-        :param dx: int: Deplacement selon x du repere du robot
-        :param dy: int: Deplacement selon y du repere du robot
+        :param dx: float: Deplacement selon x du repere du robot
+        :param dy: float: Deplacement selon y du repere du robot
         :return: None
         """
         self.coord[0] += dx * cos(radians(self.angle)) - dy * sin(radians(self.angle))
@@ -114,10 +121,10 @@ class Robot(element.Board):
         """
         return self.angle
 
-    def turn(self, angle: int):
+    def turn(self, angle: float):
         """
         Tourne le robot d'une variation d'angle angle en degres.
-        :param angle: int: Variation d'angle
+        :param angle: float: Variation d'angle
         :return: None
         """
         self.angle += angle
@@ -214,6 +221,13 @@ class Robot(element.Board):
 
         if self.file == "":
             self.remove(False)
+
+        if self.gcrubs_file != "":
+            self.get_window().import_gcrubs(self.gcrubs_file)
+            self.get_window().draw_track(self.save_data.get_main_robot('sequence') if self.is_main_robot()
+                                         else self.save_data.get_second_robot('sequence'), self.is_main_robot())
+            for i in range(len(self.get_window().track)):
+                self.get_window().track[i].setVisible(True)
 
         if not self.is_updated:  # Si le robot n'a pas deja ete mis a jour
             self.is_updated = True

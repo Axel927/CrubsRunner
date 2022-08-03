@@ -10,7 +10,7 @@ from time import time
 import pyqtgraph.opengl as gl
 from PySide6 import QtWidgets
 
-import functions
+from src import functions
 
 
 class Vinyl(gl.GLImageItem):

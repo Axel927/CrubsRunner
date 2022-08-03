@@ -9,8 +9,8 @@ Fichier contenant la classe Run.
 from PySide6 import QtCore, QtWidgets
 import numpy as np
 
-import ui
-import element
+from src import ui
+from src import element
 
 
 # Note : mr mean main robot and sr mean second robot
@@ -205,6 +205,8 @@ class Run:
         self.stop_robot = 0
         self.nb_robot = 0
         self.ongoing = True
+        mr_theoretical_time = 0.
+        sr_theoretical_time = 0.
 
         if self.main_robot.is_running():  # Si le robot principal fait la simulation
             self.nb_robot += 1
@@ -223,6 +225,7 @@ class Run:
                                           filename=file)).exec()
                 self.finish()
                 return
+            mr_theoretical_time = self.calculate_theoretical_time(self.main_robot, self.main_robot_file, self.save_data)
 
         if self.second_robot.is_running():  # Si le robot secondaire fait la simulation
             self.nb_robot += 1
@@ -241,8 +244,11 @@ class Run:
                                           filename=file)).exec()
                 self.finish()
                 return
+            sr_theoretical_time = self.calculate_theoretical_time(self.second_robot, self.second_robot_file,
+                                                                  self.save_data)
 
         self.running = True
+        self.window.set_theoretical_time(max(mr_theoretical_time, sr_theoretical_time))
         self.set_refresh_time()
         self.start_time_move_mr.start(self.init_data.get_run('time_before_start') /
                                       self.init_data.get_window('speed_simulation_btn_values')[
@@ -433,6 +439,39 @@ class Run:
             self.move(rbt, cmd, 'Tourner a gauche', sep)
             return
 
+        # Pour toutes les autres commandes, on verifie que la touche correspondante n'est pas la meme
+        # qu'une touche definie par un mouvement
+        for key, value in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                              self.save_data.get_gcrubs('cmd_key').values()):
+            if value == self.save_data.get_gcrubs('keys').get('go_up') and \
+                    (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                     key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                sep = name.get(key).find('{')
+                if cmd[:sep] == name.get(key)[:sep]:
+                    self.move(rbt, cmd, key, sep)
+                    return
+            elif value == self.save_data.get_gcrubs('keys').get('go_down') and \
+                    (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                     key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                sep = name.get(key).find('{')
+                if cmd[:sep] == name.get(key)[:sep]:
+                    self.move(rbt, cmd, key, sep)
+                    return
+            elif value == self.save_data.get_gcrubs('keys').get('go_right') and \
+                    (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                     key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                sep = name.get(key).find('{')
+                if cmd[:sep] == name.get(key)[:sep]:
+                    self.move(rbt, cmd, key, sep)
+                    return
+            elif value == self.save_data.get_gcrubs('keys').get('go_left') and \
+                    (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                     key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                sep = name.get(key).find('{')
+                if cmd[:sep] == name.get(key)[:sep]:
+                    self.move(rbt, cmd, key, sep)
+                    return
+
         sep = name.get('Pause').find('{')
         if cmd[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
             end_sep = sep
@@ -448,39 +487,6 @@ class Run:
                 self._sleep_sr(float(cmd[sep:end_sep]))
                 self.timing_sr = True
             return
-
-        # Pour toutes les autres commandes, on verifie que la touche correspondante n'est pas la meme
-        # qu'une touche definie par un mouvement
-        for key, value in zip(self.save_data.get_gcrubs('cmd_key').keys(),
-                              self.save_data.get_gcrubs('cmd_key').values()):
-            if value == self.save_data.get_gcrubs('go_up') and \
-                    (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere' or
-                     key != 'Tourner a gauche' or key != 'Tourner a droite'):
-                sep = name.get(key).find('{')
-                if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(rbt, cmd, key, sep)
-                    return
-            elif value == self.save_data.get_gcrubs('go_down') and \
-                    (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere' or
-                     key != 'Tourner a gauche' or key != 'Tourner a droite'):
-                sep = name.get(key).find('{')
-                if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(rbt, cmd, key, sep)
-                    return
-            elif value == self.save_data.get_gcrubs('go_right') and \
-                    (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere' or
-                     key != 'Tourner a gauche' or key != 'Tourner a droite'):
-                sep = name.get(key).find('{')
-                if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(rbt, cmd, key, sep)
-                    return
-            elif value == self.save_data.get_gcrubs('go_left') and \
-                    (key != 'Se deplacer en avant' or key != 'Se deplacer en arriere' or
-                     key != 'Tourner a gauche' or key != 'Tourner a droite'):
-                sep = name.get(key).find('{')
-                if cmd[:sep] == name.get(key)[:sep]:
-                    self.move(rbt, cmd, key, sep)
-                    return
 
     def move(self, rbt: element.Robot, cmd: str, key: str, sep: int):
         """
@@ -565,12 +571,12 @@ class Run:
             self.last_move_sr = move * self.rest_sr
 
     @staticmethod
-    def go_to_start(rbt: element.Robot, line: str):
+    def go_to_start(rbt: element.Robot, line: str) -> np.array:
         """
         Place le robot au point de depart
         :param rbt: element.Robot: Robot concerne
         :param line: str: Ligne du fichier sequentiel contenant la position de depart
-        :return: None
+        :return: np.array: Coordonnees du point depart [x, y, angle]
         """
         coord = np.zeros(3, float)  # [x, y, angle]
 
@@ -585,3 +591,87 @@ class Run:
         # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
         rbt.move_robot(0, 0, -rbt.get_angle())
         rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1],  coord[2] - rbt.get_angle())
+
+        return coord
+
+    @staticmethod
+    def calculate_theoretical_time(robot: element.Robot, sequence: list, save_data) -> float:
+        """
+        Calcule le temps theorique que doit passer le robot a executer une sequence.
+        Ne gere que les rotations et les deplacements en avant et en arriere.
+        Aucun deplacement ajoute n'est pris en compte.
+        :param robot: element.Robot: Robot auquel correspond la sequence.
+        :param sequence: list: Liste des commandes
+        :param save_data: data.Save: Donnees de sauvegardes
+        :return: float: Temps en secondes
+        """
+        time = 0.
+        name = save_data.get_gcrubs('cmd_name')  # On recupere les commandes
+
+        for line in sequence:
+            sep = name.get('Se deplacer en avant').find('{')
+            if line[:sep] == name.get('Se deplacer en avant')[:sep]:
+                time += Run.time_from_command(robot, line, sep, 'Se deplacer en avant', save_data)
+                continue
+
+            sep = name.get('Se deplacer en arriere').find('{')
+            if line[:sep] == name.get('Se deplacer en arriere')[:sep]:
+                time += Run.time_from_command(robot, line, sep, 'Se deplacer en arriere', save_data)
+                continue
+
+            sep = name.get('Tourner a droite').find('{')
+            if line[:sep] == name.get('Tourner a droite')[:sep]:
+                time += Run.time_from_command(robot, line, sep, 'Tourner a droite', save_data)
+                continue
+
+            sep = name.get('Tourner a gauche').find('{')
+            if line[:sep] == name.get('Tourner a gauche')[:sep]:
+                time += Run.time_from_command(robot, line, sep, 'Tourner a gauche', save_data)
+                continue
+
+            sep = name.get('Pause').find('{')
+            if line[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
+                end_sep = sep
+                for char in line[sep:]:
+                    if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
+                        break
+                    end_sep += 1
+
+                time += float(line[sep:end_sep])
+                continue
+
+        return time
+
+    @staticmethod
+    def time_from_command(robot: element.Robot, cmd: str, sep: int, key: str, save_data) -> float:
+        """
+        Renvoie le temps necessaire au deplacement du robot selon la distance a parcourir.
+        :param robot: element.Robot: Robot dont on veut connaitre le temps de deplacement
+        :param cmd: str: Commande sequentielle
+        :param sep: int: Position du debut de la distance
+        :param key: str: Touche correspondante au deplacement
+        :param save_data: data.Save: Donnees de sauvegarde
+        :return: float: Temps du deplacement en secondes
+        """
+        cmd_key = save_data.get_gcrubs('cmd_key')
+        if cmd_key.get(key) == save_data.get_gcrubs('keys').get('turn_right') or \
+                cmd_key.get(key) == save_data.get_gcrubs('keys').get('turn_left'):
+            rotation = True
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_up') or \
+                cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_down') or \
+                cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_left') or \
+                cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_right'):
+            rotation = False
+        else:
+            return 0.
+
+        end_sep = sep
+        for char in cmd[sep:]:
+            if not char.isdigit():
+                break  # Obtention de la position de la fin de la valeur
+            end_sep += 1
+
+        if rotation:
+            return int(cmd[sep:end_sep]) / robot.get_speed_rotation()
+        else:
+            return int(cmd[sep:end_sep]) / robot.get_speed()

@@ -13,8 +13,8 @@ from PIL import Image
 import fitz
 import trimesh
 
-import element
-import data
+from src import element
+from src import data
 
 
 def make_mesh(elem: gl.GLMeshItem, points: np.array, faces: np.array):
@@ -68,7 +68,7 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
             QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
                                   init_data.get_window('error_format_file_title'),
                                   init_data.get_window('error_format_file_message').format(
-                                      filename=vinyl.get_file())).exec()
+                                      filename=elem.get_file())).exec()
             return False
     except FileNotFoundError:
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
@@ -127,6 +127,7 @@ def load_pdf(file: str) -> np.array:
     :param file: str: Chemin du fichier
     :return: np.array: Tableau 3D
     """
+    # noinspection PyUnresolvedReferences
     pdf = fitz.open(file)
     pix = pdf.get_page_pixmap(0)  # Conversion en pixmap
     if pix.alpha:  # S'il y a un canal alpha

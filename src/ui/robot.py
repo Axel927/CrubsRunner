@@ -8,13 +8,12 @@ Fichier contenant la partie interface de la classe Robot.
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from time import time
-from math import cos, sin, radians
 import pyqtgraph.opengl as gl
 import numpy as np
 
-import functions
-import widget
-import element
+from src import simulation
+from src import widget
+from src import element
 
 
 class Robot:
@@ -307,18 +306,20 @@ class Robot:
 
         self.window.close()
 
-    def import_gcrubs(self):
+    def import_gcrubs(self, file=''):
         """
         Fonction pour importer un fichier sequentiel.
+        :param file: str: Chemin du fichier a ouvrir. Si file vaut '', une fenetre est ouverte pour choisir le fichier.
         :return: None
         """
         if time() - self.time < 0.2:
             return
 
-        file = QtWidgets.QFileDialog.getOpenFileName(self.window,
-                                                     self.init_data.get_main_robot('import_gcrubs_title'),
-                                                     self.save_data.get_window('directory'),
-                                                     self.init_data.get_main_robot('import_gcrubs_extension'))[0]
+        if not file:
+            file = QtWidgets.QFileDialog.getOpenFileName(self.window,
+                                                         self.init_data.get_main_robot('import_gcrubs_title'),
+                                                         self.save_data.get_window('directory'),
+                                                         self.init_data.get_main_robot('import_gcrubs_extension'))[0]
         if file:
             self.robot.set_gcrubs_file(file)
             self.sequence_text.clear()
@@ -340,6 +341,7 @@ class Robot:
             else:
                 self.save_data.set_second_robot('gcrubs_file', file)
                 self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+            self.draw_track(self.sequence_text.document().toPlainText(), self.robot.is_main_robot())
 
         self.time = time()
 
@@ -606,7 +608,7 @@ class Robot:
 
     def create_sequence(self):
         """
-        Fonction pour cree la fenetre pour creer la sequence.
+        Fonction pour creer la fenetre pour creer la sequence.
         :return: None
         """
         self._close()
@@ -663,7 +665,7 @@ class Robot:
 
     def sequence_list_update(self):
         """
-        Met a jour la liste qui contient les commandes
+        Met a jour la liste qui contient les commandes.
         :return: None
         """
         self.sequence_list.clear()
@@ -695,6 +697,12 @@ class Robot:
         self.track_visible(False)
         self.track.clear()
         self.robot.set_key(None)
+        self.sequence_text.clear()
+        if self.robot.is_main_robot():
+            self.save_data.set_main_robot('gcrubs_file', '')
+        else:
+            self.save_data.set_second_robot('gcrubs_file', '')
+
         self.save_data.set_main_robot('sequence', '') if self.robot.is_main_robot \
             else self.save_data.set_second_robot('sequence', '')
 
@@ -715,6 +723,9 @@ class Robot:
         Fonction pour sauvegarder la sequence.
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
+
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('gcrubs_file') == '':
                 filename = \
@@ -724,6 +735,7 @@ class Robot:
                                                           self.init_data.get_window('project_default_name') +
                                                           self.init_data.get_extension('sequence'),
                                                           self.save_data.get_gcrubs('extension'))[0]
+                self.save_data.set_main_robot('gcrubs_file', filename)
             else:
                 filename = self.save_data.get_main_robot('gcrubs_file')
         else:
@@ -735,6 +747,7 @@ class Robot:
                                                           self.init_data.get_window('project_default_name') +
                                                           self.init_data.get_extension('sequence'),
                                                           self.save_data.get_gcrubs('extension'))[0]
+                self.save_data.set_second_robot('gcrubs_file', filename)
             else:
                 filename = self.save_data.get_second_robot('gcrubs_file')
 
@@ -746,12 +759,12 @@ class Robot:
                 file.write(self.sequence_text.document().toPlainText())
                 file.write('\n')
 
-            if self.robot.is_main_robot():
-                self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
-                    if self.robot.is_main_robot() \
-                    else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
+                if self.robot.is_main_robot() \
+                else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
 
             self.robot.set_gcrubs_file(filename)
+        self.time = time()
 
     def _set_sequence(self):
         """
@@ -763,7 +776,7 @@ class Robot:
         self.sequence_text.append(self.save_data.get_gcrubs("cmd_name").get(
             self.sequence_list.get_contents()[self.sequence_list.currentRow()]))
 
-        self.add_track()
+        self.add_track(self.robot)
         self.key = None
         self.time = time()
 
@@ -826,6 +839,13 @@ class Robot:
                         angle=round(self.robot.get_angle())))
                 else:
                     self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
+                    for line in self.save_data.get_main_robot('sequence').split('\n'):
+                        if self.init_data.get_main_robot('position_text') in line:
+                            coord = simulation.Run.go_to_start(self.robot, line)
+                            self.parent.status_bar.showMessage(
+                                self.init_data.get_window('position_status_message').format(
+                                    x=round(coord[0]), y=round(coord[1]), angle=round(coord[2])))
+                            break
 
             else:  # Second_robot
                 if self.save_data.get_second_robot('sequence') == '':
@@ -839,12 +859,19 @@ class Robot:
                         angle=round(self.robot.get_angle())))
                 else:
                     self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
+                    for line in self.save_data.get_second_robot('sequence').split('\n'):
+                        if self.init_data.get_main_robot('position_text') in line:
+                            coord = simulation.Run.go_to_start(self.robot, line)
+                            self.parent.status_bar.showMessage(
+                                self.init_data.get_window('position_status_message').format(
+                                    x=round(coord[0]), y=round(coord[1]), angle=round(coord[2])))
+                            break
 
             self.robot.set_ready_sequence(True)
 
         else:
             self.robot.set_origined(True)
-            self.coord = [0, 0]
+            self.robot.set_origin()
             if self.robot.is_running():
                 self._cancel_sequence()
             else:
@@ -857,9 +884,21 @@ class Robot:
                 self.parent.vinyl.setVisible(True)
                 self.time = time()
 
-    def add_track(self):
+                if self.robot.is_main_robot():
+                    if self.save_data.get_main_robot('sequence') != "":
+                        while time() - self.time < 0.2:
+                            pass
+                        self._set_origin()
+                else:
+                    if self.save_data.get_second_robot('sequence') != "":
+                        while time() - self.time < 0.2:
+                            pass
+                        self._set_origin()
+
+    def add_track(self, robot: element.Robot):
         """
         Ajoute un element de chemin a la position du robot.
+        :param robot: element.Robot: Robot dont on trace le chemin
         :return: None
         """
         color = self.save_data.get_main_robot('color') if self.robot.is_main_robot() \
@@ -872,8 +911,8 @@ class Robot:
                                                colors=np.full((4, 4), color)))  # Couleur du robot
 
         self.parent.viewer.addItem(self.track[-1])
-        self.track[-1].translate(*self.robot.get_coord(), 0)  # Place a la position du robot
-        self.track[-1].rotate(self.robot.get_angle(), 0, 0, 1, True)  # Met dans le sens du robot
+        self.track[-1].translate(*robot.get_coord(), 0)  # Place a la position du robot
+        self.track[-1].rotate(robot.get_angle(), 0, 0, 1, True)  # Met dans le sens du robot
 
         if not self.track_visible_cb.isChecked():
             self.track[-1].setVisible(False)
@@ -925,3 +964,141 @@ class Robot:
         """
         self.track[-1].setVisible(False)
         self.track.pop(-1)
+
+    def draw_track(self, sequence: str, main_robot=True):
+        """
+        Dessine la trace depuis la sequence.
+        :param sequence: str: Contenu du fichier sequentiel
+        :param main_robot: bool: Robot principal ou non
+        :return: None
+        """
+        robot = element.Robot(self.save_data, self.parent, main_robot)
+        robot.setVisible(False)
+        name = self.save_data.get_gcrubs('cmd_name')  # On recupere les commandes
+
+        for line in sequence.split('\n'):
+            if self.init_data.get_main_robot('position_text') in line:
+                simulation.Run.go_to_start(robot, line)
+                continue
+
+            sep = name.get('Se deplacer en avant').find('{')
+            if line[:sep] == name.get('Se deplacer en avant')[:sep]:
+                self.add_track(robot)
+                movement = self.move(robot, line, 'Se deplacer en avant', sep, self.save_data)
+                if movement[0] == 0:
+                    self.update_last_track(movement[1], 0, movement[1])
+                elif movement[1] == 0:
+                    self.update_last_track(movement[0], movement[0], 0)
+                continue
+
+            sep = name.get('Se deplacer en arriere').find('{')
+            if line[:sep] == name.get('Se deplacer en arriere')[:sep]:
+                self.add_track(robot)
+                movement = self.move(robot, line, 'Se deplacer en arriere', sep, self.save_data)
+                if movement[0] == 0:
+                    self.update_last_track(movement[1], 0, movement[1])
+                elif movement[1] == 0:
+                    self.update_last_track(movement[0], movement[0], 0)
+                continue
+
+            sep = name.get('Tourner a droite').find('{')
+            if line[:sep] == name.get('Tourner a droite')[:sep]:
+                self.move(robot, line, 'Tourner a droite', sep, self.save_data)
+                continue
+
+            sep = name.get('Tourner a gauche').find('{')
+            if line[:sep] == name.get('Tourner a gauche')[:sep]:
+                self.move(robot, line, 'Tourner a gauche', sep, self.save_data)
+                continue
+
+            # Pour toutes les autres commandes, on verifie que la touche correspondante n'est pas la meme
+            # qu'une touche definie par un mouvement
+            for key, value in zip(self.save_data.get_gcrubs('cmd_key').keys(),
+                                  self.save_data.get_gcrubs('cmd_key').values()):
+                if value == self.save_data.get_gcrubs('keys').get('go_up') and \
+                        (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                         key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                    sep = name.get(key).find('{')
+                    if line[:sep] == name.get(key)[:sep]:
+                        self.add_track(robot)
+                        movement = self.move(robot, line, key, sep, self.save_data)
+                        if movement[0] == 0:
+                            self.update_last_track(movement[1], 0, movement[1])
+                        elif movement[1] == 0:
+                            self.update_last_track(movement[0], movement[0], 0)
+                        break
+                elif value == self.save_data.get_gcrubs('keys').get('go_down') and \
+                        (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                         key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                    sep = name.get(key).find('{')
+                    if line[:sep] == name.get(key)[:sep]:
+                        self.add_track(robot)
+                        movement = self.move(robot, line, key, sep, self.save_data)
+                        if movement[0] == 0:
+                            self.update_last_track(movement[1], 0, movement[1])
+                        elif movement[1] == 0:
+                            self.update_last_track(movement[0], movement[0], 0)
+                        break
+                elif value == self.save_data.get_gcrubs('keys').get('go_right') and \
+                        (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                         key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                    sep = name.get(key).find('{')
+                    if line[:sep] == name.get(key)[:sep]:
+                        self.add_track(robot)
+                        movement = self.move(robot, line, key, sep, self.save_data)
+                        if movement[0] == 0:
+                            self.update_last_track(movement[1], 0, movement[1])
+                        elif movement[1] == 0:
+                            self.update_last_track(movement[0], movement[0], 0)
+                        break
+                elif value == self.save_data.get_gcrubs('keys').get('go_left') and \
+                        (key != 'Se deplacer en avant' and key != 'Se deplacer en arriere' and
+                         key != 'Tourner a gauche' and key != 'Tourner a droite'):
+                    sep = name.get(key).find('{')
+                    if line[:sep] == name.get(key)[:sep]:
+                        self.add_track(robot)
+                        movement = self.move(robot, line, key, sep, self.save_data)
+                        if movement[0] == 0:
+                            self.update_last_track(movement[1], 0, movement[1])
+                        elif movement[1] == 0:
+                            self.update_last_track(movement[0], movement[0], 0)
+                        break
+
+    @staticmethod
+    def move(robot, cmd, key, sep, save_data) -> np.array:
+        """
+        Deplace le robot d'apres la commande et la touche.
+        :param robot: element.Robot: Robot a deplacer
+        :param cmd: str: Commande sequentielle
+        :param key: str: Touche qui correspond a la commande
+        :param sep: int: Position du debut de la distance a lire:
+        :param save_data: data.Save: Donnees de sauvegarde
+        :return: np.array: Deplacement du robot [dx, dy, rz]
+        """
+        cmd_key = save_data.get_gcrubs('cmd_key')
+
+        if cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_up'):
+            move = np.array([0, 1, 0])
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_down'):
+            move = np.array([0, -1, 0])
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_right'):
+            move = np.array([1, 0, 0])
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('go_left'):
+            move = np.array([-1, 0, 0])
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('turn_right'):
+            move = np.array([0, 0, -1])
+        elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('turn_left'):
+            move = np.array([0, 0, 1])
+        else:
+            return
+
+        end_sep = sep
+        for char in cmd[sep:]:
+            if not char.isdigit():
+                break  # Obtention de la position de la fin de la valeur
+            end_sep += 1
+
+        movement = int(cmd[sep:end_sep])  # Obtention de la distance a parcourir
+        robot.move_robot(*move * movement)
+
+        return move * movement

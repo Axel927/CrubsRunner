@@ -9,7 +9,8 @@ Ces valeurs sont celles qui sont ecrites dans les fichiers de sauvegarde.
 
 from PySide6 import QtCore
 import numpy as np
-import data
+
+from src import data
 
 
 class Save:
@@ -253,12 +254,18 @@ class Save:
         elif to_save == 'main_robot':
             ans = self.init_data.get_window('main_robot_first_line')
             for key, value in zip(self.main_robot.keys(), self.main_robot.values()):
-                ans += str(key) + " = '" + str(value) + "'\n"
+                if key == 'sequence':
+                    continue
+                else:
+                    ans += str(key) + " = '" + str(value) + "'\n"
 
         elif to_save == 'second_robot':
             ans = self.init_data.get_window('second_robot_first_line')
             for key, value in zip(self.second_robot.keys(), self.second_robot.values()):
-                ans += str(key) + " = '" + str(value) + "'\n"
+                if key == 'sequence':
+                    continue
+                else:
+                    ans += str(key) + " = '" + str(value) + "'\n"
 
         elif to_save == 'grid':
             ans = self.init_data.get_window('grid_first_line')
@@ -300,9 +307,9 @@ class Save:
         elif dictionary == 'board':
             return len(self.board)
         elif dictionary == 'main_robot':
-            return len(self.main_robot)
+            return len(self.main_robot) - 1  # -1 car la sequence n'est pas enregistree
         elif dictionary == 'second_robot':
-            return len(self.second_robot)
+            return len(self.second_robot) - 1
         elif dictionary == 'grid':
             return len(self.grid)
         elif dictionary == 'gcrubs':

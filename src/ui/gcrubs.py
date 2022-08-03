@@ -8,7 +8,7 @@ Fichier contenant la classe GCrubs.
 
 from PySide6 import QtWidgets, QtCore
 
-import widget
+from src import widget
 
 
 class GCrubs:

@@ -11,13 +11,13 @@ import os
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
 
-import data
-import ui
-
 if os.getcwd().split('/')[-1] == 'src':
     os.chdir('../')  # Set the directory CrubsRunner as the current working directory
     if os.getcwd() not in sys.path:
         sys.path.append(os.getcwd())
+
+from src import data
+from src import ui
 
 
 def set_app(application: QApplication):

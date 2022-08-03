@@ -498,6 +498,8 @@ class Init:
             'cmd_lbl_main': "Commande robot principal : {cmd}",
             'cmd_lbl_second': "Commande robot secondaire : {cmd}",
             'time_lbl': "Chrono : {time} s",
+            'theoretical_time_lbl': "Temps theorique : {time} s",
+            'theoretical_time_accuracy': 2,  # Nombre de chiffres apres la virgule
             'accuracy_timer': None,  # None pour ne pas voir les chiffres apres la virgule
             'time_before_start': 2000,  # ms
             'timer_refresh': 1000,  # ms

@@ -7,7 +7,8 @@ Fichier contenant la classe Run, partie graphique.
 """
 
 from PySide6 import QtWidgets
-import data
+from src import data
+
 
 # Note : mr mean main robot and sr mean second robot
 
@@ -16,6 +17,7 @@ class Run:
     """
     Classe qui gere la partie graphique de la simulation.
     """
+
     def __init__(self, parent=None):
         """
         Constructeur de Run.
@@ -28,6 +30,7 @@ class Run:
         self.cmd_mr_lbl = QtWidgets.QLabel(self.init_data.get_run('cmd_lbl_main').format(cmd=""))
         self.cmd_sr_lbl = QtWidgets.QLabel(self.init_data.get_run('cmd_lbl_second').format(cmd=""))
         self.time_lbl = QtWidgets.QLabel(self.init_data.get_run('time_lbl').format(time=-2.))
+        self.theoretical_time = QtWidgets.QLabel(self.init_data.get_run('theoretical_time_lbl').format(time=0.))
         self.layout = QtWidgets.QVBoxLayout()
 
         self.init_window()
@@ -41,6 +44,7 @@ class Run:
         self.parent.properties_dock.setWindowTitle(self.init_data.get_run('window_title'))
 
         self.layout.addWidget(self.time_lbl)
+        self.layout.addWidget(self.theoretical_time)
         self.layout.addWidget(self.cmd_mr_lbl)
         self.layout.addWidget(self.cmd_sr_lbl)
 
@@ -49,12 +53,21 @@ class Run:
 
     def set_time(self, set_time: float):
         """
-        Definit la valeur du chrono.
+        Affiche la valeur du chrono.
         :param set_time: float: Valeur a afficher
         :return: None
         """
         self.time_lbl.setText(self.init_data.get_run('time_lbl').format(
             time=round(set_time, self.init_data.get_run('accuracy_timer'))))
+
+    def set_theoretical_time(self, time: float):
+        """
+        Affiche le temps theorique de la simulation.
+        :param time: float: Temps a afficher
+        :return: None
+        """
+        self.theoretical_time.setText(self.init_data.get_run('theoretical_time_lbl').format(
+            time=round(time, self.init_data.get_run('theoretical_time_accuracy'))))
 
     def set_mr_command(self, command: str):
         """

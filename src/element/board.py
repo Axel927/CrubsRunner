@@ -5,11 +5,10 @@
 """
 Fichier contenant la classe Board, partie objet.
 """
-import numpy as np
 
-import functions
-import element
-import ui
+from src import functions
+from src import element
+from src import ui
 
 
 class Board(element.CoordSys):
