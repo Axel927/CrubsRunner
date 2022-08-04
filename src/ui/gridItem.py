@@ -232,6 +232,7 @@ class GridItem(gl.GLGridItem):
         self.parent.x_coord_sys.setVisible(not self.init_data.get_view('color_sys_visible'))
         self.parent.y_coord_sys.setVisible(not self.init_data.get_view('color_sys_visible'))
         self.parent.z_coord_sys.setVisible(not self.init_data.get_view('color_sys_visible'))
+        self.cb_see_grid.setChecked(True)
 
     def _transparency_grid(self):
         """

@@ -100,7 +100,7 @@ class ViewWidget(gl.GLViewWidget):
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_right') and \
                     event.key() != self.save_data.get_gcrubs('keys').get('turn_left'):
 
-                elem.add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
                 elem.set_key(None)
                 return
 

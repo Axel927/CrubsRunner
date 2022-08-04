@@ -370,7 +370,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.second_robot = element.Robot(self.save_data, self, False)
         self.vinyl.setVisible(False)
         self.vinyl = element.Vinyl(self, self.save_data)
-
+        self.list_widget.setVisible(False)
         self.list_widget = widget.ListWidget()
         self.list_widget.add_content(self.grid)
         self.component_dock.setWidget(self.list_widget)
@@ -1147,13 +1147,20 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour gerer les touches qui permettent de deplacer le robot.
         :return: None
         """
+        if time() - self.time < 0.2:
+            return
+
         window = widget.KeyDialog(self.save_data, self)
         window.setModal(self.init_data.get_window('keys_modal'))
         window.setWindowTitle(self.init_data.get_window('keys_title'))
 
         def get_key():
+            """
+            Si l'un des boutons pour selectionne la touche est appuye.
+            :return: None
+            """
             k = 0
-            for k in range(6):
+            for k in range(len(self.save_data.get_gcrubs('keys'))):  # On cherche quel bouton a ete appuye
                 if keys[k][1].is_clicked():
                     break
             window.set_movement(list(self.save_data.get_gcrubs('keys').keys())[k])
@@ -1161,9 +1168,18 @@ class MainWindow(QtWidgets.QMainWindow):
             keys[k][1].set_unclicked()
 
         def close_():
+            """
+            Si bouton close appuye.
+            :return: None
+            """
             window.close()
+            self.time = time()
 
         def apply():
+            """
+            si bouton apply appuye.
+            :return: None
+            """
             key_ = dict()
             for k, val in zip(self.save_data.get_gcrubs('keys').keys(), keys):
                 key_[k] = val[2].get_key()
@@ -1173,13 +1189,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         keys = list()
         layout = QtWidgets.QGridLayout(window)
-        for i, key in zip(range(6), self.save_data.get_gcrubs('keys').values()):
+        for i, key in zip(range(len(self.save_data.get_gcrubs('keys'))), self.save_data.get_gcrubs('keys').values()):
             keys.append(list())
             keys[i].append(QtWidgets.QLabel(self.init_data.get_window('keys_lbl_{num}'.format(num=i))))
             keys[i].append(widget.Button(self, i))
-            keys[i].append(widget.Label(self.init_data.get_window('keys_lbl_key').format(
-                key=window.ret_key(key))))
+            keys[i].append(widget.Label(self.init_data.get_window('keys_lbl_key').format(key=window.ret_key(key))))
             keys[i][2].set_key(key)
+
             for j in range(len(keys[i])):
                 layout.addWidget(keys[i][j], i, j)
 
@@ -1199,6 +1215,8 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(apply_btn, 6, 2)
         window.setLayout(layout)
         window.show()
+
+        self.time = time()
 
     def update_(self):
         """

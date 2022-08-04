@@ -718,9 +718,15 @@ class Robot:
 
         self.sequence_origin_btn.setVisible(True)
         self.sequence_origin_lbl.setVisible(True)
-        self.robot.set_origined(False)
         self.robot.set_ready_sequence(False)
-        self._set_origin()
+
+        self.parent.status_bar.showMessage(
+            self.init_data.get_window('position_status_message').format(x=round(self.robot.get_coord()[0]),
+                                                                        y=round(self.robot.get_coord()[1]),
+                                                                        angle=self.robot.get_angle()))
+        self.sequence_origin_lbl.setText(self.init_data.get_main_robot('sequence_origin_lbl_text_start'))
+        self.parent.board.setVisible(True)
+        self.parent.vinyl.setVisible(True)
 
     def save_sequence(self):
         """
@@ -813,11 +819,11 @@ class Robot:
         Slot pour placer le robot a l'origine et au point de depart.
         :return: None
         """
-        if self.robot.is_origined():  # Si l'origine du robot a deja ete choisie
-            if time() - self.time < 0.2:
-                # Permet d'eviter un bug d'affichage lors de la deuxieme ouverture de sequence_dialog
-                return
+        if time() - self.time < 0.2:
+            # Permet d'eviter un bug d'affichage lors de la deuxieme ouverture de sequence_dialog
+            return
 
+        if self.robot.is_origined():  # Si la position de depart du robot vient d'etre choisie
             self.sequence_origin_btn.setVisible(False)
             self.sequence_origin_lbl.setVisible(False)
 
@@ -874,7 +880,7 @@ class Robot:
 
             self.robot.set_ready_sequence(True)
 
-        else:
+        else:  # Si l'origine du robot vient d'etre choisie
             self.robot.set_origined(True)
             self.robot.set_origin()
             if self.robot.is_running():
