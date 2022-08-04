@@ -52,6 +52,7 @@ class ViewWidget(gl.GLViewWidget):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
                 self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
             else:
+                self.setCursor(self.init_data.get_view('orbit_cursor'))
                 self.orbit(-diff.x(), diff.y())  # Tourne la vue
         elif ev.buttons() == self.init_data.get_view('moving_view_middle_button'):
             if ev.modifiers() & self.init_data.get_view('moving_view_middle_button1'):

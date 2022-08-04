@@ -329,4 +329,8 @@ class Save:
         self.settings.setValue(key, value)
 
     def get_init_data(self) -> data.Init:
+        """
+        Renvoie un pointeur vers les donnees initiales.
+        :return: data.Init: donnees
+        """
         return self.init_data

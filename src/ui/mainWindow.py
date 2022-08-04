@@ -403,6 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.board
             self.board = element.Board(self.save_data, self)
             if '.' + extension in self.init_data.get_extension('3d_file'):
@@ -424,6 +425,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.x_coord_sys.setVisible(True)
                     self.y_coord_sys.setVisible(True)
                     self.z_coord_sys.setVisible(True)
+            self.setCursor(self.init_data.get_window('normal_cursor'))
 
     def new_vinyl(self, message=True, file=""):
         """
@@ -443,12 +445,14 @@ class MainWindow(QtWidgets.QMainWindow):
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_vinyl('vinyl_dialog_open_extensions'))[0]
         if file and '.' + file.split('.')[-1] in self.init_data.get_extension('vinyl'):
+            self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.vinyl
             self.vinyl = element.Vinyl(self, self.save_data)
             self.vinyl.set_file(file)
             if functions.object.show_vinyl(self.vinyl):
                 self.viewer.addItem(self.vinyl)
                 self.list_widget.add_content(self.vinyl)
+            self.setCursor(self.init_data.get_window('normal_cursor'))
 
     def new_main_robot(self, message=True, file=""):
         """
@@ -471,6 +475,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.main_robot
             self.main_robot = element.Robot(self.save_data, self, True)
             self.running.set_main_robot(self.main_robot)
@@ -494,6 +499,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.x_coord_sys.setVisible(True)
                     self.y_coord_sys.setVisible(True)
                     self.z_coord_sys.setVisible(True)
+            self.setCursor(self.init_data.get_window('normal_cursor'))
 
     def new_second_robot(self, message=True, file=""):
         """
@@ -521,6 +527,7 @@ class MainWindow(QtWidgets.QMainWindow):
         extension = file.split('.')[-1]
 
         if file:
+            self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.second_robot
             self.second_robot = element.Robot(self.save_data, self, False)
             self.running.set_second_robot(self.second_robot)
@@ -536,6 +543,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.save_data.set_second_robot('offset', self.second_robot.get_offset())
                     self.second_robot.setColor(self.init_data.get_second_robot('color'))
                     self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
+
             elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
                     extension == self.init_data.get_extension('robot')[1:]:
                 if self.open_project(file):
@@ -543,6 +551,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.x_coord_sys.setVisible(True)
                     self.y_coord_sys.setVisible(True)
                     self.z_coord_sys.setVisible(True)
+            self.setCursor(self.init_data.get_window('normal_cursor'))
 
     def open_project(self, file="") -> bool:
         """
@@ -574,6 +583,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.create_connections()
 
         if file:
+            self.setCursor(self.init_data.get_window('cursor_while_opening'))
             try:
                 with open(file, 'r') as file:
                     for param in file:
@@ -654,6 +664,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.time = time()
                 return False
             self.update_()
+            self.setCursor(self.init_data.get_window('normal_cursor'))
         self.time = time()
         return True
 

@@ -23,6 +23,8 @@ class Init:
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
             'speed_tip': "Vitesse de deplacement du robot",
+            'cursor_while_opening': QtCore.Qt.WaitCursor,
+            'normal_cursor': QtCore.Qt.ArrowCursor,
 
             'new_project_name': "Nouveau",
             'new_project_status_tip': "Creer un nouveau projet",
@@ -373,7 +375,8 @@ class Init:
             'top_view_position_elevation': 90,
             'bottom_view_position_elevation': -90,
 
-            'moving_cursor': QtCore.Qt.DragMoveCursor,
+            'moving_cursor': QtCore.Qt.ClosedHandCursor,
+            'orbit_cursor': QtCore.Qt.DragMoveCursor,
             'rotation_view_key': QtCore.Qt.MouseButton.LeftButton,
             'moving_view1': QtCore.Qt.KeyboardModifier.ControlModifier,  # & ev.modifiers()
             'moving_view_middle_button': QtCore.Qt.MouseButton.MiddleButton,

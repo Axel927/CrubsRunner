@@ -62,8 +62,6 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
     try:
         if '.' + elem.get_file().split('.')[-1] in init_data.get_extension('3d_file'):
             mesh = trimesh.load(elem.get_file(), force='mesh')
-            points = mesh.vertices
-            faces = mesh.faces
         else:
             QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
                                   init_data.get_window('error_format_file_title'),
@@ -77,7 +75,7 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
                                   filename=elem.get_file())).exec()
         return False
 
-    make_mesh(elem, points, faces)
+    make_mesh(elem, mesh.vertices, mesh.faces)
     return True
 
 
@@ -127,7 +125,6 @@ def load_pdf(file: str) -> np.array:
     :param file: str: Chemin du fichier
     :return: np.array: Tableau 3D
     """
-    # noinspection PyUnresolvedReferences
     pdf = fitz.open(file)
     pix = pdf.get_page_pixmap(0)  # Conversion en pixmap
     if pix.alpha:  # S'il y a un canal alpha
