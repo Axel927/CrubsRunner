@@ -141,7 +141,7 @@ class Robot(element.Board):
     def get_key(self) -> QtCore.Qt:
         """
         Renvoie la derniere touche du robot qui l'a fait se deplacer.
-        :return: PySide6.QtCore.Qt: cle
+        :return: PySide6.QtCore.Qt: Touche du clavier
         """
         return self.key
 
@@ -154,7 +154,7 @@ class Robot(element.Board):
 
     def set_moving(self, dx=0., dy=0., rz=0.):
         """
-        Fait bouger le robot selon dx, dy et rz dans le repere local.
+        Change les coordonnees du robot selon dx, dy et rz dans le repere local.
         :param dx: float: Deplacement selon x
         :param dy: float: Deplacement selon y
         :param rz: float: Rotation selon z
@@ -226,8 +226,7 @@ class Robot(element.Board):
             self.get_window().import_gcrubs(self.gcrubs_file)
             self.get_window().draw_track(self.save_data.get_main_robot('sequence') if self.is_main_robot()
                                          else self.save_data.get_second_robot('sequence'), self.is_main_robot())
-            for i in range(len(self.get_window().track)):
-                self.get_window().track[i].setVisible(True)
+            self.get_window().track_visible(True)
 
         if not self.is_updated:  # Si le robot n'a pas deja ete mis a jour
             self.is_updated = True

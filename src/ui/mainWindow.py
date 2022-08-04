@@ -919,14 +919,27 @@ class MainWindow(QtWidgets.QMainWindow):
             for _ in range(len(self.undoing) - self.init_data.get_window('max_len_doing')):
                 self.undoing.pop(0)
             self.undoing.append(self.doing.pop(-1))
-            self.undoing[-1][0].move_robot(self.undoing[-1][1], self.undoing[-1][2], self.undoing[-1][3])
-            self.status_bar.showMessage(
-                self.init_data.get_window('position_status_message').format(x=round(self.undoing[-1][0].get_coord()[0]),
-                                                                            y=round(self.undoing[-1][0].get_coord()[1]),
-                                                                            angle=round(self.undoing[-1][0].get_angle())
-                                                                            ))
-            if self.undoing[-1][3] == 0:  # Si pas de rotation
-                self.undoing[-1][0].get_window().remove_last_track()
+            if len(self.undoing[-1]) == 2:
+                text = ""
+                for line in self.undoing[-1][0].get_window().get_sequence_text().split('\n')[:-1]:
+                    text += line
+                    text += '\n'
+                self.undoing[-1][0].get_window().set_sequence_text(text[:-1])  # On enleve le dernier '\n'
+            else:
+                self.undoing[-1][0].move_robot(self.undoing[-1][1], self.undoing[-1][2], self.undoing[-1][3])
+                text = ""
+                for line in self.undoing[-1][0].get_window().get_sequence_text().split('\n')[:-1]:
+                    text += line
+                    text += '\n'
+                self.undoing[-1][0].get_window().set_sequence_text(text[:-1])
+                self.status_bar.showMessage(
+                    self.init_data.get_window('position_status_message').format(
+                        x=round(self.undoing[-1][0].get_coord()[0]),
+                        y=round(self.undoing[-1][0].get_coord()[1]),
+                        angle=round(self.undoing[-1][0].get_angle())))
+
+                if self.undoing[-1][3] == 0:  # Si pas de rotation
+                    self.undoing[-1][0].get_window().remove_last_track()
 
     def redo(self):
         """
@@ -937,14 +950,20 @@ class MainWindow(QtWidgets.QMainWindow):
             for _ in range(len(self.doing) - self.init_data.get_window('max_len_doing')):
                 self.doing.pop(0)
             self.doing.append(self.undoing.pop(-1))
-            self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
-            self.doing[-1][0].get_window().add_track()
-            self.doing[-1][0].get_window().update_last_track(self.doing[-1][1] + self.doing[-1][2], self.doing[-1][1],
-                                                             self.doing[-1][2])
-            self.status_bar.showMessage(
-                self.init_data.get_window('position_status_message').format(x=round(self.doing[-1][0].get_coord()[0]),
-                                                                            y=round(self.doing[-1][0].get_coord()[1]),
-                                                                            angle=round(self.doing[-1][0].get_angle())))
+            if len(self.doing[-1]) == 2:
+                self.doing[-1][0].get_window().add_sequence_text(self.doing[-1][1])
+            else:
+                self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
+                self.doing[-1][0].get_window().add_track()
+                self.doing[-1][0].get_window().update_last_track(self.doing[-1][1] + self.doing[-1][2],
+                                                                 self.doing[-1][1],
+                                                                 self.doing[-1][2])
+                self.doing[-1][0].get_window().set_sequence_text(self.doing[-1][4])
+                self.status_bar.showMessage(
+                    self.init_data.get_window('position_status_message').format(
+                        x=round(self.doing[-1][0].get_coord()[0]),
+                        y=round(self.doing[-1][0].get_coord()[1]),
+                        angle=round(self.doing[-1][0].get_angle())))
 
     def do(self, action):
         """

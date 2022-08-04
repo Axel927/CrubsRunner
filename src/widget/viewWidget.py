@@ -153,11 +153,10 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
+                        self.parent.do([elem, 0, 0, 0, ""])
 
                     self.angle += speed
                     self.angle %= 360
-                    self.parent.updo([elem, 0, 0, self.angle])
 
                     elem.get_window().set_sequence_text(self.sequence_text)
                     try:
@@ -165,6 +164,8 @@ class ViewWidget(gl.GLViewWidget):
                             angle=self.angle))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+
+                    self.parent.updo([elem, 0, 0, self.angle, elem.get_window().get_sequence_text()])
                     break
 
     def _turn_left(self, event, elem, mvt: tuple, speed: int):
@@ -192,11 +193,10 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
+                        self.parent.do([elem, 0, 0, 0, ""])
 
                     self.angle += speed
                     self.angle %= 360
-                    self.parent.updo([elem, 0, 0, -self.angle])
 
                     elem.get_window().set_sequence_text(self.sequence_text)
                     try:
@@ -204,6 +204,7 @@ class ViewWidget(gl.GLViewWidget):
                             angle=self.angle))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                    self.parent.updo([elem, 0, 0, -self.angle, elem.get_window().get_sequence_text()])
                     break
 
     def _go_up(self, event, elem, mvt: tuple, speed: int):
@@ -224,20 +225,21 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():  # Si la touche actuelle est differente de la precedente
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track(elem)
+                        self.parent.do([elem, 0, 0, 0, ""])
+                        elem.get_window().add_track()
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
                         elem.get_window().update_last_track(speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, 0, -self.dist, 0])
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+
+                    self.parent.updo([elem, 0, -self.dist, 0, elem.get_window().get_sequence_text()])
                     break
 
     def _go_down(self, event, elem, mvt: tuple, speed: int):
@@ -258,20 +260,21 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track(elem)
+                        self.parent.do([elem, 0, 0, 0, ""])
+                        elem.get_window().add_track()
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
                         elem.get_window().update_last_track(-speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, 0, self.dist, 0])
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+
+                    self.parent.updo([elem, 0, self.dist, 0, elem.get_window().get_sequence_text()])
                     break
 
     def _go_left(self, event, elem, mvt: tuple, speed: int):
@@ -292,20 +295,20 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track(elem)
+                        self.parent.do([elem, 0, 0, 0, ""])
+                        elem.get_window().add_track()
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
                         elem.get_window().update_last_track(-speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, self.dist, 0, 0])
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text()])
                     break
 
     def _go_right(self, event, elem, mvt: tuple, speed: int):
@@ -326,20 +329,21 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0])
-                        elem.get_window().add_track(elem)
+                        self.parent.do([elem, 0, 0, 0, ""])
+                        elem.get_window().add_track()
 
                     self.dist += speed
                     if len(elem.get_window().track) != 0:
                         elem.get_window().update_last_track(speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    self.parent.updo([elem, self.dist, 0, 0])
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
+
+                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text()])
                     break
 
     def mouseReleaseEvent(self, ev):
