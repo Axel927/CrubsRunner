@@ -906,9 +906,10 @@ class Robot:
                             pass
                         self._set_origin()
 
-    def add_track(self):
+    def add_track(self, robot: element.Robot):
         """
         Ajoute un element de chemin a la position du robot.
+        :param robot: element.Robot: Robot dont on trace le chemin
         :return: None
         """
         color = self.save_data.get_main_robot('color') if self.robot.is_main_robot() \
@@ -921,8 +922,8 @@ class Robot:
                                                colors=np.full((4, 4), color)))  # Couleur du robot
 
         self.parent.viewer.addItem(self.track[-1])
-        self.track[-1].translate(*self.robot.get_coord(), 0)  # Place a la position du robot
-        self.track[-1].rotate(self.robot.get_angle(), 0, 0, 1, True)  # Met dans le sens du robot
+        self.track[-1].translate(*robot.get_coord(), 0)  # Place a la position du robot
+        self.track[-1].rotate(robot.get_angle(), 0, 0, 1, True)  # Met dans le sens du robot
 
         if not self.track_visible_cb.isChecked():
             self.track[-1].setVisible(False)
@@ -993,7 +994,7 @@ class Robot:
 
             sep = name.get('Se deplacer en avant').find('{')
             if line[:sep] == name.get('Se deplacer en avant')[:sep]:
-                self.add_track()
+                self.add_track(robot)
                 movement = self.move(robot, line, 'Se deplacer en avant', sep, self.save_data)
                 if movement[0] == 0:
                     self.update_last_track(movement[1], 0, movement[1])
@@ -1003,7 +1004,7 @@ class Robot:
 
             sep = name.get('Se deplacer en arriere').find('{')
             if line[:sep] == name.get('Se deplacer en arriere')[:sep]:
-                self.add_track()
+                self.add_track(robot)
                 movement = self.move(robot, line, 'Se deplacer en arriere', sep, self.save_data)
                 if movement[0] == 0:
                     self.update_last_track(movement[1], 0, movement[1])
@@ -1030,7 +1031,7 @@ class Robot:
                          key != 'Tourner a gauche' and key != 'Tourner a droite'):
                     sep = name.get(key).find('{')
                     if line[:sep] == name.get(key)[:sep]:
-                        self.add_track()
+                        self.add_track(robot)
                         movement = self.move(robot, line, key, sep, self.save_data)
                         if movement[0] == 0:
                             self.update_last_track(movement[1], 0, movement[1])
@@ -1042,7 +1043,7 @@ class Robot:
                          key != 'Tourner a gauche' and key != 'Tourner a droite'):
                     sep = name.get(key).find('{')
                     if line[:sep] == name.get(key)[:sep]:
-                        self.add_track()
+                        self.add_track(robot)
                         movement = self.move(robot, line, key, sep, self.save_data)
                         if movement[0] == 0:
                             self.update_last_track(movement[1], 0, movement[1])
@@ -1054,7 +1055,7 @@ class Robot:
                          key != 'Tourner a gauche' and key != 'Tourner a droite'):
                     sep = name.get(key).find('{')
                     if line[:sep] == name.get(key)[:sep]:
-                        self.add_track()
+                        self.add_track(robot)
                         movement = self.move(robot, line, key, sep, self.save_data)
                         if movement[0] == 0:
                             self.update_last_track(movement[1], 0, movement[1])
@@ -1066,7 +1067,7 @@ class Robot:
                          key != 'Tourner a gauche' and key != 'Tourner a droite'):
                     sep = name.get(key).find('{')
                     if line[:sep] == name.get(key)[:sep]:
-                        self.add_track()
+                        self.add_track(robot)
                         movement = self.move(robot, line, key, sep, self.save_data)
                         if movement[0] == 0:
                             self.update_last_track(movement[1], 0, movement[1])
@@ -1100,7 +1101,7 @@ class Robot:
         elif cmd_key.get(key) == save_data.get_gcrubs('keys').get('turn_left'):
             move = np.array([0, 0, 1])
         else:
-            return
+            return np.zeros(shape=3)
 
         end_sep = sep
         for char in cmd[sep:]:
