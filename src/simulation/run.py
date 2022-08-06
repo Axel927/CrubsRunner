@@ -590,7 +590,7 @@ class Run:
 
         # Place le robot dans l'orientation de depart car move_robot deplace en coordonnees locales
         rbt.move_robot(0, 0, -rbt.get_angle())
-        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1],  coord[2] - rbt.get_angle())
+        rbt.move_robot(coord[0] - rbt.get_coord()[0], coord[1] - rbt.get_coord()[1], coord[2] - rbt.get_angle())
 
         return coord
 
@@ -633,7 +633,7 @@ class Run:
             if line[:sep] == name.get('Pause')[:sep]:  # si c'est une pause
                 end_sep = sep
                 for char in line[sep:]:
-                    if not char.isdigit() and char != '.':  # Si ce n'est pas un nombre
+                    if not char.isdigit() and char != '.':  # Si ce n'est pas un chiffre
                         break
                     end_sep += 1
 
