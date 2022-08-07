@@ -240,8 +240,7 @@ class Robot(element.Board):
 
         if self.gcrubs_file != "":
             self.get_window().import_gcrubs(self.gcrubs_file)
-            self.get_window().draw_track(self.save_data.get_main_robot('sequence') if self.is_main_robot()
-                                         else self.save_data.get_second_robot('sequence'), self.is_main_robot())
+            self.get_window().draw_track(self.get_sequence())
             self.get_window().track_visible(True)
 
         if not self.is_updated:  # Si le robot n'a pas deja ete mis a jour
