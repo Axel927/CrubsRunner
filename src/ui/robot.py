@@ -338,10 +338,10 @@ class Robot:
                                           filename=file)).exec()
             if self.robot.is_main_robot():
                 self.save_data.set_main_robot('gcrubs_file', file)
-                self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText())
+                self.robot.set_sequence(self.sequence_text.document().toPlainText())
             else:
                 self.save_data.set_second_robot('gcrubs_file', file)
-                self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+                self.robot.set_sequence(self.sequence_text.document().toPlainText())
             self.draw_track(self.sequence_text.document().toPlainText(), self.robot.is_main_robot())
 
         self.time = time()
@@ -617,10 +617,9 @@ class Robot:
 
         if self.robot.is_main_robot():
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_main_robot('sequence_dialog_title'))
-            self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
         else:
             self.parent.sequence_dock.setWindowTitle(self.init_data.get_second_robot('sequence_dialog_title'))
-            self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
+        self.sequence_text.setText(self.robot.get_sequence())
 
         self.parent.sequence_dock.setWidget(self.sequence_dialog)
         self.sequence_list_update()
@@ -683,9 +682,9 @@ class Robot:
         Slot pour annuler la sequence.
         :return: None
         """
-        self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
+        self.robot.set_sequence(self.sequence_text.document().toPlainText()) \
             if self.robot.is_main_robot() \
-            else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+            else self.robot.set_sequence(self.sequence_text.document().toPlainText())
 
         self.sequence_text.clear()
         self.sequence_dialog.close()
@@ -707,8 +706,8 @@ class Robot:
         else:
             self.save_data.set_second_robot('gcrubs_file', '')
 
-        self.save_data.set_main_robot('sequence', '') if self.robot.is_main_robot \
-            else self.save_data.set_second_robot('sequence', '')
+        self.robot.set_sequence('') if self.robot.is_main_robot \
+            else self.robot.set_sequence('')
 
         self.sequence_list.setVisible(False)
         self.sequence_text.setVisible(False)
@@ -769,9 +768,9 @@ class Robot:
                 file.write(self.sequence_text.document().toPlainText())
                 file.write('\n')
 
-            self.save_data.set_main_robot('sequence', self.sequence_text.document().toPlainText()) \
+            self.robot.set_sequence(self.sequence_text.document().toPlainText()) \
                 if self.robot.is_main_robot() \
-                else self.save_data.set_second_robot('sequence', self.sequence_text.document().toPlainText())
+                else self.robot.set_sequence(self.sequence_text.document().toPlainText())
 
             self.robot.set_gcrubs_file(filename)
         self.time = time()
@@ -839,7 +838,7 @@ class Robot:
                 self.parent.z_coord_sys.setVisible(False)
 
             if self.robot.is_main_robot():
-                if self.save_data.get_main_robot('sequence') == '':
+                if self.robot.get_sequence() == '':
                     self.sequence_text.setText(self.init_data.get_main_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
@@ -849,8 +848,8 @@ class Robot:
                         y=round(self.robot.get_coord()[1]),
                         angle=round(self.robot.get_angle())))
                 else:
-                    self.sequence_text.setText(self.save_data.get_main_robot('sequence'))
-                    for line in self.save_data.get_main_robot('sequence').split('\n'):
+                    self.sequence_text.setText(self.robot.get_sequence())
+                    for line in self.robot.get_sequence().split('\n'):
                         if self.init_data.get_main_robot('position_text') in line:
                             coord = simulation.Run.go_to_start(self.robot, line)
                             self.parent.status_bar.showMessage(
@@ -859,7 +858,7 @@ class Robot:
                             break
 
             else:  # Second_robot
-                if self.save_data.get_second_robot('sequence') == '':
+                if self.robot.get_sequence() == '':
                     self.sequence_text.setText(self.init_data.get_second_robot('sequence_text').format(
                         comment=self.save_data.get_gcrubs('cmd_name').get("Commentaire"),
                         date=QtCore.QDate.currentDate().toString(self.init_data.get_main_robot('date_format'))))
@@ -869,8 +868,8 @@ class Robot:
                         y=round(self.robot.get_coord()[1]),
                         angle=round(self.robot.get_angle())))
                 else:
-                    self.sequence_text.setText(self.save_data.get_second_robot('sequence'))
-                    for line in self.save_data.get_second_robot('sequence').split('\n'):
+                    self.sequence_text.setText(self.robot.get_sequence())
+                    for line in self.robot.get_sequence().split('\n'):
                         if self.init_data.get_main_robot('position_text') in line:
                             coord = simulation.Run.go_to_start(self.robot, line)
                             self.parent.status_bar.showMessage(
@@ -896,12 +895,12 @@ class Robot:
                 self.time = time()
 
                 if self.robot.is_main_robot():
-                    if self.save_data.get_main_robot('sequence') != "":
+                    if self.robot.get_sequence() != "":
                         while time() - self.time < 0.2:
                             pass
                         self._set_origin()
                 else:
-                    if self.save_data.get_second_robot('sequence') != "":
+                    if self.robot.get_sequence() != "":
                         while time() - self.time < 0.2:
                             pass
                         self._set_origin()

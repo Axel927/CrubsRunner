@@ -37,6 +37,7 @@ class Robot(element.Board):
         self.moving = np.zeros(shape=3, dtype='float')
         self.running = False
         self.gcrubs_file = ""
+        self.sequence = ""
         self.ready_sequence = False
         self.file = str()
         self.axis_angle = 0
@@ -52,6 +53,21 @@ class Robot(element.Board):
             self.speed_rotation = self.save_data.get_second_robot('speed_rotation')
             self.name = self.init_data.get_second_robot('name')
         self.window = ui.Robot(self.parent, self.save_data, self)
+
+    def set_sequence(self, sequence: str):
+        """
+        Definit la sequence du robot.
+        :param sequence: str: Sequence
+        :return: None
+        """
+        self.sequence = sequence
+
+    def get_sequence(self) -> str:
+        """
+        Renvoie la sequence du robot.
+        :return: str: Sequence
+        """
+        return self.sequence
 
     def is_selected(self) -> bool:
         """

@@ -59,7 +59,6 @@ class Save:
             'speed': 200,
             'speed_rotation': 45,
             'gcrubs_file': "",
-            'sequence': "",
             'start_position': np.zeros(shape=3, dtype='float')  # x, y, angle
         }
 
@@ -73,7 +72,6 @@ class Save:
             'speed': 200,
             'speed_rotation': 45,
             'gcrubs_file': "",
-            'sequence': "",
             'start_position': np.zeros(shape=3, dtype='float')  # x, y, angle
         }
 
@@ -307,9 +305,9 @@ class Save:
         elif dictionary == 'board':
             return len(self.board)
         elif dictionary == 'main_robot':
-            return len(self.main_robot) - 1  # -1 car la sequence n'est pas enregistree
+            return len(self.main_robot)
         elif dictionary == 'second_robot':
-            return len(self.second_robot) - 1
+            return len(self.second_robot)
         elif dictionary == 'grid':
             return len(self.grid)
         elif dictionary == 'gcrubs':
