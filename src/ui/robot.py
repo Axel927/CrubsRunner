@@ -300,10 +300,14 @@ class Robot:
         if self.robot.is_main_robot():
             self.robot.setColor(self.init_data.get_main_robot('color'))
             self.robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
+            for track in self.track:
+                track.setColor(self.init_data.get_main_robot('color'))
 
         else:
             self.robot.setColor(self.init_data.get_second_robot('color'))
             self.robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
+            for track in self.track:
+                track.setColor(self.init_data.get_second_robot('color'))
 
         self.window.close()
 
