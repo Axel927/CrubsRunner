@@ -1349,7 +1349,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.new_vinyl(False, self.dropped_filename)
 
         elif extension == self.init_data.get_extension('sequence'):  # Si c'est un fichier sequentiel
-            pass
+            if self.main_robot.get_window().is_visible():  # Si la fenetre du robot principal est ouverte
+                self.main_robot.get_window().import_gcrubs(self.dropped_filename)
+            elif self.second_robot.get_window().is_visible():  # Si la fenetre du robot secondaire est ouverte
+                self.second_robot.get_window().import_gcrubs(self.dropped_filename)
 
         self.dropped_filename = ""
 

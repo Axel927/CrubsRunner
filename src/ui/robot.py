@@ -214,6 +214,13 @@ class Robot:
         self.sequence_origin_btn.clicked.connect(self._set_origin)
         self.sequence_new_btn.clicked.connect(self._new_sequence)
 
+    def is_visible(self) -> bool:
+        """
+        Indique si la fenetre est visible.
+        :return: bool: Fenetre visible
+        """
+        return self.window.isVisible()
+
     def _color_robot(self):
         """
         Slot pour choisir la couleur du robot.
@@ -690,7 +697,6 @@ class Robot:
             if self.robot.is_main_robot() \
             else self.robot.set_sequence(self.sequence_text.document().toPlainText())
 
-        self.sequence_text.clear()
         self.sequence_dialog.close()
         self.sequence_list.setVisible(False)
         self.robot.set_ready_sequence(False)
