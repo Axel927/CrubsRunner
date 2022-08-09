@@ -965,7 +965,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.doing[-1][0].get_window().add_sequence_text(self.doing[-1][1])
             else:
                 self.doing[-1][0].move_robot(-self.doing[-1][1], -self.doing[-1][2], -self.doing[-1][3])
-                self.doing[-1][0].get_window().add_track()
+                self.doing[-1][0].get_window().add_track(self.doing[-1][0])
                 self.doing[-1][0].get_window().update_last_track(self.doing[-1][1] + self.doing[-1][2],
                                                                  self.doing[-1][1],
                                                                  self.doing[-1][2])
