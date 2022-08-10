@@ -42,6 +42,18 @@ class ListWidget(QtWidgets.QListWidget):
         """
         return self.contents
 
+    def get_content_row(self, item) -> int:
+        """
+        Renvoie la position de l'item dans la liste.
+        Renvoie 0 si pas dans la liste.
+        :param item: Item de la liste
+        :return: int: Position
+        """
+        for i in range(len(self.contents)):
+            if item == self.contents[i]:
+                return i
+        return 0
+
     def remove_content(self, position: int):
         """
         Supprime l'element a la position entree.
