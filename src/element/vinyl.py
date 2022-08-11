@@ -98,7 +98,9 @@ class Vinyl(gl.GLImageItem):
         """
         if self.file == '':
             self.file = self.save_data.get_vinyl('file')
-            functions.object.show_vinyl(self)
+            if not functions.object.show_mesh(self):
+                self.file = ''
+
         if self.file == "":
             for i in range(self.parent.list_widget.get_len()):
                 # Si c'est l'element dans le list widget

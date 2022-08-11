@@ -45,7 +45,10 @@ class Board(element.CoordSys):
         """
         if self.file == '':
             self.file = self.save_data.get_board('file')
-            functions.object.show_mesh(self)
+            if not functions.object.show_mesh(self):
+                self.file = ''
+                self.remove(False)
+                return
 
         self.setColor(self.save_data.get_board('color'))
         self.set_edge_color(self.save_data.get_board('edge_color'))

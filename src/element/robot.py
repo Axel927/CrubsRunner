@@ -190,7 +190,10 @@ class Robot(element.Board):
                 self.file = self.save_data.get_main_robot('file')
             else:
                 self.file = self.save_data.get_second_robot('file')
-            functions.object.show_mesh(self)
+            if not functions.object.show_mesh(self):
+                self.file = ''
+                self.remove(False)
+                return
 
         if self.main_robot:
             self.setColor(self.save_data.get_main_robot('color'))

@@ -152,8 +152,8 @@ class Init:
             'menu_bar_menu3': "&Run",
 
             'error_open_file_type': QtWidgets.QMessageBox.Critical,
-            'error_open_file_title': "Fichier non trouve",
-            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve.'",
+            'error_open_file_title': "Erreur a l'ouverture ou a la lecture",
+            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve ou n'a pas pu etre lu.'",
 
             'error_format_file_type': QtWidgets.QMessageBox.Critical,
             'error_format_file_title': "Format non supporte",

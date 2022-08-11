@@ -585,11 +585,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if file:
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
             try:
-                with open(file, 'r') as file:
-                    for param in file:
+                with open(file, 'r') as f:
+                    for param in f:
                         if param.find(self.init_data.get_window('window_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('window')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_window(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
                                 except (IndexError, SyntaxError, NameError):
@@ -597,7 +597,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         elif param.find(self.init_data.get_window('grid_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('grid')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_grid(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
                                 except (IndexError, SyntaxError, NameError):
@@ -605,7 +605,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         elif param.find(self.init_data.get_window('board_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('board')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_board(param.split(' = ')[0], eval(param.split(' = ')[1][1:-2]))
                                 except (IndexError, SyntaxError, NameError):
@@ -617,7 +617,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         elif param.find(self.init_data.get_window('main_robot_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('main_robot')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_main_robot(param.split(' = ')[0],
                                                                   eval(param.split(' = ')[1][1:-2]))
@@ -628,7 +628,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         elif param.find(self.init_data.get_window('second_robot_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('second_robot')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_second_robot(param.split(' = ')[0],
                                                                     eval(param.split(' = ')[1][1:-2]))
@@ -639,7 +639,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         elif param.find(self.init_data.get_window('gcrubs_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('gcrubs')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_gcrubs(param.split(' = ')[0],
                                                               eval(param.split(' = ')[1][1:-2].replace("PySide6.", "")))
@@ -648,7 +648,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                               eval(param.split(' = ')[1][:-1].replace("PySide6.", "")))
                         elif param.find(self.init_data.get_window('vinyl_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('vinyl')):
-                                param = file.readline()
+                                param = f.readline()
                                 try:
                                     self.save_data.set_vinyl(param.split(' = ')[0],
                                                              eval(param.split(' = ')[1][1:-2]))
@@ -656,13 +656,30 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.save_data.set_vinyl(param.split(' = ')[0],
                                                              eval(param.split(' = ')[1][:-1]))
                             self.list_widget.add_content(self.vinyl)
-            except FileNotFoundError:
+            except (FileNotFoundError, SyntaxError):
                 QtWidgets.QMessageBox(self.init_data.get_window('error_open_file_type'),
                                       self.init_data.get_window('error_open_file_title'),
                                       self.init_data.get_window('error_open_file_message').format(
                                           filename=file)).exec()
+                # On retire tout
+                self.grid.reset()
+                self.board.remove(False)
+                self.board = element.Board(self.save_data, self)
+                self.main_robot.remove(False)
+                self.main_robot = element.Robot(self.save_data, self, True)
+                self.second_robot.remove(False)
+                self.second_robot = element.Robot(self.save_data, self, False)
+                self.vinyl.setVisible(False)
+                self.vinyl = element.Vinyl(self, self.save_data)
+
+                self.list_widget = widget.ListWidget()
+                self.list_widget.add_content(self.grid)
+                self.component_dock.setWidget(self.list_widget)
+                self.create_connections()
+
                 self.time = time()
                 return False
+
             self.update_()
             self.setCursor(self.init_data.get_window('normal_cursor'))
         self.time = time()

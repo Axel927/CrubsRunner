@@ -10,7 +10,7 @@ from PySide6 import QtWidgets
 import numpy as np
 import pyqtgraph.opengl as gl
 from PIL import Image
-import fitz
+import fitz  # PyMuPDF
 import trimesh
 
 from src import element
@@ -68,7 +68,7 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
                                   init_data.get_window('error_format_file_message').format(
                                       filename=elem.get_file())).exec()
             return False
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         QtWidgets.QMessageBox(init_data.get_window('error_open_file_type'),
                               init_data.get_window('error_open_file_title'),
                               init_data.get_window('error_open_file_message').format(
