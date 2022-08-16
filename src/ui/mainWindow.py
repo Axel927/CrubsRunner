@@ -189,7 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:  # C'est un peu sale mais erreur inconnue en executable
                     continue
 
-            action.setIcon(None)
+            action.setIcon(QtGui.QIcon(""))
 
         self.new_project_action.setShortcuts(self.init_data.get_window('new_project_shortcut'))
         self.new_project_action.setStatusTip(self.init_data.get_window('new_project_status_tip'))
@@ -354,12 +354,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.y_coord_sys.set_element_type("coord_sys")
         self.z_coord_sys.set_element_type("coord_sys")
 
-        functions.object.show_mesh(self.x_coord_sys)
-        self.viewer.addItem(self.x_coord_sys)
-        functions.object.show_mesh(self.y_coord_sys)
-        self.viewer.addItem(self.y_coord_sys)
-        functions.object.show_mesh(self.z_coord_sys)
-        self.viewer.addItem(self.z_coord_sys)
+        if functions.object.show_mesh(self.x_coord_sys):
+        	self.viewer.addItem(self.x_coord_sys)
+        	functions.object.show_mesh(self.y_coord_sys)
+        	self.viewer.addItem(self.y_coord_sys)
+        	functions.object.show_mesh(self.z_coord_sys)
+        	self.viewer.addItem(self.z_coord_sys)
 
         self.y_coord_sys.rotate(90, 0, 0, 1)
         self.z_coord_sys.rotate(-90, 0, 1, 0)
@@ -1075,7 +1075,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:  # C'est un peu sale mais erreur inconnue en executable
                     continue
 
-            action.setIcon("")
+            action.setIcon(QtGui.QIcon(""))
 
         if self.running.is_ongoing():  # Si la simulation est deja en cours
             if self.running.is_running():  # Si la simulation est en pause ou non

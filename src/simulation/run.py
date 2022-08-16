@@ -331,7 +331,7 @@ class Run:
                     f.close()
                     self.parent.run_action.setIcon(QtGui.QIcon(p + '/' +
                                                                self.init_data.get_window("run_action_icon_stopped")))
-                    return
+                    break
                 except:  # C'est un peu sale mais erreur inconnue en executable
                     continue
 

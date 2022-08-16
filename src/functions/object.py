@@ -71,6 +71,9 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
                         break
                     except:  # C'est un peu sale mais erreur inconnue en executable
                         continue
+                        
+                if not mesh:
+                	return False
             else:
                 mesh = trimesh.load(elem.get_file(), force='mesh')
 
