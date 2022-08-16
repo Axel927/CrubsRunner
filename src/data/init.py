@@ -7,7 +7,7 @@ Fichier contenant toutes les valeurs utiles a l'application dans la classe InitD
 Ces valeurs ne changent pas pendant que l'application tourne.
 """
 
-from PySide6 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class Init:
@@ -29,23 +29,23 @@ class Init:
             'new_project_name': "Nouveau",
             'new_project_status_tip': "Creer un nouveau projet",
             'new_project_shortcut': QtGui.QKeySequence.New,  # Ctrl + N
-            'new_project_icon': QtGui.QIcon("icon/icon_new.png"),
+            'new_project_icon': "icon/icon_new.png",
 
             'open_project_name': "Ouvrir",
             'open_project_shortcut': QtGui.QKeySequence.Open,  # Ctrl + O
             'open_project_status_tip': "Ouvrir un projet",
-            'open_project_icon': QtGui.QIcon("icon/icon_open.png"),
+            'open_project_icon': "icon/icon_open.png",
             'open_project_dialog_title': "Ouvrir un projet",
 
             'save_project_name': "Enregistrer",
             'save_project_shortcut': QtGui.QKeySequence.Save,  # Ctrl + S
             'save_project_status_tip': "Enregistrer le projet",
-            'save_project_icon': QtGui.QIcon("icon/icon_save.png"),
+            'save_project_icon': "icon/icon_save.png",
 
             'save_as_project_name': "Enregistrer sous",
             'save_as_project_shortcut': QtGui.QKeySequence.SaveAs,  # Ctrl + Shift + S
             'save_as_project_status_tip': "Enregistrer sous le projet",
-            'save_as_project_icon': QtGui.QIcon("icon/icon_save_as.png"),
+            'save_as_project_icon': "icon/icon_save_as.png",
             'save_as_project_dialog_title': "Enregistrer le projet",
             'project_extension': "CrubsRunner project (*.crp)",
             'project_default_name': "SansNom",
@@ -62,7 +62,7 @@ class Init:
             'import_name': "Importer",
             'import_shortcut': QtGui.QKeySequence.Italic,  # Ctrl + I
             'import_status_tip': "Importer un composant",
-            'import_icon': QtGui.QIcon("icon/icon_import.png"),
+            'import_icon': "icon/icon_import.png",
             'import_dialog_title': "Choisir le composant a importer",
             'import_dialog_modal': True,
             'import_radio_board_name': "Plateau",
@@ -83,39 +83,46 @@ class Init:
             'export_name': "Exporter",
             'export_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_E),
             'export_status_tip': "Exporter un composant",
-            'export_icon': QtGui.QIcon("icon/icon_export.png"),
+            'export_icon': "icon/icon_export.png",
             "export_dialog_title": "Exporter un composant",  # Other parameters : same as import
             'export_component_dialog_min_size': (280, 150),
 
             'top_view_action_name': "Vue de dessus",
             'top_view_action_shortcut': QtGui.QKeySequence.AddTab,  # Ctrl + T
             'top_view_action_status_tip': "Vue de dessus",
-            'top_view_action_icon': QtGui.QIcon("icon/icon_top_view.png"),
+            'top_view_action_icon': "icon/icon_top_view.png",
 
             'start_view_action_name': "Vue de depart",
             'start_view_action_shortcut': QtGui.QKeySequence.Underline,  # Ctrl + U
             'start_view_action_status_tip': "Vue de depart",
-            'start_view_action_icon': QtGui.QIcon("icon/icon_start_view.png"),
+            'start_view_action_icon': "icon/icon_start_view.png",
 
             'bottom_view_action_name': "Vue de dessous",
             'bottom_view_action_shortcut': QtGui.QKeySequence.Bold,  # Ctrl + B
             'bottom_view_action_status_tip': "Vue de dessous",
-            'bottom_view_action_icon': QtGui.QIcon("icon/icon_bottom_view.png"),
+            'bottom_view_action_icon': "icon/icon_bottom_view.png",
 
             'undo_name': "Annuler le deplacement",
             'undo_shortcut': QtGui.QKeySequence.Undo,  # Ctrl + Z
             'undo_status_tip': "Annuler le deplacement",
-            'undo_icon': QtGui.QIcon("icon/icon_undo.png"),
+            'undo_icon': "icon/icon_undo.png",
             'max_len_doing': 50,
 
             'redo_name': "Remettre le deplacement",
             'redo_shortcut': QtGui.QKeySequence.Redo,  # Ctrl + Shift + Z ou Ctrl + Y
             'redo_status_tip': "Remettre le deplacement",
-            'redo_icon': QtGui.QIcon("icon/icon_redo.png"),
+            'redo_icon': "icon/icon_redo.png",
 
             'key_action_name': "Choisir les touches",
             'key_action_status_tip': "Choisir les touches",
-            'key_action_icon': QtGui.QIcon("icon/icon_key.png"),
+            'key_action_icon': "icon/icon_key.png",
+
+            'edit_action_icon': "icon/icon_edit_gcrubs.png",
+            'del_btn_icon': "icon/icon_del.png",
+            'key_btn_icon': 'icon/icon_key.png',
+            'run_action_icon_stopped': "icon/icon_run_stopped.png",
+            'run_action_icon_running': "icon/icon_run_running.png",
+            'stop_run_action_icon': "icon/icon_stop_run.png",
 
             'speed_simulation_btn_name': "x {multi}",
             'speed_simulation_btn_tip': "Vitesse de la simulation", 
@@ -439,7 +446,7 @@ class Init:
             'extension': "Sequence CrubsRunner (*.gcrubs)",
             'edit_action_name': "Editer les commandes gcrubs",
             'edit_action_status_tip': "Editer les commandes gcrubs",
-            'edit_action_icon': QtGui.QIcon("icon/icon_edit_gcrubs.png"),
+
             'edit_window_title': "Editer les commandes gcrubs",
             'description_lbl_text': "Remplir a gauche la description de ce que fait l'action et a droite "
                                     "la sequence correspondante.\n"
@@ -459,8 +466,7 @@ class Init:
             'key_btn_tip': "Choisir la touche associee",
             'del_btn_tip': "Supprimer la commande",
             'btn_cursor': QtCore.Qt.PointingHandCursor,
-            'del_btn_icon': QtGui.QIcon("icon/icon_del.png"),
-            'key_btn_icon': QtGui.QIcon('icon/icon_key.png'),
+
             'sa_height': 430,
             'sa_width': 730,
             'window_modal': True,
@@ -478,13 +484,10 @@ class Init:
             'run_action_name': "Lancer une simulation",
             'run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R),
             'run_action_tip': "Lancer une simulation",
-            'run_action_icon_stopped': QtGui.QIcon("icon/icon_run_stopped.png"),
-            'run_action_icon_running': QtGui.QIcon("icon/icon_run_running.png"),
 
             'stop_run_action_name': "Arreter la simulation",
             'stop_run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R | QtCore.Qt.SHIFT),
             'stop_run_action_tip': "Arreter la simulation",
-            'stop_run_action_icon': QtGui.QIcon("icon/icon_stop_run.png"),
 
             'dialog_title': "Choix du robot a simuler",
             'dialog_modal': True,

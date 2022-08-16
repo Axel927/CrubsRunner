@@ -6,7 +6,7 @@
 Fichier de la classe Robot.
 """
 import numpy as np
-from PySide6 import QtCore
+from PyQt5 import QtCore
 from math import cos, sin, radians
 
 from src import element
@@ -149,7 +149,7 @@ class Robot(element.Board):
     def set_key(self, key: QtCore.Qt):
         """
         Definit la touche du robot qui l'a fait se deplacer.
-        :param key: PySide6.QtCore.Qt: cle
+        :param key: PyQt5.QtCore.Qt: cle
         :return: None
         """
         self.key = key
@@ -157,7 +157,7 @@ class Robot(element.Board):
     def get_key(self) -> QtCore.Qt:
         """
         Renvoie la derniere touche du robot qui l'a fait se deplacer.
-        :return: PySide6.QtCore.Qt: Touche du clavier
+        :return: PyQt5.QtCore.Qt: Touche du clavier
         """
         return self.key
 

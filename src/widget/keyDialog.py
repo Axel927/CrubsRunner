@@ -6,7 +6,7 @@
 Fichier contenant la classe KeyDialog.
 """
 
-from PySide6 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 
 class KeyDialog(QtWidgets.QDialog):

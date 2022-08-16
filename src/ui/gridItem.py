@@ -7,7 +7,7 @@ Fichier qui contient la classe GridItem.
 """
 
 import pyqtgraph.opengl as gl
-from PySide6 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from time import time
 
 

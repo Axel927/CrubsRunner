@@ -8,13 +8,18 @@ Fichier de lancement de l'application CrubsRunner.
 
 import sys
 import os
-from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QIcon
+from pathlib import Path
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
 
-if os.getcwd().split('/')[-1] == 'src':
-    os.chdir('../')  # Set the directory CrubsRunner as the current working directory
-    if os.getcwd() not in sys.path:
-        sys.path.append(os.getcwd())
+path = Path(__file__).parent.resolve()
+os.chdir(path)
+if os.getcwd() not in sys.path:  # /~/CrubsRunner/src
+    sys.path.append(os.getcwd())
+
+os.chdir('../')
+if os.getcwd() not in sys.path:  # /~/CrubsRunner
+    sys.path.append(os.getcwd())
 
 from src import data
 from src import ui
@@ -40,7 +45,7 @@ def main():
     Fonction principale qui lance l'application.
     :return: None
     """
-    app = QApplication()
+    app = QApplication(sys.argv)
     init_data = data.Init()
     set_app(app)
 

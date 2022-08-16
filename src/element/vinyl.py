@@ -8,7 +8,7 @@ Fichier contenant la classe ImageItem.
 import numpy as np
 from time import time
 import pyqtgraph.opengl as gl
-from PySide6 import QtWidgets
+from PyQt5 import QtWidgets
 
 from src import functions
 

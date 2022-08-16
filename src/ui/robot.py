@@ -6,7 +6,7 @@
 Fichier contenant la partie interface de la classe Robot.
 """
 
-from PySide6 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 from time import time
 import pyqtgraph.opengl as gl
 import numpy as np

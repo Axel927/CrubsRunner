@@ -7,7 +7,7 @@ Fichier contenant toutes les valeurs utiles pendant le programme et qui peuvent 
 Ces valeurs sont celles qui sont ecrites dans les fichiers de sauvegarde.
 """
 
-from PySide6 import QtCore
+from PyQt5 import QtCore
 import numpy as np
 
 from src import data
@@ -19,7 +19,7 @@ class Save:
         self.settings = QtCore.QSettings('Crubs', 'CrubsRunner')
 
         self.window = {  # Donnees du projet
-            'directory': self.settings.value('directory', ''),
+            'directory': self.settings.value('directory', '/'),
             'project_file': ""
         }
 

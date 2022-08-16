@@ -19,16 +19,16 @@ L'utilisation principale prevue est la coupe de **France de robotique**.
 **OS** : Linux, MacOS, Windows
 
 **Python 3** :  
-* PySide6 --> pip3 install PySide6
-* Numpy --> pip3 install numpy
-* Trimesh --> pip3 install trimesh
-* PyQtGraph --> pip3 install pyqtgraph
-* OpenGL --> pip3 install PyOpengl
-* PyMu --> pip3 install PyMuPDF
+* PyQt --> `pip3 install PyQt5`
+* Numpy --> `pip3 install numpy`
+* Trimesh --> `pip3 install trimesh`
+* PyQtGraph --> `pip3 install pyqtgraph`
+* OpenGL --> `pip3 install PyOpengl`
+* PyMu --> `pip3 install PyMuPDF`
 
 ## Installation
 
-A COMPLETER
+ A COMPLETER
 
 ## Exemple d'utilisation
 

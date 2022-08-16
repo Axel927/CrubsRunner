@@ -6,7 +6,7 @@
 Fichier contenant la classe Label.
 """
 
-from PySide6 import QtWidgets
+from PyQt5 import QtWidgets
 
 
 class Label(QtWidgets.QLabel):

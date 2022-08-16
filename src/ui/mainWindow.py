@@ -6,10 +6,10 @@
 Fichier qui contient la classe MainWindow.
 """
 
-from PySide6 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 from time import time
 from platform import system
-import warnings
+from sys import path
 
 from src import functions
 from src import ui
@@ -65,22 +65,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.running = simulation.Run(self.save_data, self.main_robot, self.second_robot, self)
 
-        self.new_project_action = QtGui.QAction(self.init_data.get_window('new_project_name'), self)
-        self.open_project_action = QtGui.QAction(self.init_data.get_window('open_project_name'), self)
-        self.save_action = QtGui.QAction(self.init_data.get_window('save_project_name'), self)
-        self.save_as_action = QtGui.QAction(self.init_data.get_window('save_as_project_name'), self)
-        self.import_action = QtGui.QAction(self.init_data.get_window('import_name'), self)
-        self.export_action = QtGui.QAction(self.init_data.get_window('export_name'), self)
-        self.edit_gcrubs_action = QtGui.QAction(self.init_data.get_gcrubs('edit_action_name'))
-        self.undo_action = QtGui.QAction(self.init_data.get_window('undo_name'), self)
-        self.redo_action = QtGui.QAction(self.init_data.get_window('redo_name'), self)
-        self.run_action = QtGui.QAction(self.init_data.get_run('run_action_name'), self)
-        self.stop_run_action = QtGui.QAction(self.init_data.get_run('stop_run_action_name'), self)
-        self.key_action = QtGui.QAction(self.init_data.get_window('key_action_name'), self)
+        self.new_project_action = QtWidgets.QAction(self.init_data.get_window('new_project_name'), self)
+        self.open_project_action = QtWidgets.QAction(self.init_data.get_window('open_project_name'), self)
+        self.save_action = QtWidgets.QAction(self.init_data.get_window('save_project_name'), self)
+        self.save_as_action = QtWidgets.QAction(self.init_data.get_window('save_as_project_name'), self)
+        self.import_action = QtWidgets.QAction(self.init_data.get_window('import_name'), self)
+        self.export_action = QtWidgets.QAction(self.init_data.get_window('export_name'), self)
+        self.edit_gcrubs_action = QtWidgets.QAction(self.init_data.get_gcrubs('edit_action_name'))
+        self.undo_action = QtWidgets.QAction(self.init_data.get_window('undo_name'), self)
+        self.redo_action = QtWidgets.QAction(self.init_data.get_window('redo_name'), self)
+        self.run_action = QtWidgets.QAction(self.init_data.get_run('run_action_name'), self)
+        self.stop_run_action = QtWidgets.QAction(self.init_data.get_run('stop_run_action_name'), self)
+        self.key_action = QtWidgets.QAction(self.init_data.get_window('key_action_name'), self)
 
-        self.top_view_action = QtGui.QAction(self.init_data.get_window('top_view_action_name'), self)
-        self.start_view_action = QtGui.QAction(self.init_data.get_window('start_view_action_name'), self)
-        self.bottom_view_action = QtGui.QAction(self.init_data.get_window('bottom_view_action_name'), self)
+        self.top_view_action = QtWidgets.QAction(self.init_data.get_window('top_view_action_name'), self)
+        self.start_view_action = QtWidgets.QAction(self.init_data.get_window('start_view_action_name'), self)
+        self.bottom_view_action = QtWidgets.QAction(self.init_data.get_window('bottom_view_action_name'), self)
 
         self.speed_sb = QtWidgets.QSpinBox(self)
         self.speed_simulation_btn_nb = 2
@@ -174,70 +174,81 @@ class MainWindow(QtWidgets.QMainWindow):
         Cree les actions.
         :return: None
         """
+
+        def set_icon(action, icon_name):
+            """
+            Selectionne le bon chemin pour les icones.
+            """
+            for p in path:
+                # noinspection PyBroadException
+                try:
+                    f = open(p + '/' + self.init_data.get_window(icon_name), 'r')
+                    f.close()
+                    action.setIcon(QtGui.QIcon(p + '/' + self.init_data.get_window(icon_name)))
+                    return
+                except:  # C'est un peu sale mais erreur inconnue en executable
+                    continue
+
+            action.setIcon(None)
+
         self.new_project_action.setShortcuts(self.init_data.get_window('new_project_shortcut'))
         self.new_project_action.setStatusTip(self.init_data.get_window('new_project_status_tip'))
-        self.new_project_action.setIcon(self.init_data.get_window('new_project_icon'))
+        set_icon(self.new_project_action, 'new_project_icon')
 
         self.open_project_action.setShortcuts(self.init_data.get_window('open_project_shortcut'))
         self.open_project_action.setStatusTip(self.init_data.get_window('open_project_status_tip'))
-        self.open_project_action.setIcon(self.init_data.get_window('open_project_icon'))
+        set_icon(self.open_project_action, 'open_project_icon')
 
         self.save_action.setShortcuts(self.init_data.get_window('save_project_shortcut'))
         self.save_action.setStatusTip(self.init_data.get_window('save_project_status_tip'))
-        self.save_action.setIcon(self.init_data.get_window('save_project_icon'))
+        set_icon(self.save_action, 'save_project_icon')
 
         self.save_as_action.setShortcuts(self.init_data.get_window('save_as_project_shortcut'))
         self.save_as_action.setStatusTip(self.init_data.get_window('save_as_project_status_tip'))
-        self.save_as_action.setIcon(self.init_data.get_window('save_as_project_icon'))
+        set_icon(self.save_as_action, 'save_as_project_icon')
 
         self.import_action.setShortcuts(self.init_data.get_window('import_shortcut'))
         self.import_action.setStatusTip(self.init_data.get_window('import_status_tip'))
-        self.import_action.setIcon(self.init_data.get_window('import_icon'))
+        set_icon(self.import_action, 'import_icon')
 
-        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
-            warnings.simplefilter('ignore')
-            self.export_action.setShortcuts(self.init_data.get_window('export_shortcut'))
+        self.export_action.setShortcuts(self.init_data.get_window('export_shortcut'))
         self.export_action.setStatusTip(self.init_data.get_window('export_status_tip'))
-        self.export_action.setIcon(self.init_data.get_window('export_icon'))
+        set_icon(self.export_action, 'export_icon')
 
         self.undo_action.setShortcuts(self.init_data.get_window('undo_shortcut'))
         self.undo_action.setStatusTip(self.init_data.get_window('undo_status_tip'))
-        self.undo_action.setIcon(self.init_data.get_window('undo_icon'))
+        set_icon(self.undo_action, 'undo_icon')
 
         self.redo_action.setShortcuts(self.init_data.get_window('redo_shortcut'))
         self.redo_action.setStatusTip(self.init_data.get_window('redo_status_tip'))
-        self.redo_action.setIcon(self.init_data.get_window('redo_icon'))
+        set_icon(self.redo_action, 'redo_icon')
 
         self.top_view_action.setShortcuts(self.init_data.get_window('top_view_action_shortcut'))
         self.top_view_action.setStatusTip(self.init_data.get_window('top_view_action_status_tip'))
-        self.top_view_action.setIcon(self.init_data.get_window('top_view_action_icon'))
+        set_icon(self.top_view_action, 'top_view_action_icon')
 
         self.bottom_view_action.setShortcuts(self.init_data.get_window('bottom_view_action_shortcut'))
         self.bottom_view_action.setStatusTip(self.init_data.get_window('bottom_view_action_status_tip'))
-        self.bottom_view_action.setIcon(self.init_data.get_window('bottom_view_action_icon'))
+        set_icon(self.bottom_view_action, 'bottom_view_action_icon')
 
         self.start_view_action.setShortcuts(self.init_data.get_window('start_view_action_shortcut'))
         self.start_view_action.setStatusTip(self.init_data.get_window('start_view_action_status_tip'))
-        self.start_view_action.setIcon(self.init_data.get_window('start_view_action_icon'))
+        set_icon(self.start_view_action, 'start_view_action_icon')
 
         self.edit_gcrubs_action.setStatusTip(self.init_data.get_gcrubs('edit_action_status_tip'))
-        self.edit_gcrubs_action.setIcon(self.init_data.get_gcrubs('edit_action_icon'))
+        set_icon(self.edit_gcrubs_action, 'edit_action_icon')
 
-        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
-            warnings.simplefilter('ignore')
-            self.run_action.setShortcuts(self.init_data.get_run('run_action_shortcut'))
+        self.run_action.setShortcuts(self.init_data.get_run('run_action_shortcut'))
         self.run_action.setStatusTip(self.init_data.get_run('run_action_tip'))
-        self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
+        set_icon(self.run_action, 'run_action_icon_stopped')
 
-        with warnings.catch_warnings():  # Ignore le RuntimeWarning du a la sequence
-            warnings.simplefilter('ignore')
-            self.stop_run_action.setShortcuts(self.init_data.get_run('stop_run_action_shortcut'))
+        self.stop_run_action.setShortcuts(self.init_data.get_run('stop_run_action_shortcut'))
         self.stop_run_action.setStatusTip(self.init_data.get_run('stop_run_action_tip'))
-        self.stop_run_action.setIcon(self.init_data.get_run('stop_run_action_icon'))
+        set_icon(self.stop_run_action, 'stop_run_action_icon')
         self.stop_run_action.setEnabled(False)
 
         self.key_action.setStatusTip(self.init_data.get_window('key_action_status_tip'))
-        self.key_action.setIcon(self.init_data.get_window('key_action_icon'))
+        set_icon(self.key_action, 'key_action_icon')
 
     def create_menubar(self):
         """
@@ -286,24 +297,24 @@ class MainWindow(QtWidgets.QMainWindow):
         Cree les connexions.
         :return: None
         """
-        self.new_project_action.connect(QtCore.SIGNAL('triggered()'), self.new_project)
-        self.open_project_action.connect(QtCore.SIGNAL('triggered()'), self.open_project)
-        self.save_action.connect(QtCore.SIGNAL('triggered()'), self.save_project)
-        self.save_as_action.connect(QtCore.SIGNAL('triggered()'), self.save_as_project)
-        self.import_action.connect(QtCore.SIGNAL('triggered()'), self.import_component)
-        self.export_action.connect(QtCore.SIGNAL('triggered()'), self.export_component)
-        self.undo_action.connect(QtCore.SIGNAL('triggered()'), self.undo)
-        self.redo_action.connect(QtCore.SIGNAL('triggered()'), self.redo)
+        self.new_project_action.triggered.connect(self.new_project)
+        self.open_project_action.triggered.connect(self.open_project)
+        self.save_action.triggered.connect(self.save_project)
+        self.save_as_action.triggered.connect(self.save_as_project)
+        self.import_action.triggered.connect(self.import_component)
+        self.export_action.triggered.connect(self.export_component)
+        self.undo_action.triggered.connect(self.undo)
+        self.redo_action.triggered.connect(self.redo)
         self.list_widget.itemDoubleClicked.connect(self.element_properties)
         self.list_widget.currentRowChanged.connect(self.select_element)
-        self.start_view_action.connect(QtCore.SIGNAL('triggered()'), self.start_view)
-        self.top_view_action.connect(QtCore.SIGNAL('triggered()'), self.top_view)
-        self.bottom_view_action.connect(QtCore.SIGNAL('triggered()'), self.bottom_view)
-        self.edit_gcrubs_action.connect(QtCore.SIGNAL('triggered()'), self.edit_gcrubs)
+        self.start_view_action.triggered.connect(self.start_view)
+        self.top_view_action.triggered.connect(self.top_view)
+        self.bottom_view_action.triggered.connect(self.bottom_view)
+        self.edit_gcrubs_action.triggered.connect(self.edit_gcrubs)
         self.speed_sb.valueChanged.connect(self.speed)
-        self.run_action.connect(QtCore.SIGNAL('triggered()'), self.run)
-        self.stop_run_action.connect(QtCore.SIGNAL('triggered()'), self.stop_run)
-        self.key_action.connect(QtCore.SIGNAL('triggered()'), self.keys)
+        self.run_action.triggered.connect(self.run)
+        self.stop_run_action.triggered.connect(self.stop_run)
+        self.key_action.triggered.connect(self.keys)
         self.speed_simulation_btn.clicked.connect(self.speed_simulation)
 
     def speed_simulation(self):
@@ -395,14 +406,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                   self.init_data.get_board('new_message_box_title'),
                                   self.init_data.get_board('new_message_box_message')).exec()
 
-        if file == "":
+        if not file:
             file = QtWidgets.QFileDialog.getOpenFileName(self,
                                                          self.init_data.get_board('new_message_box_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_board('file_dialog_open_extensions'))[0]
-        extension = file.split('.')[-1]
-
         if file:
+            extension = file.split('.')[-1]
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.board
             self.board = element.Board(self.save_data, self)
@@ -439,7 +449,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                   self.init_data.get_vinyl('vinyl_message_box_title'),
                                   self.init_data.get_vinyl('vinyl_message_box_message')).exec()
 
-        if file == "":
+        if not file:
             file = QtWidgets.QFileDialog.getOpenFileName(self,
                                                          self.init_data.get_vinyl('vinyl_dialog_open_title'),
                                                          self.save_data.get_window('directory'),
@@ -466,15 +476,14 @@ class MainWindow(QtWidgets.QMainWindow):
                                   self.init_data.get_main_robot('new_message_box_title'),
                                   self.init_data.get_main_robot('new_message_box_message')).exec()
 
-        if file == "":
+        if not file:
             file = QtWidgets.QFileDialog.getOpenFileName(self,
                                                          self.init_data.get_main_robot('new_message_box_title'),
                                                          self.save_data.get_window('directory'),
-                                                         self.init_data.get_main_robot('file_dialog_open_extensions'))[
-                0]
-        extension = file.split('.')[-1]
-
+                                                         self.init_data.get_main_robot(
+                                                             'file_dialog_open_extensions'))[0]
         if file:
+            extension = file.split('.')[-1]
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.main_robot
             self.main_robot = element.Robot(self.save_data, self, True)
@@ -517,16 +526,15 @@ class MainWindow(QtWidgets.QMainWindow):
             if ans == QtWidgets.QMessageBox.No:
                 return
 
-        if file == "":
+        if not file:
             file = QtWidgets.QFileDialog.getOpenFileName(self,
                                                          self.init_data.get_second_robot(
                                                              'new_message_box_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_main_robot(
                                                              'file_dialog_open_extensions'))[0]
-        extension = file.split('.')[-1]
-
         if file:
+            extension = file.split('.')[-1]
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.second_robot
             self.second_robot = element.Robot(self.save_data, self, False)
@@ -562,7 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if time() - self.time < 0.2:
             return
 
-        if file == "":
+        if not file:
             file = QtWidgets.QFileDialog.getOpenFileName(self, self.init_data.get_window('open_project_dialog_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_window('project_extension'))[0]
@@ -642,10 +650,10 @@ class MainWindow(QtWidgets.QMainWindow):
                                 param = f.readline()
                                 try:
                                     self.save_data.set_gcrubs(param.split(' = ')[0],
-                                                              eval(param.split(' = ')[1][1:-2].replace("PySide6.", "")))
+                                                              eval(param.split(' = ')[1][1:-2].replace("PyQt5.", "")))
                                 except (IndexError, SyntaxError, NameError):
                                     self.save_data.set_gcrubs(param.split(' = ')[0],
-                                                              eval(param.split(' = ')[1][:-1].replace("PySide6.", "")))
+                                                              eval(param.split(' = ')[1][:-1].replace("PyQt5.", "")))
                         elif param.find(self.init_data.get_window('vinyl_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('vinyl')):
                                 param = f.readline()
@@ -1056,12 +1064,25 @@ class MainWindow(QtWidgets.QMainWindow):
         if time() - self.time < 2.:
             return
 
+        def set_icon(action, icon_name):
+            for p in path:
+                # noinspection PyBroadException
+                try:
+                    f = open(p + '/' + self.init_data.get_window(icon_name), 'r')
+                    f.close()
+                    action.setIcon(QtGui.QIcon(p + '/' + self.init_data.get_window(icon_name)))
+                    return
+                except:  # C'est un peu sale mais erreur inconnue en executable
+                    continue
+
+            action.setIcon("")
+
         if self.running.is_ongoing():  # Si la simulation est deja en cours
             if self.running.is_running():  # Si la simulation est en pause ou non
-                self.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
+                set_icon(self.run_action, 'run_action_icon_stopped')
                 self.running.stop()
             else:
-                self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
+                set_icon(self.run_action, 'run_action_icon_running')
                 self.running.resume()
         else:
             dialog = QtWidgets.QDialog(self)
@@ -1112,7 +1133,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 dialog.close()
                 self.stop_run_action.setEnabled(True)
-                self.run_action.setIcon(self.init_data.get_run('run_action_icon_running'))
+                set_icon(self.run_action, 'run_action_icon_running')
                 self.time = time()
                 self.running = simulation.Run(self.save_data, self.main_robot, self.second_robot, self)
                 self.time = time()

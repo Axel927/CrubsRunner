@@ -6,8 +6,9 @@
 Fichier contenant la classe Run.
 """
 
-from PySide6 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
+from sys import path
 
 from src import ui
 from src import element
@@ -322,7 +323,18 @@ class Run:
             self.ongoing = False
             self.main_robot.set_running(False)
             self.second_robot.set_running(False)
-            self.parent.run_action.setIcon(self.init_data.get_run('run_action_icon_stopped'))
+
+            for p in path:
+                # noinspection PyBroadException
+                try:
+                    f = open(p + '/' + self.init_data.get_window("run_action_icon_stopped"), 'r')
+                    f.close()
+                    self.parent.run_action.setIcon(QtGui.QIcon(p + '/' +
+                                                               self.init_data.get_window("run_action_icon_stopped")))
+                    return
+                except:  # C'est un peu sale mais erreur inconnue en executable
+                    continue
+
             self.parent.stop_run_action.setEnabled(False)
 
     def _start_time_sr(self):

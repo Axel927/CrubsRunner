@@ -6,7 +6,8 @@
 Fichier contenant la classe GCrubs.
 """
 
-from PySide6 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
+from sys import path
 
 from src import widget
 
@@ -178,8 +179,16 @@ class GCrubs:
         self.cmd[self.cmd_size][3].setCursor(self.init_data.get_gcrubs('btn_cursor'))
         self.cmd[self.cmd_size][0].setToolTip(self.init_data.get_gcrubs('del_btn_tip'))
         self.cmd[self.cmd_size][3].setToolTip(self.init_data.get_gcrubs('key_btn_tip'))
-        self.cmd[self.cmd_size][0].setIcon(self.init_data.get_gcrubs('del_btn_icon'))
-        self.cmd[self.cmd_size][3].setIcon(self.init_data.get_gcrubs('key_btn_icon'))
+        for p in path:
+            # noinspection PyBroadException
+            try:
+                f = open(p + '/' + self.init_data.get_window("del_btn_icon"), 'r')
+                f.close()
+                self.cmd[self.cmd_size][0].setIcon(QtGui.QIcon(p + '/' + self.init_data.get_window("del_btn_icon")))
+                self.cmd[self.cmd_size][3].setIcon(QtGui.QIcon(p + '/' + self.init_data.get_window("key_btn_icon")))
+                break
+            except:  # C'est un peu sale mais erreur inconnue en executable
+                continue
 
         self.cmd[self.cmd_size][1].setText(key)
         self.cmd[self.cmd_size][2].setText(value)

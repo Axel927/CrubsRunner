@@ -6,7 +6,7 @@
 Fichier contenant la classe ViewWidget.
 """
 
-from PySide6 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 import pyqtgraph.opengl as gl
 
 from src import widget

@@ -6,7 +6,7 @@
 Fichier contenant la classe LineEdit.
 """
 
-from PySide6 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 
 class LineEdit(QtWidgets.QLineEdit):

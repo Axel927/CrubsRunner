@@ -6,7 +6,7 @@
 Fichier contenant la class Board, partie interface graphique.
 """
 
-from PySide6 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui
 from time import time
 
 

@@ -6,7 +6,7 @@
 Fichier contenant la classe Run, partie graphique.
 """
 
-from PySide6 import QtWidgets
+from PyQt5 import QtWidgets
 from src import data
 
 

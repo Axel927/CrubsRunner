@@ -6,12 +6,13 @@
 Fichier contenant des fonctions concernant les objets 3D.
 """
 
-from PySide6 import QtWidgets
+from PyQt5 import QtWidgets
 import numpy as np
 import pyqtgraph.opengl as gl
 from PIL import Image
 import fitz  # PyMuPDF
 import trimesh
+from sys import path
 
 from src import element
 from src import data
@@ -61,7 +62,18 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
     init_data = data.Init()
     try:
         if '.' + elem.get_file().split('.')[-1] in init_data.get_extension('3d_file'):
-            mesh = trimesh.load(elem.get_file(), force='mesh')
+            if elem.get_element_type() == 'coord_sys':
+                mesh = None
+                for p in path:
+                    # noinspection PyBroadException
+                    try:
+                        mesh = trimesh.load(p + '/' + elem.get_file(), force='mesh')
+                        break
+                    except:  # C'est un peu sale mais erreur inconnue en executable
+                        continue
+            else:
+                mesh = trimesh.load(elem.get_file(), force='mesh')
+
         else:
             QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
                                   init_data.get_window('error_format_file_title'),
