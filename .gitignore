@@ -4,6 +4,5 @@
 **/.DS_Store
 .DS_Store
 .idea/
-build/
+build/*
 dist/
-/build/
