@@ -30,7 +30,7 @@ L'utilisation principale prevue est la coupe de **France de robotique**.
 
 ### Linux
 * Telecharger la compilation ici (LIER LE LIEN A ICI)
-* Decompresser l'archive 
+* Decompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
 * Depuis le terminal, se placer dans le dossier CrubsRunner_Linux puis executer `bash linux_installer.sh`
 * Executer `cd ..`
 * Vous pouvez desormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
