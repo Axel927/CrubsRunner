@@ -27,6 +27,7 @@ class CoordSys(gl.GLMeshItem):
         self.element_type = ""
         self.dimensions = np.zeros(shape=3, dtype="float")
         self.min_max = np.zeros(shape=(3, 2), dtype="float")
+        self.setVisible(False)
 
     def set_file(self, file: str):
         """
@@ -57,6 +58,7 @@ class CoordSys(gl.GLMeshItem):
         :return: None
         """
         self.dimensions = dimensions
+        self.setVisible(True)
 
     def get_min_max(self) -> np.array:
         """

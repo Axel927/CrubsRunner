@@ -396,6 +396,9 @@ class Init:
             'coord_sys_x_color': (1., 0., 0., 1.),
             'coord_sys_y_color': (0., 1., 0., 1.),
             'coord_sys_z_color': (0., 0., 1., 1.),
+
+            'min_zoom': 3000,
+            'max_zoom': 7000
         }  # End self.view
 
         self.grid = {  # Contient les donnees de la grille dans le widget central

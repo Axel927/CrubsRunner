@@ -6,8 +6,9 @@
 Fichier contenant la classe ViewWidget.
 """
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph.opengl as gl
+import numpy as np
 
 from src import widget
 
@@ -36,6 +37,47 @@ class ViewWidget(gl.GLViewWidget):
         self.angle = 0
         self.sequence_text = ""
         self.view_changed = False
+        self.view_position = np.zeros(shape=2)
+        self.zoom = self.init_data.get_view('start_view_position_distance')
+
+    def wheelEvent(self, event):
+        """
+        Zoom ou dezoom la vue avec la mollette de la souris.
+        :param event: Evenement
+        :return: None
+        """
+        if self.init_data.get_view('min_zoom') < self.zoom + event.angleDelta().y() < \
+                self.init_data.get_view('max_zoom'):
+            super(ViewWidget, self).wheelEvent(event)
+            self.zoom += event.angleDelta().y()
+
+    def panable(self) -> bool:
+        """
+        Indique si on autorise a deplacer ou non la vue.
+        :return: bool: True si ok, False sinon
+        """
+        w = QtWidgets.QDesktopWidget()
+        if self.parent.grid.visible():
+            ref = self.parent.grid
+        elif self.parent.board.visible():
+            ref = self.parent.board
+        elif self.parent.vinyl.visible():
+            ref = self.parent.vinyl
+        else:
+            return True
+
+        if ref in self.itemsAt((0, 0, w.screenGeometry().width(), w.screenGeometry().height())):
+            return True
+        else:
+            if self.view_position[0] < 0:
+                self.pan(10, 0, 0, relative='view')
+            else:
+                self.pan(-10, 0, 0, relative='view')
+            if self.view_position[1] < 0:
+                self.pan(0, 10, 0, relative='view')
+            else:
+                self.pan(0, -10, 0, relative='view')
+            return False
 
     def mouseMoveEvent(self, ev):
         """
@@ -44,7 +86,6 @@ class ViewWidget(gl.GLViewWidget):
         :return: None
         """
         self.setCursor(self.init_data.get_view('moving_cursor'))
-
         lpos = ev.position() if hasattr(ev, 'position') else ev.localPos()  # Donne la position de la souris
         diff = lpos - self.mousePos
         self.mousePos = lpos
@@ -56,17 +97,31 @@ class ViewWidget(gl.GLViewWidget):
 
         if ev.buttons() == self.init_data.get_view('rotation_view_key'):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
-                self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
+                if self.panable():
+                    self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
             else:
                 self.setCursor(self.init_data.get_view('orbit_cursor'))
                 self.orbit(-diff.x(), diff.y())  # Tourne la vue
+
         elif ev.buttons() == self.init_data.get_view('moving_view_middle_button'):
             if ev.modifiers() & self.init_data.get_view('moving_view_middle_button1'):
-                self.pan(diff.x(), 0, diff.y(), relative='view-upright')
+                if self.panable():
+                    self.pan(diff.x(), 0, diff.y(), relative='view-upright')
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
             else:
-                self.pan(diff.x(), diff.y(), 0, relative='view-upright')
+                if self.panable():
+                    self.pan(diff.x(), diff.y(), 0, relative='view-upright')
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
+
         elif ev.buttons() == self.init_data.get_view('moving_view2'):
-            self.pan(diff.x(), diff.y(), 0, relative='view')
+            if self.panable():
+                self.pan(diff.x(), diff.y(), 0, relative='view')
+                self.view_position[0] += diff.x()
+                self.view_position[1] += diff.y()
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """
@@ -398,3 +453,18 @@ class ViewWidget(gl.GLViewWidget):
         :return: None
         """
         self.getting_key = False
+
+    def get_view_position(self) -> np.array:
+        """
+        Donne la position de la vue
+        :return: np.array: [x, y]
+        """
+        return self.view_position
+
+    def reset_view_position(self):
+        """
+        Reset la valeur de position et du zoom.
+        :return: None
+        """
+        self.view_position = np.zeros(shape=2)
+        self.zoom = self.init_data.get_view('start_view_position_distance')

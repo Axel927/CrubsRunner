@@ -38,6 +38,7 @@ class Vinyl(gl.GLImageItem):
         self.save_data.set_vinyl('pixel_height', self.pixel_height)
         self.save_data.set_vinyl('pixel_width', self.pixel_width)
         self.time = 0.
+        self.setVisible(False)
 
     def get_pixel_height(self) -> int:
         """
@@ -83,6 +84,7 @@ class Vinyl(gl.GLImageItem):
         self.pixel_width = len(array[0])
         self.save_data.set_vinyl('pixel_height', self.pixel_height)
         self.save_data.set_vinyl('pixel_width', self.pixel_width)
+        self.setVisible(True)
 
     def get_name(self) -> str:
         """

@@ -355,11 +355,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.z_coord_sys.set_element_type("coord_sys")
 
         if functions.object.show_mesh(self.x_coord_sys):
-        	self.viewer.addItem(self.x_coord_sys)
-        	functions.object.show_mesh(self.y_coord_sys)
-        	self.viewer.addItem(self.y_coord_sys)
-        	functions.object.show_mesh(self.z_coord_sys)
-        	self.viewer.addItem(self.z_coord_sys)
+            self.viewer.addItem(self.x_coord_sys)
+            functions.object.show_mesh(self.y_coord_sys)
+            self.viewer.addItem(self.y_coord_sys)
+            functions.object.show_mesh(self.z_coord_sys)
+            self.viewer.addItem(self.z_coord_sys)
 
         self.y_coord_sys.rotate(90, 0, 0, 1)
         self.z_coord_sys.rotate(-90, 0, 1, 0)
@@ -1038,9 +1038,12 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot pour passer en vue initiale.
         :return: None
         """
+        self.viewer.reset_view_position()
         self.viewer.setCameraPosition(rotation=self.init_data.get_view('start_view_position_rotation'),
                                       distance=self.init_data.get_view('start_view_position_distance'),
                                       pos=self.init_data.get_view('start_view_position_pos'))
+
+        self.viewer.pan(*(self.viewer.get_view_position() * -1), 0, relative='view-upright')
 
     def edit_gcrubs(self):
         """

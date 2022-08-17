@@ -67,7 +67,6 @@ class GridItem(gl.GLGridItem):
         self.color_grid_btn.setCursor(self.init_data.get_grid('color_cursor'))
         self.color_grid_btn.setDefault(self.init_data.get_grid('color_default'))
         self.color_dialog.setParent(self.window)
-        self.color_dialog.setVisible(False)
 
         self.transparency_grid_sb.setMaximum(255)
         self.transparency_grid_sb.setMinimum(0)
