@@ -8,6 +8,7 @@ Fichier de lancement de l'application CrubsRunner.
 
 import sys
 import os
+from platform import system
 from pathlib import Path
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
@@ -20,6 +21,9 @@ if os.getcwd() not in sys.path:  # /~/CrubsRunner/src
 os.chdir('../')
 if os.getcwd() not in sys.path:  # /~/CrubsRunner
     sys.path.append(os.getcwd())
+
+if system() == "Linux":
+    sys.path.append("/home/{user}/CrubsRunner/".format(user=str(path).split('/')[1]))
 
 from src import data
 from src import ui

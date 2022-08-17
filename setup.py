@@ -32,7 +32,7 @@ INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
 EXCLUDES = []
 
 if system() == 'Linux':
-    pass
+    print("Pour compiler l'application sur Linux, executez : bash linux_builder.sh")
 
 elif system() == 'Darwin':
     APP = ['src/CrubsRunner.py']
