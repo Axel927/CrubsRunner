@@ -1,4 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
+# usage :
+#  * Linux : python3 -m PyInstaller setup.spec
 
 block_cipher = None
 
@@ -41,4 +43,3 @@ exe = EXE(
     entitlements_file=None,
     icon='icon/icon_app.ico'
 )
-

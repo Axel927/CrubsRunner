@@ -23,7 +23,7 @@ if os.getcwd() not in sys.path:  # /~/CrubsRunner
     sys.path.append(os.getcwd())
 
 if system() == "Linux":
-    sys.path.append("/home/{user}/CrubsRunner/".format(user=str(path).split('/')[1]))
+    sys.path.append("/home/{user}/.CrubsRunner/".format(user=str(path).split('/')[1]))
 
 from src import data
 from src import ui

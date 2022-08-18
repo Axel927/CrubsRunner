@@ -1,3 +1,9 @@
+"""
+Utilisation :
+ * MacOS : python3 setup.py py2app
+ * Windows : python3 setup.py py2exe
+"""
+
 try:
     from setuptools import setup
 except ImportError:
@@ -25,7 +31,7 @@ DATA_FILES = ['icon', '3d_files']
 
 # Tous les paquets utilises dans l'application
 INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
-            'numpy', 'trimesh', 'fitz', 'pyqtgraph', 'OpenGL', 'os', 'sys', 'pathlib', 'time', 'PIL']
+            'numpy', 'trimesh', 'fitz', 'pyqtgraph', 'OpenGL', 'os', 'sys', 'pathlib', 'time', 'PIL', 'platform']
 
 # Packets installes mais inutiles pour l'application,
 # cela peut permettre de reduire grandement la taille de l'application
@@ -63,7 +69,8 @@ elif system() == 'Windows':
             }]
 
     OPTIONS = {'includes': INCLUDES,
-               'excludes': EXCLUDES
+               'excludes': EXCLUDES,
+               'bundle_files': 1, 'compressed': True
                }
 
     if not EXCLUDES:

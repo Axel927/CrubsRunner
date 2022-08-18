@@ -1,18 +1,16 @@
-# !/bin/bash
+#!/bin/bash
 
 # Script bash pour installer CrubsRunner sur Linux
 
-# Executer ce script depuis CrubsRunner_Linux
+directory=$(dirname "$PWD/$0") # Recuperation du dossier actuel
 
-echo "Copie des fichiers vers /home/$USER/CrubsRunner"
-mkdir /home/"$USER"/CrubsRunner
-mv icon/ /home/"$USER"/CrubsRunner
-mv 3d_files/ /home/"$USER"/CrubsRunner
+echo "Copie des fichiers vers /home/$USER/.CrubsRunner"
+mkdir /home/"$USER"/.CrubsRunner
+mv "$directory"/icon/ /home/"$USER"/.CrubsRunner
+mv "$directory"/3d_files/ /home/"$USER"/.CrubsRunner
 
-mv CrubsRunner ..
+mv "$directory"/CrubsRunner "$directory"/..
 
 echo "Suppression du dossier CrubsRunner_Linux"
-cd ..
-rm -r CrubsRunner_Linux
+rm -r "$directory"
 echo "Installation terminee"
-
