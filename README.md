@@ -55,3 +55,5 @@ A COMPLETER
 Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LIER LE LIEN A ICI)
 
 Pour toute question, vous pouvez contacter le CRUBS par email : [club.robotique.ubs@gmail.com]()
+
+![logo_crubs](https://user-images.githubusercontent.com/77966063/185453250-659324dc-f10a-42a1-8c63-552ee739ef6b.jpg)
