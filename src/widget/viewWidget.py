@@ -36,7 +36,6 @@ class ViewWidget(gl.GLViewWidget):
         self.dist = 0
         self.angle = 0
         self.sequence_text = ""
-        self.view_changed = False
         self.view_position = np.zeros(shape=2)
         self.zoom = self.init_data.get_view('start_view_position_distance')
 
@@ -46,10 +45,14 @@ class ViewWidget(gl.GLViewWidget):
         :param event: Evenement
         :return: None
         """
-        if self.init_data.get_view('min_zoom') < self.zoom + event.angleDelta().y() < \
-                self.init_data.get_view('max_zoom'):
-            super(ViewWidget, self).wheelEvent(event)
-            self.zoom += event.angleDelta().y()
+        delta = event.angleDelta().x()
+        if delta == 0:
+            delta = event.angleDelta().y()
+
+        if self.init_data.get_view('min_zoom') < self.zoom + delta < self.init_data.get_view('max_zoom'):
+            self.opts['distance'] *= 0.999 ** delta
+            self.update()
+            self.zoom += delta
 
     def mouseMoveEvent(self, ev):
         """
@@ -61,11 +64,6 @@ class ViewWidget(gl.GLViewWidget):
         lpos = ev.position() if hasattr(ev, 'position') else ev.localPos()  # Donne la position de la souris
         diff = lpos - self.mousePos
         self.mousePos = lpos
-
-        if diff == QtCore.QPointF(0., 0.):
-            self.view_changed = False
-        else:
-            self.view_changed = True
 
         if ev.buttons() == self.init_data.get_view('rotation_view_key'):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
@@ -422,26 +420,6 @@ class ViewWidget(gl.GLViewWidget):
         :return: None
         """
         self.setCursor(QtCore.Qt.ArrowCursor)
-
-        if not self.view_changed:
-            # Selection du robot
-            region = (ev.pos().x() - 5, ev.pos().y() - 5, 10, 10)  # Rectangle de 10 pixels autour de la souris
-            if self.parent.main_robot in self.itemsAt(region):  # Si le robot principal se trouve la ou est la souris
-                self.parent.main_robot.set_selected(True)
-                self.parent.second_robot.set_selected(False)
-                self.parent.list_widget.item(
-                    self.parent.list_widget.get_content_row(self.parent.main_robot)).setSelected(True)
-
-            elif self.parent.second_robot in self.itemsAt(region):
-                self.parent.second_robot.set_selected(True)
-                self.parent.main_robot.set_selected(False)
-                self.parent.list_widget.item(
-                    self.parent.list_widget.get_content_row(self.parent.second_robot)).setSelected(True)
-
-            else:
-                self.parent.main_robot.set_selected(False)
-                self.parent.second_robot.set_selected(False)
-                self.parent.list_widget.item(0).setSelected(True)
 
     def get_key(self, where_to_show, write_key):
         """

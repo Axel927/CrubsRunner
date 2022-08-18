@@ -1,30 +1,35 @@
 # CrubsRunner
 
+[comment]: <> (Le lien de l'image a ete depose dans issue -> new issue -> drop dans la zone de texte puis copier coller)
+
+![image_demo_app](https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png)
+
 ## TABLE DES MATIERES
 
 * Introduction
-* Prerequis
+* Prerequis au developpement
 * Installation
 * Exemple d'utilisation
 
 ## Introduction
 
-**CrubsRunner** est une application developpee par le **CRUBS** 
+**CrubsRunner** est une application multi-plateforme developpee par le **CRUBS** 
 grace a l'interface graphique **Qt** liee a **OpenGL** pour creer facilement un fichier sequentiel
 pour un (ou deux) robot(s).
 L'utilisation principale prevue est la **coupe de France de robotique**.
 
-## Prerequis
+## Prerequis au developpement
 
 **OS** : Linux, MacOS, Windows
 
-**Python 3** :  
-* PyQt --> `pip3 install PyQt5`
+**Python 3** :
+
 * Numpy --> `pip3 install numpy`
-* Trimesh --> `pip3 install trimesh`
-* PyQtGraph --> `pip3 install pyqtgraph`
 * OpenGL --> `pip3 install PyOpengl`
 * PyMu --> `pip3 install PyMuPDF`
+* PyQt --> `pip3 install PyQt5`
+* PyQtGraph --> `pip3 install pyqtgraph`
+* Trimesh --> `pip3 install trimesh`
 
 ## Installation
 
@@ -47,4 +52,6 @@ A COMPLETER
 
 ## Exemple d'utilisation
 
-A COMPLETER
+Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LIER LE LIEN A ICI)
+
+Pour toute question, vous pouvez contacter le CRUBS par email : [club.robotique.ubs@gmail.com]()
