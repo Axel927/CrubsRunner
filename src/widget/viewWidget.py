@@ -6,7 +6,7 @@
 Fichier contenant la classe ViewWidget.
 """
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui
 import pyqtgraph.opengl as gl
 import numpy as np
 
@@ -51,34 +51,6 @@ class ViewWidget(gl.GLViewWidget):
             super(ViewWidget, self).wheelEvent(event)
             self.zoom += event.angleDelta().y()
 
-    def panable(self) -> bool:
-        """
-        Indique si on autorise a deplacer ou non la vue.
-        :return: bool: True si ok, False sinon
-        """
-        w = QtWidgets.QDesktopWidget()
-        if self.parent.grid.visible():
-            ref = self.parent.grid
-        elif self.parent.board.visible():
-            ref = self.parent.board
-        elif self.parent.vinyl.visible():
-            ref = self.parent.vinyl
-        else:
-            return True
-
-        if ref in self.itemsAt((0, 0, w.screenGeometry().width(), w.screenGeometry().height())):
-            return True
-        else:
-            if self.view_position[0] < 0:
-                self.pan(10, 0, 0, relative='view')
-            else:
-                self.pan(-10, 0, 0, relative='view')
-            if self.view_position[1] < 0:
-                self.pan(0, 10, 0, relative='view')
-            else:
-                self.pan(0, -10, 0, relative='view')
-            return False
-
     def mouseMoveEvent(self, ev):
         """
         Lorsque la souris est deplacee, change la vue.
@@ -97,31 +69,27 @@ class ViewWidget(gl.GLViewWidget):
 
         if ev.buttons() == self.init_data.get_view('rotation_view_key'):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
-                if self.panable():
-                    self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
-                    self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y()
+                self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
+                self.view_position[0] += diff.x()
+                self.view_position[1] += diff.y()
             else:
                 self.setCursor(self.init_data.get_view('orbit_cursor'))
                 self.orbit(-diff.x(), diff.y())  # Tourne la vue
 
         elif ev.buttons() == self.init_data.get_view('moving_view_middle_button'):
             if ev.modifiers() & self.init_data.get_view('moving_view_middle_button1'):
-                if self.panable():
-                    self.pan(diff.x(), 0, diff.y(), relative='view-upright')
-                    self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y()
-            else:
-                if self.panable():
-                    self.pan(diff.x(), diff.y(), 0, relative='view-upright')
-                    self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y()
-
-        elif ev.buttons() == self.init_data.get_view('moving_view2'):
-            if self.panable():
-                self.pan(diff.x(), diff.y(), 0, relative='view')
+                self.pan(diff.x(), 0, diff.y(), relative='view-upright')
                 self.view_position[0] += diff.x()
                 self.view_position[1] += diff.y()
+            else:
+                self.pan(diff.x(), diff.y(), 0, relative='view-upright')
+                self.view_position[0] += diff.x()
+                self.view_position[1] += diff.y()
+
+        elif ev.buttons() == self.init_data.get_view('moving_view2'):
+            self.pan(diff.x(), diff.y(), 0, relative='view')
+            self.view_position[0] += diff.x()
+            self.view_position[1] += diff.y()
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """
@@ -279,6 +247,16 @@ class ViewWidget(gl.GLViewWidget):
         """
         elem.translate(*mvt[1] * speed, local=True)
         elem.move(0, speed)
+
+        # Si le robot est trop en dehors du plateau
+        if not -self.init_data.get_main_robot('out_limits')[0] < elem.get_coord()[0] < \
+                self.init_data.get_main_robot('out_limits')[0] or \
+                not -self.init_data.get_main_robot('out_limits')[1] < elem.get_coord()[1] < \
+                self.init_data.get_main_robot('out_limits')[1]:
+            elem.translate(*mvt[1] * -speed, local=True)
+            elem.move(0, -speed)
+            return
+
         if elem.is_ready_sequence():  # Si on enregistre une sequence
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
@@ -314,6 +292,16 @@ class ViewWidget(gl.GLViewWidget):
         """
         elem.translate(*mvt[1] * -speed, local=True)
         elem.move(0, -speed)
+
+        # Si le robot est trop en dehors du plateau
+        if not -self.init_data.get_main_robot('out_limits')[0] < elem.get_coord()[0] < \
+                self.init_data.get_main_robot('out_limits')[0] or \
+                not -self.init_data.get_main_robot('out_limits')[1] < elem.get_coord()[1] < \
+                self.init_data.get_main_robot('out_limits')[1]:
+            elem.translate(*mvt[1] * speed, local=True)
+            elem.move(0, speed)
+            return
+
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
@@ -349,6 +337,16 @@ class ViewWidget(gl.GLViewWidget):
         """
         elem.translate(*mvt[0] * -speed, local=True)
         elem.move(-speed, 0)
+
+        # Si le robot est trop en dehors du plateau
+        if not -self.init_data.get_main_robot('out_limits')[0] < elem.get_coord()[0] < \
+                self.init_data.get_main_robot('out_limits')[0] or \
+                not -self.init_data.get_main_robot('out_limits')[1] < elem.get_coord()[1] < \
+                self.init_data.get_main_robot('out_limits')[1]:
+            elem.translate(*mvt[0] * speed, local=True)
+            elem.move(speed, 0)
+            return
+
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):
@@ -383,6 +381,16 @@ class ViewWidget(gl.GLViewWidget):
         """
         elem.translate(*mvt[0] * speed, local=True)
         elem.move(speed, 0)
+
+        # Si le robot est trop en dehors du plateau
+        if not -self.init_data.get_main_robot('out_limits')[0] < elem.get_coord()[0] < \
+                self.init_data.get_main_robot('out_limits')[0] or \
+                not -self.init_data.get_main_robot('out_limits')[1] < elem.get_coord()[1] < \
+                self.init_data.get_main_robot('out_limits')[1]:
+            elem.translate(*mvt[0] * -speed, local=True)
+            elem.move(-speed, 0)
+            return
+
         if elem.is_ready_sequence():
             for key, cmd in zip(self.save_data.get_gcrubs('cmd_key').keys(),
                                 self.save_data.get_gcrubs('cmd_key').values()):

@@ -345,7 +345,8 @@ class Init:
             'sequence_origin_btn_default': True,
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,
 
-            'track_width': 20  # mm
+            'track_width': 20,  # mm
+            'out_limits': (2000, 1500)  # mm avant de considerer hors du plateau
         }   # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire

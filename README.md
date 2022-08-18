@@ -10,9 +10,9 @@
 ## Introduction
 
 **CrubsRunner** est une application developpee par le **CRUBS** 
-grace a l'interface graphique **Qt** pour creer facilement un fichier sequentiel
+grace a l'interface graphique **Qt** liee a **OpenGL** pour creer facilement un fichier sequentiel
 pour un (ou deux) robot(s).
-L'utilisation principale prevue est la coupe de **France de robotique**.
+L'utilisation principale prevue est la **coupe de France de robotique**.
 
 ## Prerequis
 
@@ -31,10 +31,9 @@ L'utilisation principale prevue est la coupe de **France de robotique**.
 ### Linux
 * Telecharger la compilation ici (LIER LE LIEN A ICI)
 * Decompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
-* Depuis le terminal, se placer dans le dossier CrubsRunner_Linux puis executer `bash linux_installer.sh`
-* Executer `cd ..`
+* Depuis le terminal, executer `bash CrubsRunner_Linux/linux_installer.sh`
 * Vous pouvez desormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
-soit en double cliquant sur CrubsRunner depuis l'application Fichiers.
+soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 
 ### MacOS
 * Telecharger la compilation ici (LIER LE LIEN A ICI)
