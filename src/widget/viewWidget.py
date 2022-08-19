@@ -36,8 +36,10 @@ class ViewWidget(gl.GLViewWidget):
         self.dist = 0
         self.angle = 0
         self.sequence_text = ""
+        self.view_changed = False
         self.view_position = np.zeros(shape=2)
         self.zoom = self.init_data.get_view('start_view_position_distance')
+        self.first_click = True
 
     def wheelEvent(self, event):
         """
@@ -53,6 +55,32 @@ class ViewWidget(gl.GLViewWidget):
             self.opts['distance'] *= 0.999 ** delta
             self.update()
             self.zoom += delta
+            
+    def mousePressEvent(self, ev):
+        if not self.first_click:
+            super(ViewWidget, self).mousePressEvent(ev)
+
+    def panable(self) -> bool:
+        """
+        Indique si on autorise a deplacer ou non la vue.
+        :return: bool: True si ok, False sinon
+        """
+        if self.parent.grid.visible():
+            ref = self.parent.grid
+        elif self.parent.board.visible():
+            ref = self.parent.board
+        elif self.parent.vinyl.visible():
+            ref = self.parent.vinyl
+        else:
+            return True
+
+        geom = (self.parent.center_widget.width(), self.parent.center_widget.height())
+        ratio = self.parent.screen().devicePixelRatio()
+        if ref in self.itemsAt((40, 40, (geom[0] - 40) * ratio, (geom[1] - 40) * ratio)):
+            return True
+        else:
+            self.parent.start_view()
+            return False
 
     def mouseMoveEvent(self, ev):
         """
@@ -60,34 +88,47 @@ class ViewWidget(gl.GLViewWidget):
         :param ev: Evenement
         :return: None
         """
+        if self.first_click:
+            return
+
         self.setCursor(self.init_data.get_view('moving_cursor'))
         lpos = ev.position() if hasattr(ev, 'position') else ev.localPos()  # Donne la position de la souris
         diff = lpos - self.mousePos
         self.mousePos = lpos
 
+        if diff == QtCore.QPointF(0., 0.):
+            self.view_changed = False
+            return
+        else:
+            self.view_changed = True
+
         if ev.buttons() == self.init_data.get_view('rotation_view_key'):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
-                self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
-                self.view_position[0] += diff.x()
-                self.view_position[1] += diff.y()
+                if self.panable():
+                    self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
             else:
                 self.setCursor(self.init_data.get_view('orbit_cursor'))
                 self.orbit(-diff.x(), diff.y())  # Tourne la vue
 
         elif ev.buttons() == self.init_data.get_view('moving_view_middle_button'):
             if ev.modifiers() & self.init_data.get_view('moving_view_middle_button1'):
-                self.pan(diff.x(), 0, diff.y(), relative='view-upright')
-                self.view_position[0] += diff.x()
-                self.view_position[1] += diff.y()
+                if self.panable():
+                    self.pan(diff.x(), 0, diff.y(), relative='view-upright')
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
             else:
-                self.pan(diff.x(), diff.y(), 0, relative='view-upright')
-                self.view_position[0] += diff.x()
-                self.view_position[1] += diff.y()
+                if self.panable():
+                    self.pan(diff.x(), diff.y(), 0, relative='view-upright')
+                    self.view_position[0] += diff.x()
+                    self.view_position[1] += diff.y()
 
         elif ev.buttons() == self.init_data.get_view('moving_view2'):
-            self.pan(diff.x(), diff.y(), 0, relative='view')
-            self.view_position[0] += diff.x()
-            self.view_position[1] += diff.y()
+            if self.panable():
+                self.pan(diff.x(), diff.y(), 0, relative='view')
+                self.view_position[0] += diff.x()
+                self.view_position[1] += diff.y()
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """
@@ -421,6 +462,31 @@ class ViewWidget(gl.GLViewWidget):
         """
         self.setCursor(QtCore.Qt.ArrowCursor)
 
+        if self.first_click:
+            self.first_click = False
+            return
+
+        if not self.view_changed:
+            ratio = self.parent.screen().devicePixelRatio()
+            # Selection du robot # Rectangle de 10 pixels autour de la souris
+            region = (ev.pos().x() * ratio - 5, ev.pos().y() * ratio - 5, 10, 10)
+            if self.parent.main_robot in self.itemsAt(region):  # Si le robot principal se trouve la ou est la souris
+                self.parent.main_robot.set_selected(True)
+                self.parent.second_robot.set_selected(False)
+                self.parent.list_widget.item(
+                    self.parent.list_widget.get_content_row(self.parent.main_robot)).setSelected(True)
+
+            elif self.parent.second_robot in self.itemsAt(region):
+                self.parent.second_robot.set_selected(True)
+                self.parent.main_robot.set_selected(False)
+                self.parent.list_widget.item(
+                    self.parent.list_widget.get_content_row(self.parent.second_robot)).setSelected(True)
+
+            else:
+                self.parent.main_robot.set_selected(False)
+                self.parent.second_robot.set_selected(False)
+                self.parent.list_widget.item(0).setSelected(True)
+
     def get_key(self, where_to_show, write_key):
         """
         Debut de la reception des touches.
@@ -454,3 +520,10 @@ class ViewWidget(gl.GLViewWidget):
         """
         self.view_position = np.zeros(shape=2)
         self.zoom = self.init_data.get_view('start_view_position_distance')
+
+    def set_first_click(self):
+        """
+        Definit qu'il n'y a pas encore eu de click dans le viewer.
+        :return: None
+        """
+        self.first_click = True

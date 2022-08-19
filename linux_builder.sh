@@ -9,7 +9,7 @@ echo ""
 
 python3 -m PyInstaller  setup.spec
 
-if [ -e dist/CrubsRunner ]  # On verirife que le fichier binaire a bien ete cree
+if [ -e dist/CrubsRunner ]  # On verifie que le fichier binaire a bien ete cree
 then
   echo ""
   echo "Compilation reussie"
@@ -21,6 +21,10 @@ then
   cp -r  icon/  CrubsRunner_Linux/icon/
   cp -r  3d_files/  CrubsRunner_Linux/3d_files/
   cp  linux_installer.sh  CrubsRunner_Linux/linux_installer.sh
+
+  echo ""
+  echo "Creation du README.txt"
+  echo "Pour installer CrubsRunner, executez : bash linux_installer.sh" >> CrubsRunner_Linux/README.txt
 
   echo ""
   echo "Compression du dossier"
