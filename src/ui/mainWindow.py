@@ -306,7 +306,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.undo_action.triggered.connect(self.undo)
         self.redo_action.triggered.connect(self.redo)
         self.list_widget.itemDoubleClicked.connect(self.element_properties)
-        self.list_widget.currentRowChanged.connect(self.select_element)
+        self.list_widget.itemClicked.connect(self.select_element)
         self.start_view_action.triggered.connect(self.start_view)
         self.top_view_action.triggered.connect(self.top_view)
         self.bottom_view_action.triggered.connect(self.bottom_view)
@@ -1182,6 +1182,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.list_widget.get_contents()[i].set_selected(False)
             except AttributeError:
                 continue
+
+        self.viewer.set_first_click()
 
     def keys(self):
         """
