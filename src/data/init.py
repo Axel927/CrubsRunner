@@ -209,9 +209,9 @@ class Init:
             'color_cursor': QtCore.Qt.PointingHandCursor,
             'color_default': False,
             'color_dialog_title': "Couleur du plateau",
-            'edge_color_name': "Choisir la couleur des arretes",
+            'edge_color_name': "Choisir la couleur des aretes",
             'edge_color_default': False,
-            'edge_color_dialog_title': "Couleur des arretes du plateau",
+            'edge_color_dialog_title': "Couleur des aretes du plateau",
 
             'axis_rotation_x_name': "x",
             'axis_rotation_y_name': "y",
@@ -279,9 +279,9 @@ class Init:
 
             'window_title': "Proprietes du robot principal",
             'color_name': "Choisir la couleur du robot",
-            'edge_color_name': "Choisir la couleur des arretes",
+            'edge_color_name': "Choisir la couleur des aretes",
             'color_dialog_title': "Couleur du robot",
-            'edge_color_dialog_title': "Couleur des arretes",
+            'edge_color_dialog_title': "Couleur des aretes",
             'remove_message_box_message': "Etes-vous sur de vouloir supprimer le robot principal ?\n"
                                           "Cette action est irreversible.",
             'axis_rotation_x_name': "x",

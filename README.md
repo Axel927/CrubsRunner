@@ -2,7 +2,9 @@
 
 [comment]: <> (Le lien de l'image a ete depose dans issue -> new issue -> drop dans la zone de texte puis copier coller)
 
-![image_demo_app](https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png">
+</p>
 
 ## TABLE DES MATIERES
 
@@ -56,4 +58,6 @@ Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LI
 
 Pour toute question, vous pouvez contacter le CRUBS par email : [club.robotique.ubs@gmail.com]()
 
-![logo_crubs](https://user-images.githubusercontent.com/77966063/185453250-659324dc-f10a-42a1-8c63-552ee739ef6b.jpg)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/77966063/185453250-659324dc-f10a-42a1-8c63-552ee739ef6b.jpg">
+</p>

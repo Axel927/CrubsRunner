@@ -34,6 +34,7 @@ then
   echo "Construction terminee"
 
 else
+  rm -rf build/ dist/
   echo ""
   echo "Compilation echouee"
 fi
