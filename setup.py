@@ -43,13 +43,13 @@ if system() == 'Linux':
 elif system() == 'Darwin':
     APP = ['src/CrubsRunner.py']
 
+    if not EXCLUDES:
+        EXCLUDES = ['matplotlib', 'pygame', 'pytmx', 'sympy', 'pygments', 'Cython', 'scipy']
+
     OPTIONS = {'iconfile': str(path) + '/icon/icon_app.icns',
                'includes': INCLUDES,
                'excludes': EXCLUDES
                }
-
-    if not EXCLUDES:
-        EXCLUDES = ['matplotlib', 'pygame', 'pytmx', 'sympy', 'pygments', 'Cython', 'scipy']
 
     setup(
         app=APP,
@@ -68,13 +68,14 @@ elif system() == 'Windows':
             'icon_resources': [(1, "icon/icon_app.ico")]
             }]
 
+    if not EXCLUDES:
+        EXCLUDES = []
+
     OPTIONS = {'includes': INCLUDES,
                'excludes': EXCLUDES,
                'bundle_files': 1, 'compressed': True
                }
 
-    if not EXCLUDES:
-        EXCLUDES = []
     setup(
         windows=APP,
         data_files=DATA_FILES,
