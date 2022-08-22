@@ -9,10 +9,11 @@
 ## Table des matieres
 
 * [Introduction](#Introduction)
-* [Prerequis au developpement](#Prerequis au developpement)
+* [Prerequis au developpement](#Prerequis)
 * [Installation](#Installation)
-* [Exemple d'utilisation](#Exemple d'utilisation)
+* [Exemple d'utilisation](#Exemple)
 
+<span id="Introduction"><span>
 ## Introduction
 
 **CrubsRunner** est une application multi-plateforme developpee par le **CRUBS** 
@@ -20,6 +21,7 @@ grace a l'interface graphique **Qt** liee a **OpenGL** dans le but de creer faci
 pour un (ou deux) robot(s).
 L'utilisation principale prevue est la **coupe de France de robotique**.
 
+<span id="Prerequis"><span>
 ## Prerequis au developpement
 
 **OS** : Linux, MacOs, Windows
@@ -33,6 +35,7 @@ L'utilisation principale prevue est la **coupe de France de robotique**.
 * PyQtGraph --> `pip3 install pyqtgraph`
 * Trimesh --> `pip3 install trimesh`
 
+<span id="Installation"><span>
 ## Installation
 
 ### Linux
@@ -52,6 +55,7 @@ soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 
 A COMPLETER
 
+<span id="Exemple"><span>
 ## Exemple d'utilisation
 
 Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LIER LE LIEN A ICI)
