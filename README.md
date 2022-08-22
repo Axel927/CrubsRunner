@@ -6,28 +6,28 @@
 <img src="https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png">
 </p>
 
-## TABLE DES MATIERES
+## Table des matieres
 
-* Introduction
-* Prerequis au developpement
-* Installation
-* Exemple d'utilisation
+* [Introduction](#Introduction)
+* [Prerequis au developpement](#Prerequis au developpement)
+* [Installation](#Installation)
+* [Exemple d'utilisation](#Exemple d'utilisation)
 
 ## Introduction
 
 **CrubsRunner** est une application multi-plateforme developpee par le **CRUBS** 
-grace a l'interface graphique **Qt** liee a **OpenGL** pour creer facilement un fichier sequentiel
+grace a l'interface graphique **Qt** liee a **OpenGL** dans le but de creer facilement un fichier sequentiel
 pour un (ou deux) robot(s).
 L'utilisation principale prevue est la **coupe de France de robotique**.
 
 ## Prerequis au developpement
 
-**OS** : Linux, MacOS, Windows
+**OS** : Linux, MacOs, Windows
 
 **Python 3** :
 
 * Numpy --> `pip3 install numpy`
-* OpenGL --> `pip3 install PyOpengl`
+* PyOpenGL --> `pip3 install PyOpengl`
 * PyMu --> `pip3 install PyMuPDF`
 * PyQt --> `pip3 install PyQt5`
 * PyQtGraph --> `pip3 install pyqtgraph`
@@ -42,10 +42,10 @@ L'utilisation principale prevue est la **coupe de France de robotique**.
 * Vous pouvez desormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
 soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 
-### MacOS
+### MacOs
 * Telecharger la compilation ici (LIER LE LIEN A ICI)
-* Decompresser l'archive
-* Deplacer CrubsRunner.app dans le dossier application
+* Decompresser le zip.
+* Deplacer CrubsRunner.app dans le dossier application.
 * Vous pouvez desormais lancer l'application normalement.
 
 ### Windows
@@ -56,7 +56,7 @@ A COMPLETER
 
 Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LIER LE LIEN A ICI)
 
-Pour toute question, vous pouvez contacter le CRUBS par email : [club.robotique.ubs@gmail.com]()
+Pour toute question, vous pouvez contacter le CRUBS par [email](mailto:club.robotique.ubs@gmail.com).
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/77966063/185453250-659324dc-f10a-42a1-8c63-552ee739ef6b.jpg">
