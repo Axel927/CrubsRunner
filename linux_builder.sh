@@ -32,9 +32,11 @@ then
 
   echo ""
   echo "Construction terminee"
+  exit 0
 
 else
   rm -rf build/ dist/
   echo ""
   echo "Compilation echouee"
+  exit 1
 fi

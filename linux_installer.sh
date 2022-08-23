@@ -14,3 +14,4 @@ mv "$directory"/CrubsRunner "$directory"/..
 echo "Suppression du dossier CrubsRunner_Linux"
 rm -r "$directory"
 echo "Installation terminee"
+exit 0

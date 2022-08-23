@@ -39,7 +39,7 @@ class ViewWidget(gl.GLViewWidget):
         self.view_changed = False
         self.view_position = np.zeros(shape=2)
         self.zoom = self.init_data.get_view('start_view_position_distance')
-        self.first_click = True
+        self.first_click = False
 
     def wheelEvent(self, event):
         """

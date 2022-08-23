@@ -35,6 +35,8 @@ INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
 
 # Packets installes mais inutiles pour l'application,
 # cela peut permettre de reduire grandement la taille de l'application
+# Normalement inutile de la remplir si vous avez créé un environnement virtuel
+# et que vous n'avez pas ajoute de packets inutiles
 EXCLUDES = []
 
 if system() == 'Linux':
@@ -42,9 +44,6 @@ if system() == 'Linux':
 
 elif system() == 'Darwin':
     APP = ['src/CrubsRunner.py']
-
-    if not EXCLUDES:
-        EXCLUDES = ['matplotlib', 'pygame', 'pytmx', 'sympy', 'pygments', 'Cython', 'scipy']
 
     OPTIONS = {'iconfile': str(path) + '/icon/icon_app.icns',
                'includes': INCLUDES,
@@ -67,9 +66,6 @@ elif system() == 'Windows':
     APP = [{'script': str(path) + "src/CrubsRunner.py",
             'icon_resources': [(1, "icon/icon_app.ico")]
             }]
-
-    if not EXCLUDES:
-        EXCLUDES = []
 
     OPTIONS = {'includes': INCLUDES,
                'excludes': EXCLUDES,
