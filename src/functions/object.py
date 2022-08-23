@@ -71,9 +71,9 @@ def show_mesh(elem: gl.GLMeshItem) -> bool:
                         break
                     except:  # C'est un peu sale mais erreur inconnue en executable
                         continue
-                        
+
                 if not mesh:
-                	return False
+                    return False
             else:
                 mesh = trimesh.load(elem.get_file(), force='mesh')
 
@@ -106,10 +106,11 @@ def show_vinyl(vinyl: element.Vinyl) -> bool:
     init_data = data.Init()
 
     try:
-        if vinyl.get_file().split('.')[-1] == 'pdf':
-            vinyl.set_array(load_pdf(vinyl.get_file()))
-        elif vinyl.get_file().split('.')[-1] in ('png', 'jpg'):
-            vinyl.set_array(np.array(Image.open(vinyl.get_file())))
+        if '.' + vinyl.get_file().split('.')[-1] in init_data.get_extension('vinyl'):
+            if vinyl.get_file().split('.')[-1] == 'pdf':
+                vinyl.set_array(load_pdf(vinyl.get_file()))
+            else:
+                vinyl.set_array(np.array(Image.open(vinyl.get_file())))
         else:
             QtWidgets.QMessageBox(init_data.get_window('error_format_file_type'),
                                   init_data.get_window('error_format_file_title'),

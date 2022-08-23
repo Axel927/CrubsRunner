@@ -501,8 +501,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.main_robot.setColor(self.init_data.get_main_robot('color'))
                     self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
 
-            elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
-                    extension == self.init_data.get_extension('robot')[1:]:
+            elif extension in self.init_data.get_extension('robot')[1:]:
                 if self.open_project(file):
                     self.main_robot.set_name(self.init_data.get_main_robot('name'))
                     self.x_coord_sys.setVisible(True)
@@ -552,8 +551,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.second_robot.setColor(self.init_data.get_second_robot('color'))
                     self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
 
-            elif extension[-4:-1] == self.init_data.get_extension('robot')[1:] or \
-                    extension == self.init_data.get_extension('robot')[1:]:
+            elif extension in self.init_data.get_extension('robot')[1:]:
                 if self.open_project(file):
                     self.second_robot.set_name(self.init_data.get_second_robot('name'))
                     self.x_coord_sys.setVisible(True)
