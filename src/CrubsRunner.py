@@ -15,11 +15,11 @@ from PyQt5.QtGui import QIcon
 
 path = Path(__file__).parent.resolve()
 os.chdir(path)
-if os.getcwd() not in sys.path:  # /~/CrubsRunner/src
+if os.getcwd() not in sys.path:  # /.../CrubsRunner/src
     sys.path.append(os.getcwd())
 
 os.chdir('../')
-if os.getcwd() not in sys.path:  # /~/CrubsRunner
+if os.getcwd() not in sys.path:  # /.../CrubsRunner
     sys.path.append(os.getcwd())
 
 if system() == "Linux":
