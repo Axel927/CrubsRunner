@@ -21,6 +21,7 @@ then
   cp -r  icon/  CrubsRunner_Linux/icon/
   cp -r  3d_files/  CrubsRunner_Linux/3d_files/
   cp  linux_installer.sh  CrubsRunner_Linux/linux_installer.sh
+  cp LICENSE CrubsRunner_Linux/LICENSE
 
   echo ""
   echo "Creation du README.txt"
