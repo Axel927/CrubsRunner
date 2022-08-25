@@ -476,6 +476,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                          self.init_data.get_vinyl('vinyl_dialog_open_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_vinyl('vinyl_dialog_open_extensions'))[0]
+
         if file and '.' + file.split('.')[-1] in self.init_data.get_extension('vinyl'):
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
             del self.vinyl
@@ -594,21 +595,21 @@ class MainWindow(QtWidgets.QMainWindow):
             file = QtWidgets.QFileDialog.getOpenFileName(self, self.init_data.get_window('open_project_dialog_title'),
                                                          self.save_data.get_window('directory'),
                                                          self.init_data.get_window('project_extension'))[0]
-            if file:  # On retire tout
-                self.grid.reset()
-                self.board.remove(False)
-                self.board = element.Board(self.save_data, self)
-                self.main_robot.remove(False)
-                self.main_robot = element.Robot(self.save_data, self, True)
-                self.second_robot.remove(False)
-                self.second_robot = element.Robot(self.save_data, self, False)
-                self.vinyl.setVisible(False)
-                self.vinyl = element.Vinyl(self, self.save_data)
+        if file:  # On retire tout
+            self.grid.reset()
+            self.board.remove(False)
+            self.board = element.Board(self.save_data, self)
+            self.main_robot.remove(False)
+            self.main_robot = element.Robot(self.save_data, self, True)
+            self.second_robot.remove(False)
+            self.second_robot = element.Robot(self.save_data, self, False)
+            self.vinyl.setVisible(False)
+            self.vinyl = element.Vinyl(self, self.save_data)
 
-                self.list_widget = widget.ListWidget()
-                self.list_widget.add_content(self.grid)
-                self.component_dock.setWidget(self.list_widget)
-                self.create_connections()
+            self.list_widget = widget.ListWidget()
+            self.list_widget.add_content(self.grid)
+            self.component_dock.setWidget(self.list_widget)
+            self.create_connections()
 
         if file:
             self.setCursor(self.init_data.get_window('cursor_while_opening'))
@@ -674,6 +675,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 except (IndexError, SyntaxError, NameError):
                                     self.save_data.set_gcrubs(param.split(' = ')[0],
                                                               eval(param.split(' = ')[1][:-1].replace("PyQt5.", "")))
+
                         elif param.find(self.init_data.get_window('vinyl_first_line')[1:-1]) != -1:
                             for _ in range(self.save_data.get_len('vinyl')):
                                 param = f.readline()
@@ -780,6 +782,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if time() - self.time < 0.2:
             return
+
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(self.init_data.get_window('import_dialog_title'))
         dialog.setModal(self.init_data.get_window('import_dialog_modal'))

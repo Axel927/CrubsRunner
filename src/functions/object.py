@@ -122,7 +122,7 @@ def show_vinyl(vinyl: element.Vinyl) -> bool:
     :param vinyl: widget.ImageItem: Tapis
     :return: bool: Renvoie True si tout s'est bien passe, False sinon
     """
-    if vinyl.get_file() == "":
+    if not vinyl.get_file():
         return False
 
     init_data = data.Init()

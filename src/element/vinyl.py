@@ -122,15 +122,14 @@ class Vinyl(gl.GLImageItem):
         """
         if self.file == '':
             self.file = self.save_data.get_vinyl('file')
-            if not functions.object.show_mesh(self):
+            if not functions.object.show_vinyl(self):
                 self.file = ''
 
-        if self.file == "":
-            for i in range(self.parent.list_widget.get_len()):
-                # Si c'est l'element dans le list widget
-                if self.get_name() == self.parent.list_widget.get_contents()[i].get_name():
-                    self.parent.list_widget.remove_content(i)
-                    break
+                for i in range(self.parent.list_widget.get_len()):
+                    # Si c'est l'element dans le list widget
+                    if self.get_name() == self.parent.list_widget.get_contents()[i].get_name():
+                        self.parent.list_widget.remove_content(i)
+                        break
 
     def properties(self):
         """

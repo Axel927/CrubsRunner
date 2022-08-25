@@ -410,10 +410,14 @@ class Robot:
             if ans == QtWidgets.QMessageBox.No:
                 return
 
-        for i in range(self.parent.list_widget.get_len()):
+        for i in range(self.parent.list_widget.get_len()):  # On retire de la liste a droite
             if self.robot.get_name() == self.parent.list_widget.get_contents()[i].get_name():
                 self.parent.list_widget.remove_content(i)
                 break
+
+        for track in self.track:  # On retire la trace
+            track.setVisible(False)
+        self.track = list()
 
         self.robot.set_file("")
         if self.robot.is_main_robot():
