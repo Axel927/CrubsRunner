@@ -53,8 +53,6 @@ MAINTAINER = "CRUBS"
 
 MAINTAINER_EMAIL = "club.robotique.ubs@gmail.com"
 
-DATA_FILES = ['icon', '3d_files', 'LICENSE']
-
 # Tous les paquets utilises dans l'application
 INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
             'numpy', 'trimesh', 'fitz', 'pyqtgraph', 'OpenGL', 'os', 'sys', 'pathlib', 'time', 'PIL', 'platform']
@@ -70,6 +68,8 @@ if system() == 'Linux':
 
 elif system() == 'Darwin':
     APP = ['src/CrubsRunner.py']
+    
+    DATA_FILES = ['icon', '3d_files', 'LICENSE']
 
     OPTIONS = {'iconfile': str(path) + '/icon/icon_app.icns',
                'includes': INCLUDES,
@@ -89,13 +89,18 @@ elif system() == 'Darwin':
     )
 
 elif system() == 'Windows':
-    APP = [{'script': str(path) + "src/CrubsRunner.py",
-            'icon_resources': [(1, "icon/icon_app.ico")]
+    import py2exe
+    
+    APP = [{'script': str(path) + "\\src\\CrubsRunner.py",
+            'icon_resources': [(1, str(path) + "\\icon\\icon_app.ico")]
             }]
+            
+    DATA_FILES = [('3d_files', str(path) + '\\3d_files'), ('LICENSE', str(path) + '\\LICENSE')]
 
     OPTIONS = {'includes': INCLUDES,
                'excludes': EXCLUDES,
-               'bundle_files': 1, 'compressed': True
+               'bundle_files': 1, 
+               'compressed': True
                }
 
     setup(

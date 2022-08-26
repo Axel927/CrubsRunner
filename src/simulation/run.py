@@ -191,7 +191,7 @@ class Run:
                 i += 2
 
         # Convertit la duree en ms et en ajoute encore un peu
-        self.refresh_time = np.ceil(display_time.max() * 1000 + self.init_data.get_run('added_time_refresh_time'))
+        self.refresh_time = int(np.ceil(display_time.max() * 1000 + self.init_data.get_run('added_time_refresh_time')))
 
     def resume(self):
         """
@@ -273,15 +273,15 @@ class Run:
         self.running = True
         self.window.set_theoretical_time(max(mr_theoretical_time, sr_theoretical_time))
         self.set_refresh_time()
-        self.start_time_move_mr.start(self.init_data.get_run('time_before_start') /
+        self.start_time_move_mr.start(int(self.init_data.get_run('time_before_start') /
                                       self.init_data.get_window('speed_simulation_btn_values')[
-                                          self.parent.speed_simulation_btn_nb])
-        self.start_time_move_sr.start(self.init_data.get_run('time_before_start') /
+                                          self.parent.speed_simulation_btn_nb]))
+        self.start_time_move_sr.start(int(self.init_data.get_run('time_before_start') /
                                       self.init_data.get_window('speed_simulation_btn_values')[
-                                          self.parent.speed_simulation_btn_nb])
+                                          self.parent.speed_simulation_btn_nb]))
         self.timer.start(
-            self.init_data.get_run('timer_refresh') / self.init_data.get_window('speed_simulation_btn_values')[
-                self.parent.speed_simulation_btn_nb])  # Demarre le chrono
+            int(self.init_data.get_run('timer_refresh') / self.init_data.get_window('speed_simulation_btn_values')[
+                self.parent.speed_simulation_btn_nb]))  # Demarre le chrono
 
     def _timer(self):
         """

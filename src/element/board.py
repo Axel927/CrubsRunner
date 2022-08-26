@@ -124,17 +124,17 @@ class Board(element.CoordSys):
         """
         self.axis_angle = angle
 
-    def set_offset(self, value: float):
+    def set_offset(self, value: int):
         """
         Definit la valeur de l'offset pour la hauteur au dessus du plateau a laquelle doit etre le robot.
-        :param value: float: Valeur de l'offset
+        :param value: int: Valeur de l'offset
         :return: None
         """
-        self.offset = value
+        self.offset = int(value)
 
-    def get_offset(self) -> float:
+    def get_offset(self) -> int:
         """
         Renvoie la valeur de l'offset.
-        :return: float: Valeur de l'offset
+        :return: int: Valeur de l'offset
         """
         return self.offset
