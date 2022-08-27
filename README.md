@@ -28,12 +28,12 @@ L'utilisation principale prevue est la **coupe de France de robotique**.
 
 **Python 3** :
 
-* Numpy --> `pip3 install numpy`
-* PyOpenGL --> `pip3 install PyOpengl`
-* PyMu --> `pip3 install PyMuPDF`
-* PyQt --> `pip3 install PyQt5`
-* PyQtGraph --> `pip3 install pyqtgraph`
-* Trimesh --> `pip3 install trimesh`
+* Numpy
+* PyOpenGL
+* PyMu
+* PyQt 
+* PyQtGraph
+* Trimesh 
 
 <span id="Installation"><span>
 ## Installation
