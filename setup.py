@@ -27,7 +27,7 @@
 """
 Utilisation :
  * MacOS : python3 setup.py py2app
- * Windows : python3 setup.py py2exe
+ * Windows : python setup.py py2exe
 """
 
 try:
@@ -95,7 +95,8 @@ elif system() == 'Windows':
             'icon_resources': [(1, str(path) + "\\icon\\icon_app.ico")]
             }]
             
-    DATA_FILES = [('3d_files', str(path) + '\\3d_files'), ('LICENSE', str(path) + '\\LICENSE')]
+    DATA_FILES = [('3d_files', str(path) + '\\3d_files'), ('LICENSE', str(path) + '\\LICENSE'),
+                  ('icon', str(path) + '\\icon')]
 
     OPTIONS = {'includes': INCLUDES,
                'excludes': EXCLUDES,
@@ -107,7 +108,6 @@ elif system() == 'Windows':
         windows=APP,
         data_files=DATA_FILES,
         options={'py2exe': OPTIONS},
-        setup_requires=['py2exe'],
         version=VERSION,
         author=AUTHOR,
         author_email=AUTHOR_EMAIL,
