@@ -32,10 +32,16 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from time import time
 import pyqtgraph.opengl as gl
 import numpy as np
+from platform import system
 
 from src import simulation
 from src import widget
 from src import element
+
+if system() == 'Windows':
+    COEF = -1
+else:
+    COEF = 1
 
 
 class Robot:
@@ -637,7 +643,7 @@ class Robot:
         Slot pour deplacer le robot selon la valeur de l'offset
         :return: None
         """
-        self.robot.translate(0, 0, self.offset_sb.value() - self.robot.get_offset())
+        self.robot.translate(0, 0, (self.offset_sb.value() - self.robot.get_offset()) * COEF)
         self.robot.set_offset(self.offset_sb.value())
         if self.robot.is_main_robot():
             self.save_data.set_main_robot('offset', self.robot.get_offset())

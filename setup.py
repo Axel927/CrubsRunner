@@ -27,46 +27,42 @@
 """
 Utilisation :
  * MacOS : python3 setup.py py2app
- * Windows : python setup.py py2exe
 """
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-from sys import setrecursionlimit
-from pathlib import Path
 from platform import system
-
-setrecursionlimit(1500)
-path = Path(__file__).parent.resolve()
-
-VERSION = '1.1.0'
-
-AUTHOR = "Membres du CRUBS : \n" \
-          "* Axel Tremaudant \n"
-
-AUTHOR_EMAIL = "axel.tremaudant@gmail.com"
-
-MAINTAINER = "CRUBS"
-
-MAINTAINER_EMAIL = "club.robotique.ubs@gmail.com"
-
-# Tous les paquets utilises dans l'application
-INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
-            'numpy', 'trimesh', 'fitz', 'pyqtgraph', 'OpenGL', 'os', 'sys', 'pathlib', 'time', 'PIL', 'platform']
-
-# Packets installes mais inutiles pour l'application,
-# cela peut permettre de reduire grandement la taille de l'application
-# Normalement inutile de la remplir si vous avez créé un environnement virtuel
-# et que vous n'avez pas ajoute de packets inutiles
-EXCLUDES = []
 
 if system() == 'Linux':
     print("Pour compiler l'application sur Linux, executez : bash linux_builder.sh")
 
 elif system() == 'Darwin':
+    from setuptools import setup
+    from sys import setrecursionlimit
+    from pathlib import Path
+
+    setrecursionlimit(1500)
+    path = Path(__file__).parent.resolve()
+
+    VERSION = '1.1.0'
+
+    AUTHOR = "Membres du CRUBS : \n" \
+             "* Axel Tremaudant \n"
+
+    AUTHOR_EMAIL = "axel.tremaudant@gmail.com"
+
+    MAINTAINER = "CRUBS"
+
+    MAINTAINER_EMAIL = "club.robotique.ubs@gmail.com"
+
+    # Tous les paquets utilises dans l'application
+    INCLUDES = ['src', 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtGui',
+                'numpy', 'trimesh', 'fitz', 'pyqtgraph', 'OpenGL', 'os', 'sys', 'pathlib', 'time', 'PIL', 'platform']
+
+    # Packets installes mais inutiles pour l'application,
+    # cela peut permettre de reduire grandement la taille de l'application
+    # Normalement inutile de la remplir si vous avez créé un environnement virtuel
+    # et que vous n'avez pas ajoute de packets inutiles
+    EXCLUDES = []
+
     APP = ['src/CrubsRunner.py']
     
     DATA_FILES = ['icon', '3d_files', 'LICENSE']
@@ -89,31 +85,7 @@ elif system() == 'Darwin':
     )
 
 elif system() == 'Windows':
-    import py2exe
-    
-    APP = [{'script': str(path) + "\\src\\CrubsRunner.py",
-            'icon_resources': [(1, str(path) + "\\icon\\icon_app.ico")]
-            }]
-            
-    DATA_FILES = [('3d_files', str(path) + '\\3d_files'), ('LICENSE', str(path) + '\\LICENSE'),
-                  ('icon', str(path) + '\\icon')]
-
-    OPTIONS = {'includes': INCLUDES,
-               'excludes': EXCLUDES,
-               'bundle_files': 1, 
-               'compressed': True
-               }
-
-    setup(
-        windows=APP,
-        data_files=DATA_FILES,
-        options={'py2exe': OPTIONS},
-        version=VERSION,
-        author=AUTHOR,
-        author_email=AUTHOR_EMAIL,
-        maintainer=MAINTAINER,
-        maintainer_email=MAINTAINER_EMAIL
-    )
+    print("Pour compiler l'application sur Windows, executez : python -m PyInstaller setup.spec")
 
 else:
     print("L'OS {os} n'est pas supporte pour la compilation.".format(os=system()))

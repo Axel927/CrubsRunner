@@ -30,12 +30,19 @@ Ces valeurs ne changent pas pendant que l'application tourne.
 """
 
 from PyQt5 import QtCore, QtWidgets, QtGui
+from platform import system
+
+if system() == 'Windows':
+    COEF = -1
+else:
+    COEF = 1
 
 
 class Init:
     """
     Classe contenant toutes les valeurs utiles a CrubsRunner.
     """
+
     def __init__(self):
         self.window = {  # Donnees pour la fenetre principale
             'app_title': "CrubsRunner",
@@ -147,7 +154,7 @@ class Init:
             'stop_run_action_icon': "icon/icon_stop_run.png",
 
             'speed_simulation_btn_name': "x {multi}",
-            'speed_simulation_btn_tip': "Vitesse de la simulation", 
+            'speed_simulation_btn_tip': "Vitesse de la simulation",
             'speed_simulation_btn_values': (0.25, 0.5, 1, 2, 4),
 
             'window_title': "CrubsRunner",
@@ -324,7 +331,7 @@ class Init:
             'speed_min': 1,
             'speed_max': 1000,
             'speed_rotation_lbl': "Vitesse de rotation (degres/s) : ",
-            'rotation_min':  1,
+            'rotation_min': 1,
             'rotation_max': 360,
             'gb_speed_name': "Vitesses",
             'track_visible_cb_name': "Voir la trace",
@@ -369,7 +376,7 @@ class Init:
 
             'track_width': 20,  # mm
             'out_limits': (2000, 1500)  # mm avant de considerer hors du plateau
-        }   # End self.main_robot
+        }  # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
             'type': "robot",
@@ -402,8 +409,8 @@ class Init:
             'start_view_position_distance': 4000,
             'start_view_position_pos': QtGui.QVector3D(0, 0, 0),
 
-            'top_view_position_elevation': 90,
-            'bottom_view_position_elevation': -90,
+            'top_view_position_elevation': 90 * COEF,
+            'bottom_view_position_elevation': -90 * COEF,
 
             'moving_cursor': QtCore.Qt.ClosedHandCursor,
             'orbit_cursor': QtCore.Qt.DragMoveCursor,

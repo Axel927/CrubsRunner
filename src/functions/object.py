@@ -126,7 +126,6 @@ def show_vinyl(vinyl: element.Vinyl) -> bool:
         return False
 
     init_data = data.Init()
-
     try:
         if '.' + vinyl.get_file().split('.')[-1] in init_data.get_extension('vinyl'):
             if vinyl.get_file().split('.')[-1] == 'pdf':
@@ -145,15 +144,6 @@ def show_vinyl(vinyl: element.Vinyl) -> bool:
                               init_data.get_window('error_open_file_message').format(
                                   filename=vinyl.get_file())).exec()
         return False
-
-    width = init_data.get_grid('width')  # Longueur du plateau
-    # Met a la bonne taille
-    vinyl.scale(width / vinyl.get_pixel_width(), width / vinyl.get_pixel_width(), width / vinyl.get_pixel_width())
-
-    # Et le place correctement
-    vinyl.rotate(90, 0, 0, 1)
-    vinyl.rotate(180, 1, 0, 0)
-    vinyl.translate(width / 2, init_data.get_grid('height') / 2, 0)
     return True
 
 

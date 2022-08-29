@@ -61,6 +61,29 @@ class Vinyl(gl.GLImageItem):
         self.save_data.set_vinyl('pixel_width', self.pixel_width)
         self.time = 0.
         self.setVisible(False)
+        self.array = None
+        self.one_placement = True
+
+    def _updateTexture(self):
+        """
+        Insert un element. Cette methode n'a pas a etre appelee.
+        :return: None
+        """
+        # noinspection PyBroadException
+        try:
+            super(Vinyl, self)._updateTexture()
+            del self.array
+            # Met a la bonne taille
+            init_data = self.save_data.get_init_data()
+            width = init_data.get_grid('width')  # Longueur du plateau
+            self.scale(width / self.get_pixel_width(), width / self.get_pixel_width(), width / self.get_pixel_width())
+        except Exception:
+            # Dans le cas d'une vm Windows, probleme a l'affichage du tapis.
+            # Ceci divise par 2 les dimensions du tapis (en terme de points de couleur)
+            self.array = np.delete(self.array, range(0, len(self.array), 2), axis=0)
+            self.array = np.delete(self.array, range(0, len(self.array[0]), 2), axis=1)
+            self.set_array(self.array)
+            self._updateTexture()
 
     def get_pixel_height(self) -> int:
         """
@@ -102,11 +125,21 @@ class Vinyl(gl.GLImageItem):
             array = np.concatenate((array, np.full((array.shape[0], array.shape[1], 1), 255)), axis=2)
 
         self.setData(array)
+        self.array = array
         self.pixel_height = len(array)
         self.pixel_width = len(array[0])
         self.save_data.set_vinyl('pixel_height', self.pixel_height)
         self.save_data.set_vinyl('pixel_width', self.pixel_width)
         self.setVisible(True)
+
+        init_data = self.save_data.get_init_data()
+        width = init_data.get_grid('width')  # Longueur du plateau
+        if self.one_placement:
+            # Place le tapis correctement
+            self.rotate(90, 0, 0, 1)
+            self.rotate(180, 1, 0, 0)
+            self.translate(width / 2, init_data.get_grid('height') / 2, 0)
+            self.one_placement = False
 
     def get_name(self) -> str:
         """

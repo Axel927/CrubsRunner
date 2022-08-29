@@ -30,12 +30,19 @@ Fichier contenant la class Board, partie interface graphique.
 
 from PyQt5 import QtWidgets, QtGui
 from time import time
+from platform import system
+
+if system() == 'Windows':
+    COEF = -1
+else:
+    COEF = 1
 
 
 class Board:
     """
     Classe qui gere la partie graphique du plateau.
     """
+
     def __init__(self, parent, save_data, board):
         """
         Constructeur de Board.
@@ -331,6 +338,6 @@ class Board:
         Slot pour deplacer le robot selon la valeur de l'offset
         :return: None
         """
-        self.board.translate(0, 0, self.offset_sb.value() - self.board.get_offset())
+        self.board.translate(0, 0, (self.offset_sb.value() - self.board.get_offset()) * COEF)
         self.board.set_offset(self.offset_sb.value())
         self.save_data.set_main_robot('offset', self.board.get_offset())

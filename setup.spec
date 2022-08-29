@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 # usage :
 #  * Linux : python3 -m PyInstaller setup.spec
+#  * Windows : python -m PyInstaller setup.spec
 
 block_cipher = None
 
