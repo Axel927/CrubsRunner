@@ -6,23 +6,23 @@
 <img src="https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png">
 </p>
 
-## Table des matieres
+## Table des matières
 
 * [Introduction](#Introduction)
-* [Prerequis au developpement](#Prerequis)
+* [Prérequis au développement](#Prerequis)
 * [Installation](#Installation)
 * [Exemple d'utilisation](#Exemple)
 
 <span id="Introduction"><span>
 ## Introduction
 
-**CrubsRunner** est une application multi-plateforme developpee par le **CRUBS** 
-grace a l'interface graphique **Qt** liee a **OpenGL** dans le but de creer facilement un fichier sequentiel
-pour un (ou deux) robot(s).
-L'utilisation principale prevue est la **coupe de France de robotique**.
+**CrubsRunner** est une application multi-plateforme développée par le **CRUBS** 
+grâce à l'interface graphique **Qt** liée à **OpenGL** dans le but de créer facilement un fichier 
+séquentiel pour un (ou deux) robot(s).
+L'utilisation principale prévue est la **coupe de France de robotique**.
 
 <span id="Prerequis"><span>
-## Prerequis au developpement
+## Prérequis au développement
 
 **OS** : Linux, MacOs, Windows
 
@@ -38,22 +38,22 @@ L'utilisation principale prevue est la **coupe de France de robotique**.
 <span id="Installation"><span>
 ## Installation
 
+Les exécutables sont disponibles dans la partie [release](https://github.com/Axel927/CrubsRunner/releases/tag/v1.1.0).
+
 ### Linux
-* Telecharger la compilation ici (LIER LE LIEN A ICI)
-* Decompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
-* Depuis le terminal, executer `bash CrubsRunner_Linux/linux_installer.sh`
-* Vous pouvez desormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
+* Décompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
+* Depuis le terminal, exécuter `bash CrubsRunner_Linux/linux_installer.sh`
+* Vous pouvez désormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
 soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 
 ### MacOs
-* Telecharger la compilation ici (LIER LE LIEN A ICI)
-* Decompresser le zip.
-* Deplacer CrubsRunner.app dans le dossier application.
-* Vous pouvez desormais lancer l'application normalement.
+* Décompresser le zip.
+* Déplacer CrubsRunner.app dans le dossier application.
+* Vous pouvez désormais lancer l'application normalement.
 
 ### Windows
-
-A COMPLETER
+* Télécharger l'exécutable
+* Le placer où vous le souhaitez
 
 <span id="Exemple"><span>
 ## Exemple d'utilisation

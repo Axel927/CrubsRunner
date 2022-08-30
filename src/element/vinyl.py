@@ -74,8 +74,7 @@ class Vinyl(gl.GLImageItem):
             super(Vinyl, self)._updateTexture()
             del self.array
             # Met a la bonne taille
-            init_data = self.save_data.get_init_data()
-            width = init_data.get_grid('width')  # Longueur du plateau
+            width = self.save_data.get_init_data().get_grid('width')  # Longueur du plateau
             self.scale(width / self.get_pixel_width(), width / self.get_pixel_width(), width / self.get_pixel_width())
         except Exception:
             # Dans le cas d'une vm Windows, probleme a l'affichage du tapis.
