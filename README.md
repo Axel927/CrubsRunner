@@ -38,7 +38,7 @@ L'utilisation principale prévue est la **coupe de France de robotique**.
 <span id="Installation"><span>
 ## Installation
 
-Les exécutables sont disponibles dans la partie [release](https://github.com/Axel927/CrubsRunner/releases/tag/v1.1.0).
+Les exécutables sont disponibles dans la partie [releases](https://github.com/Axel927/CrubsRunner/releases/tag/v1.1.0).
 
 ### Linux
 * Décompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
@@ -58,7 +58,7 @@ soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 <span id="Exemple"><span>
 ## Exemple d'utilisation
 
-Une documentation concernant l'utilisation de CrubsRunner est disponible ici (LIER LE LIEN A ICI)
+Une documentation concernant l'utilisation de CrubsRunner est disponible sur [GitHub](https://github.com/Axel927/CrubsRunner/blob/main/additional/manuel_utilisation_crubsrunner.pdf).
 
 Pour toute question, vous pouvez contacter le CRUBS par [email](mailto:club.robotique.ubs@gmail.com).
 
