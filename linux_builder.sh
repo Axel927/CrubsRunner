@@ -29,7 +29,7 @@ then
 
   echo ""
   echo "Compression du dossier"
-  tar -zcvf CrubsRunner_Linux_v1.1.0.tar.gz  CrubsRunner_Linux
+  tar -zcvf CrubsRunner_Linux.tar.gz  CrubsRunner_Linux
 
   echo ""
   echo "Construction terminee"

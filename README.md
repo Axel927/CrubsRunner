@@ -41,7 +41,7 @@ L'utilisation principale prévue est la **coupe de France de robotique**.
 Les exécutables sont disponibles dans la partie [releases](https://github.com/Axel927/CrubsRunner/releases/tag/v1.1.0).
 
 ### Linux
-* Décompresser l'archive avec `tar -xzvf CrubsRunner_Linux_v1.1.0.tar.gz`
+* Décompresser l'archive avec `tar -xzvf CrubsRunner_Linux.tar.gz`
 * Depuis le terminal, exécuter `bash CrubsRunner_Linux/linux_installer.sh`
 * Vous pouvez désormais lancer l'application soit depuis le terminal avec `./CrubsRunner` 
 soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
