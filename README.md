@@ -3,7 +3,7 @@
 [comment]: <> (Le lien de l'image a ete depose dans issue -> new issue -> drop dans la zone de texte puis copier coller)
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/77966063/185448317-e2e98e91-3b35-4278-b4d7-26357242792e.png">
+<img src="https://user-images.githubusercontent.com/77966063/187696158-4a75d594-2304-4bd8-a92a-521247c37b4d.png">
 </p>
 
 ## Table des matières
@@ -38,7 +38,7 @@ L'utilisation principale prévue est la **coupe de France de robotique**.
 <span id="Installation"><span>
 ## Installation
 
-Les exécutables sont disponibles dans la partie [releases](https://github.com/Axel927/CrubsRunner/releases/tag/v1.1.0).
+Les exécutables sont disponibles dans la partie [releases](https://github.com/CRUBS/CrubsRunner/releases).
 
 ### Linux
 * Décompresser l'archive avec `tar -xzvf CrubsRunner_Linux.tar.gz`
@@ -58,10 +58,10 @@ soit en double-cliquant sur CrubsRunner depuis l'application Fichiers.
 <span id="Exemple"><span>
 ## Exemple d'utilisation
 
-Une documentation concernant l'utilisation de CrubsRunner est disponible sur [GitHub](https://github.com/Axel927/CrubsRunner/blob/main/additional/manuel_utilisation_crubsrunner.pdf).
+Une documentation concernant l'utilisation de CrubsRunner est disponible sur [GitHub](https://github.com/CRUBS/CrubsRunner/blob/main/additional/manuel_utilisation_crubsrunner.pdf).
 
 Pour toute question, vous pouvez contacter le CRUBS par [email](mailto:club.robotique.ubs@gmail.com).
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/77966063/185453250-659324dc-f10a-42a1-8c63-552ee739ef6b.jpg">
+<img src="https://user-images.githubusercontent.com/77966063/187696642-c14ba895-0ed0-4993-8ee1-580c46412801.jpg">
 </p>
