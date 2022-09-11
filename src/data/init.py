@@ -1,28 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# © 2022 Tremaudant Axel
-# axel.tremaudant@gmail.com
-
-# This software is a computer program whose purpose is to easily and precisely generate sequential file for robots
-# used in the Coupe de France de robotique.
-
-# This software is governed by the CeCILL license under French law and abiding by the rules of distribution of free
-# software. You can use, modify and/ or redistribute the software under the terms of the CeCILL license as circulated
-# by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
-# As a counterpart to the access to the source code and rights to copy, modify and redistribute granted by the license,
-# users are provided only with a limited warranty and the software's author, the holder of the economic rights,
-# and the successive licensors have only limited liability.
-# In this respect, the user's attention is drawn to the risks associated with loading, using, modifying
-# and/or developing or reproducing the software by the user in light of its specific status of free software,
-# that may mean that it is complicated to manipulate, and that also
-# therefore means that it is reserved for developers and experienced professionals having in-depth computer knowledge.
-# Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions
-# enabling the security of their systems and/or data to be ensured and, more generally, to use and operate it
-# in the same conditions as regards security.
-# The fact that you are presently reading this means that you have had knowledge of the CeCILL license
-# and that you accept its terms.
-
+# Created by Axel Tremaudant on 10/06/2022
 
 """
 Fichier contenant toutes les valeurs utiles a l'application dans la classe InitData.
@@ -42,7 +20,6 @@ class Init:
     """
     Classe contenant toutes les valeurs utiles a CrubsRunner.
     """
-
     def __init__(self):
         self.window = {  # Donnees pour la fenetre principale
             'app_title': "CrubsRunner",
@@ -51,12 +28,12 @@ class Init:
 
             'name_tool_bar': "Projet",
             'tool_bar_movable': False,
-            'speed_tip': "Vitesse de deplacement du robot",
+            'speed_tip': "Vitesse de déplacement du robot",
             'cursor_while_opening': QtCore.Qt.WaitCursor,
             'normal_cursor': QtCore.Qt.ArrowCursor,
 
             'new_project_name': "Nouveau",
-            'new_project_status_tip': "Creer un nouveau projet",
+            'new_project_status_tip': "Créer un nouveau projet",
             'new_project_shortcut': QtGui.QKeySequence.New,  # Ctrl + N
             'new_project_icon': "icon/icon_new.png",
 
@@ -92,7 +69,7 @@ class Init:
             'import_shortcut': QtGui.QKeySequence.Italic,  # Ctrl + I
             'import_status_tip': "Importer un composant",
             'import_icon': "icon/icon_import.png",
-            'import_dialog_title': "Choisir le composant a importer",
+            'import_dialog_title': "Choisir le composant à importer",
             'import_dialog_modal': True,
             'import_radio_board_name': "Plateau",
             'import_radio_vinyl_name': "Tapis",
@@ -121,9 +98,9 @@ class Init:
             'top_view_action_status_tip': "Vue de dessus",
             'top_view_action_icon': "icon/icon_top_view.png",
 
-            'start_view_action_name': "Vue de depart",
+            'start_view_action_name': "Vue de départ",
             'start_view_action_shortcut': QtGui.QKeySequence.Underline,  # Ctrl + U
-            'start_view_action_status_tip': "Vue de depart",
+            'start_view_action_status_tip': "Vue de départ",
             'start_view_action_icon': "icon/icon_start_view.png",
 
             'bottom_view_action_name': "Vue de dessous",
@@ -131,15 +108,15 @@ class Init:
             'bottom_view_action_status_tip': "Vue de dessous",
             'bottom_view_action_icon': "icon/icon_bottom_view.png",
 
-            'undo_name': "Annuler le deplacement",
+            'undo_name': "Annuler le déplacement",
             'undo_shortcut': QtGui.QKeySequence.Undo,  # Ctrl + Z
-            'undo_status_tip': "Annuler le deplacement",
+            'undo_status_tip': "Annuler le déplacement",
             'undo_icon': "icon/icon_undo.png",
             'max_len_doing': 50,
 
-            'redo_name': "Remettre le deplacement",
+            'redo_name': "Remettre le déplacement",
             'redo_shortcut': QtGui.QKeySequence.Redo,  # Ctrl + Shift + Z ou Ctrl + Y
-            'redo_status_tip': "Remettre le deplacement",
+            'redo_status_tip': "Remettre le déplacement",
             'redo_icon': "icon/icon_redo.png",
 
             'key_action_name': "Choisir les touches",
@@ -176,7 +153,7 @@ class Init:
             'import_message_box_type': QtWidgets.QMessageBox.Warning,
             'import_message_box_title': "Erreur d'importation",
             'import_message_box_message': "Vous devez supprimer le composant avant d'en importer un autre.",
-            "drop_message_box_message": "Les deux robots sont deja attribues, veuillez en supprimer un avant "
+            "drop_message_box_message": "Les deux robots sont déjà attribués, veuillez en supprimer un avant "
                                         "d'en ajouter un autre.",
 
             'status_bar_message': "Position du {element} : ({x}, {y}) mm",
@@ -184,25 +161,25 @@ class Init:
             'position_status_message': "Position : x = {x} mm, y = {y} mm, angle = {angle} degres ",
 
             'menu_bar_menu1': "&Fichier",
-            'menu_bar_menu2': "&Edition",
+            'menu_bar_menu2': "&Édition",
             'menu_bar_menu3': "&Run",
 
             'error_open_file_type': QtWidgets.QMessageBox.Critical,
-            'error_open_file_title': "Erreur a l'ouverture ou a la lecture",
-            'error_open_file_message': "Le fichier '{filename}' n'a pas ete trouve ou n'a pas pu etre lu.'",
+            'error_open_file_title': "Erreur à l'ouverture ou à la lecture",
+            'error_open_file_message': "Le fichier '{filename}' n'a pas été trouvé ou n'a pas pu être lu.'",
 
             'error_format_file_type': QtWidgets.QMessageBox.Critical,
-            'error_format_file_title': "Format non supporte",
-            'error_format_file_message': "Le format du fichier '{filename}' n'est pas supporte.'",
+            'error_format_file_title': "Format non supporté",
+            'error_format_file_message': "Le format du fichier '{filename}' n'est pas supporté.'",
 
             'keys_modal': True,
             'keys_title': "Choix des touches",
-            'keys_lbl_0': "Aller a droite : ",
-            'keys_lbl_1': "Aller a gauche : ",
+            'keys_lbl_0': "Aller à droite : ",
+            'keys_lbl_1': "Aller à gauche : ",
             'keys_lbl_2': "Aller en haut : ",
             'keys_lbl_3': "Aller en bas : ",
-            'keys_lbl_4': "Tourner a droite : ",
-            'keys_lbl_5': "Tourner a gauche : ",
+            'keys_lbl_4': "Tourner à droite : ",
+            'keys_lbl_5': "Tourner à gauche : ",
             'keys_lbl_key': "Touche : {key}",
             'keys_apply_btn_name': "Appliquer",
             'keys_apply_default': True,
@@ -232,15 +209,15 @@ class Init:
             'appearance_translation_y': 1000,
             'appearance_translation_z': -1,
 
-            'window_title': "Proprietes du plateau",
+            'window_title': "Propriétés du plateau",
 
             'color_name': "Choisir la couleur du plateau",
             'color_cursor': QtCore.Qt.PointingHandCursor,
             'color_default': False,
             'color_dialog_title': "Couleur du plateau",
-            'edge_color_name': "Choisir la couleur des aretes",
+            'edge_color_name': "Choisir la couleur des arêtes",
             'edge_color_default': False,
-            'edge_color_dialog_title': "Couleur des aretes du plateau",
+            'edge_color_dialog_title': "Couleur des arêtes du plateau",
 
             'axis_rotation_x_name': "x",
             'axis_rotation_y_name': "y",
@@ -266,9 +243,9 @@ class Init:
             'remove_cursor': QtCore.Qt.PointingHandCursor,
 
             'remove_message_box_type': QtWidgets.QMessageBox.Question,
-            'remove_message_box_title': "Suppression d'element",
-            'remove_message_box_message': "Etes-vous sur de vouloir supprimer le plateau ?\n"
-                                          "Cette action est irreversible.",
+            'remove_message_box_title': "Suppression d'élément",
+            'remove_message_box_message': "Etes-vous sûr de vouloir supprimer le plateau ?\n"
+                                          "Cette action est irréversible.",
             'remove_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
         }  # end self.board
 
@@ -280,9 +257,9 @@ class Init:
             'vinyl_dialog_open_extensions': "All files (*.png *.pdf *.jpg *.jpeg) ;; PNG (*.png) ;; PDF (*.pdf)"
                                             ";; JPEG (*.jpg *.jpeg)",
             'remove_message_box_type': QtWidgets.QMessageBox.Question,
-            'remove_message_box_title': "Suppression d'element",
-            'remove_message_box_message': "Etes-vous sur de vouloir supprimer le tapis ?\n"
-                                          "Cette action est irreversible.",
+            'remove_message_box_title': "Suppression d'élément",
+            'remove_message_box_message': "Etes-vous sûr de vouloir supprimer le tapis ?\n"
+                                          "Cette action est irréversible.",
             'remove_message_box_buttons': QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes,
         }  # end self.vinyl
 
@@ -306,13 +283,13 @@ class Init:
             'appearance_translation_y': 0,
             'appearance_translation_z': 0,
 
-            'window_title': "Proprietes du robot principal",
+            'window_title': "Propriétés du robot principal",
             'color_name': "Choisir la couleur du robot",
-            'edge_color_name': "Choisir la couleur des aretes",
+            'edge_color_name': "Choisir la couleur des arêtes",
             'color_dialog_title': "Couleur du robot",
-            'edge_color_dialog_title': "Couleur des aretes",
-            'remove_message_box_message': "Etes-vous sur de vouloir supprimer le robot principal ?\n"
-                                          "Cette action est irreversible.",
+            'edge_color_dialog_title': "Couleur des arêtes",
+            'remove_message_box_message': "Êtes-vous sûr de vouloir supprimer le robot principal ?\n"
+                                          "Cette action est irréversible.",
             'axis_rotation_x_name': "x",
             'axis_rotation_y_name': "y",
             'axis_rotation_z_name': "z",
@@ -330,24 +307,24 @@ class Init:
             'speed_lbl': "Vitesse (mm/s) : ",
             'speed_min': 1,
             'speed_max': 1000,
-            'speed_rotation_lbl': "Vitesse de rotation (degres/s) : ",
-            'rotation_min': 1,
+            'speed_rotation_lbl': "Vitesse de rotation (degrés/s) : ",
+            'rotation_min':  1,
             'rotation_max': 360,
             'gb_speed_name': "Vitesses",
             'track_visible_cb_name': "Voir la trace",
             'track_visible_cb_checked': True,
 
-            'sequence_btn_name': "Creer la sequence du robot",
+            'sequence_btn_name': "Créer la séquence du robot",
             'sequence_btn_default': False,
             'sequence_btn_cursor': QtCore.Qt.PointingHandCursor,
 
-            'import_gcrubs_btn_name': "Importer le fichier sequentiel",
+            'import_gcrubs_btn_name': "Importer le fichier séquentiel",
             'import_gcrubs_btn_default': False,
             'import_gcrubs_btn_cursor': QtCore.Qt.PointingHandCursor,
-            'import_gcrubs_title': "choisir le fichier sequentiel",
-            'import_gcrubs_extension': "Fichier sequentiel (*.gcrubs)",
+            'import_gcrubs_title': "Choisir le fichier séquentiel",
+            'import_gcrubs_extension': "Fichier séquentiel (*.gcrubs)",
 
-            'sequence_dialog_title': "Sequence du robot principal",
+            'sequence_dialog_title': "Séquence du robot principal",
             'sequence_text': "{comment} Sequence gcrubs generee par CrubsRunner le {date} pour le robot principal.\n",
             'sequence_save_btn_name': "Enregistrer",
             'sequence_save_btn_default': True,
@@ -358,7 +335,7 @@ class Init:
             'sequence_new_btn_name': "Nouveau fichier",
             'sequence_new_btn_default': False,
             'sequence_new_btn_cursor': QtCore.Qt.PointingHandCursor,
-            'save_sequence_title': "Sauvegarder le fichier genere",
+            'save_sequence_title': "Sauvegarder le fichier généré",
             'date_format': "dd/MM/yy",
 
             'list_sorting_order': QtCore.Qt.AscendingOrder,
@@ -367,7 +344,7 @@ class Init:
             'sequence_origin_lbl_text': "Placer le robot sur l'origine\n"
                                         "(axe z (en bleu) au niveau de\n"
                                         "l'axe de rotation).",
-            'sequence_origin_lbl_text_start': "Placer le robot en position de depart.",
+            'sequence_origin_lbl_text_start': "Placer le robot en position de départ.",
             'start_sequence_text': "{comment} Position de depart : x = {x} mm, y = {y} mm, angle = {angle} degres\n",
             'position_text': "Position de depart :",
             'sequence_origin_btn_name': "Fait",
@@ -376,7 +353,7 @@ class Init:
 
             'track_width': 20,  # mm
             'out_limits': (2000, 1500)  # mm avant de considerer hors du plateau
-        }  # End self.main_robot
+        }   # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
             'type': "robot",
@@ -396,11 +373,11 @@ class Init:
             'appearance_translation_y': 0,
             'appearance_translation_z': 0,
 
-            'window_title': "Proprietes du robot secondaire",
-            'remove_message_box_message': "Etes-vous sur de vouloir supprimer le robot secondaire ?\n"
-                                          "Cette action est irreversible.",
+            'window_title': "Propriétés du robot secondaire",
+            'remove_message_box_message': "Êtes-vous sûr de vouloir supprimer le robot secondaire ?\n"
+                                          "Cette action est irréversible.",
 
-            'sequence_dialog_title': "Sequence du robot secondaire",
+            'sequence_dialog_title': "Séquence du robot secondaire",
             'sequence_text': "{comment} Sequence gcrubs generee par CrubsRunner le {date} pour le robot secondaire.\n\n"
         }  # End self.second_robot
 
@@ -428,7 +405,7 @@ class Init:
             'coord_sys_z_color': (0., 0., 1., 1.),
 
             'min_zoom': 3000,
-            'max_zoom': 7000
+            'max_zoom': 10000
         }  # End self.view
 
         self.grid = {  # Contient les donnees de la grille dans le widget central
@@ -441,7 +418,7 @@ class Init:
             'transparency': 75,
             'visible': True,
 
-            'coord_sys_name': "Voir le repere",
+            'coord_sys_name': "Voir le repère",
             'coord_sys_visible': True,
 
             'see_name': "Voir la grille",
@@ -467,7 +444,7 @@ class Init:
             'reset_default': False,
             'reset_cursor': QtCore.Qt.PointingHandCursor,
 
-            'window_name': "Proprietes de la grille",
+            'window_name': "Propriétés de la grille",
             'window_modal': True,
 
             'color_dialog_name': "Choisir la couleur de la grille",
@@ -477,15 +454,15 @@ class Init:
 
         self.gcrubs = {  # Contient les donnees pour toute la partie fichier sequentiel
             'extension': "Sequence CrubsRunner (*.gcrubs)",
-            'edit_action_name': "Editer les commandes gcrubs",
-            'edit_action_status_tip': "Editer les commandes gcrubs",
+            'edit_action_name': "Éditer les commandes gcrubs",
+            'edit_action_status_tip': "Éditer les commandes gcrubs",
 
-            'edit_window_title': "Editer les commandes gcrubs",
-            'description_lbl_text': "Remplir a gauche la description de ce que fait l'action et a droite "
-                                    "la sequence correspondante.\n"
+            'edit_window_title': "Éditer les commandes gcrubs",
+            'description_lbl_text': "Remplir à gauche la description de ce que fait l'action et à droite "
+                                    "la séquence correspondante.\n"
                                     "Mettre entre crochets ce qui peut varier. Les variables 'dist', 'angle' et 'temps'"
-                                    " sont connues et sont a utiliser\n"
-                                    "(les unites sont respectivement 'millimetre', 'degre' et 'seconde').",
+                                    " sont connues et sont à utiliser\n"
+                                    "(les unités sont respectivement 'millimètre', 'degré' et 'seconde').",
             'apply_btn_name': "Appliquer",
             'apply_btn_default': True,
             'apply_btn_cursor': QtCore.Qt.PointingHandCursor,
@@ -496,7 +473,7 @@ class Init:
             'add_btn_default': False,
             'add_btn_cursor': QtCore.Qt.PointingHandCursor,
 
-            'key_btn_tip': "Choisir la touche associee",
+            'key_btn_tip': "Choisir la touche associée",
             'del_btn_tip': "Supprimer la commande",
             'btn_cursor': QtCore.Qt.PointingHandCursor,
 
@@ -504,8 +481,8 @@ class Init:
             'sa_width': 730,
             'window_modal': True,
 
-            'key_dialog_title': "Definir le mouvement associe",
-            'key_lbl_text': "Appuyer sur la touche correspondant a l'instruction\n"
+            'key_dialog_title': "Définir le mouvement associé",
+            'key_lbl_text': "Appuyer sur la touche correspondant à l'instruction\n"
                             "'{instruction}'\n"
                             "Touche : ",
             'key_close_name': "Fermer",
@@ -518,11 +495,11 @@ class Init:
             'run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R),
             'run_action_tip': "Lancer une simulation",
 
-            'stop_run_action_name': "Arreter la simulation",
+            'stop_run_action_name': "Arrêter la simulation",
             'stop_run_action_shortcut': QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R | QtCore.Qt.SHIFT),
-            'stop_run_action_tip': "Arreter la simulation",
+            'stop_run_action_tip': "Arrêter la simulation",
 
-            'dialog_title': "Choix du robot a simuler",
+            'dialog_title': "Choix du robot à simuler",
             'dialog_modal': True,
             'main_robot_cb_name': "Robot principal",
             'main_robot_cb_checked': False,
@@ -537,7 +514,7 @@ class Init:
             'cmd_lbl_main': "Commande robot principal : {cmd}",
             'cmd_lbl_second': "Commande robot secondaire : {cmd}",
             'time_lbl': "Chrono : {time} s",
-            'theoretical_time_lbl': "Temps theorique : {time} s",
+            'theoretical_time_lbl': "Temps théorique : {time} s",
             'theoretical_time_accuracy': 2,  # Nombre de chiffres apres la virgule
             'accuracy_timer': None,  # None pour ne pas voir les chiffres apres la virgule
             'time_before_start': 2000,  # ms

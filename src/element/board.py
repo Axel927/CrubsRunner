@@ -37,6 +37,7 @@ class Board(element.CoordSys):
     """
     Classe qui gere la partie 3D du plateau.
     """
+
     def __init__(self, save_data, parent):
         """
         Constructeur de Board.
@@ -52,6 +53,7 @@ class Board(element.CoordSys):
         self.axis_angle = 0
         self.offset = 0
         self.is_updated = False
+        self.axis = [0, 0]
 
     def properties(self):
         """
@@ -59,6 +61,25 @@ class Board(element.CoordSys):
         :return: None
         """
         self.window.properties_window()
+
+    def get_axis(self) -> list:
+        """
+        Renvoie les deplacements du plateau selon les axes x, y
+        :return: list: Deplacements selon x et y
+        """
+        return self.axis
+
+    def set_axis(self, value: int, axis: str):
+        """
+        Definit la valeur de deplacement du plateau selon l'axe.
+        :param value: Deplacement du plateau
+        :param axis: Axe de deplacement (x ou y)
+        :return: None
+        """
+        if axis == 'x':
+            self.axis[0] = int(value)
+        elif axis == 'y':
+            self.axis[1] = int(value)
 
     def update_(self):
         """
@@ -76,7 +97,9 @@ class Board(element.CoordSys):
         self.set_edge_color(self.save_data.get_board('edge_color'))
 
         self.offset = self.save_data.get_board('offset')
-        self.translate(0, 0, self.offset)
+        self.axis[0] = self.save_data.get_board('axis_x')
+        self.axis[1] = self.save_data.get_board('axis_y')
+        self.translate(*self.axis, self.offset)
 
         self.axis_angle = self.save_data.get_board('angle_rotation')
         if self.save_data.get_board('axis_rotation') == 'x':

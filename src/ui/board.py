@@ -77,6 +77,9 @@ class Board:
         self.offset_sb = QtWidgets.QSpinBox(self.window)
         self.offset_lbl = QtWidgets.QLabel(self.init_data.get_board('offset_lbl_name'))
 
+        self.axis_sb = {'x': QtWidgets.QSpinBox(self.window), 'y': QtWidgets.QSpinBox(self.window)}
+        self.axis_sb_lbl = {'x': QtWidgets.QLabel('x'), 'y': QtWidgets.QLabel('y')}
+
     def properties_window(self):
         """
         Cree la fenetre des proprietes du plateau.
@@ -106,6 +109,13 @@ class Board:
         self.offset_sb.setMaximum(self.init_data.get_board('offset_sb_max'))
         self.offset_sb.setValue(self.board.get_offset())
 
+        for sb in self.axis_sb.keys():
+            self.axis_sb.get(sb).setMinimum(self.init_data.get_board('offset_sb_min'))
+            self.axis_sb.get(sb).setMaximum(self.init_data.get_board('offset_sb_max'))
+
+        self.axis_sb.get('x').setValue(self.board.get_axis()[0])
+        self.axis_sb.get('y').setValue(self.board.get_axis()[1])
+
         if self.save_data.get_board('axis_rotation') == 'x':
             self.axis_rotation_rb_x.setChecked(True)
             self.axis_rotation_rb_y.setChecked(False)
@@ -128,6 +138,10 @@ class Board:
         gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
         gb_layout.addWidget(self.offset_lbl, 4, 0)
         gb_layout.addWidget(self.offset_sb, 4, 1)
+        gb_layout.addWidget(self.axis_sb_lbl.get('x'), 5, 0)
+        gb_layout.addWidget(self.axis_sb.get('x'), 5, 1)
+        gb_layout.addWidget(self.axis_sb_lbl.get('y'), 6, 0)
+        gb_layout.addWidget(self.axis_sb.get('y'), 6, 1)
         group_box = QtWidgets.QGroupBox(self.init_data.get_board('gb_name'), self.window)
         group_box.setLayout(gb_layout)
 
@@ -156,6 +170,18 @@ class Board:
         self.axis_rotation_rb_y.clicked.connect(self._axis_y)
         self.axis_rotation_rb_z.clicked.connect(self._axis_z)
         self.offset_sb.valueChanged.connect(self._offset)
+        self.axis_sb.get('x').valueChanged.connect(self._move_axis_x)
+        self.axis_sb.get('y').valueChanged.connect(self._move_axis_y)
+
+    def _move_axis_x(self):
+        self.board.translate(self.axis_sb.get('x').value() - self.board.get_axis()[0], 0, 0)
+        self.board.set_axis(self.axis_sb.get('x').value(), 'x')
+        self.save_data.set_board('axis_x', self.board.get_axis()[0])
+
+    def _move_axis_y(self):
+        self.board.translate(0, self.axis_sb.get('y').value() - self.board.get_axis()[1], 0)
+        self.board.set_axis(self.axis_sb.get('y').value(), 'y')
+        self.save_data.set_board('axis_y', self.board.get_axis()[1])
 
     def _color_board(self):
         """
@@ -340,4 +366,4 @@ class Board:
         """
         self.board.translate(0, 0, (self.offset_sb.value() - self.board.get_offset()) * COEF)
         self.board.set_offset(self.offset_sb.value())
-        self.save_data.set_main_robot('offset', self.board.get_offset())
+        self.save_data.set_board('offset', self.board.get_offset())

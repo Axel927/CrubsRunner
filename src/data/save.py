@@ -62,7 +62,9 @@ class Save:
             'edge_color': self.init_data.get_board('edge_color'),
             'angle_rotation': 0,
             'axis_rotation': 'x',
-            'offset': 0
+            'offset': 0,
+            'axis_x': 0,
+            'axis_y': 0
         }
 
         self.vinyl = {
