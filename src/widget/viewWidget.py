@@ -64,6 +64,7 @@ class ViewWidget(gl.GLViewWidget):
         self.dist = 0
         self.angle = 0
         self.sequence_text = ""
+        self.ccrubs_text = ""
         self.view_changed = False
         self.view_position = np.zeros(shape=2)
         self.zoom = self.init_data.get_view('start_view_position_distance')
@@ -249,7 +250,7 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.parent.do([elem, 0, 0, 0, "", None])
 
                     self.angle += speed
                     self.angle %= 360
@@ -289,7 +290,7 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.angle = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.parent.do([elem, 0, 0, 0, "", None])
 
                     self.angle += speed
                     self.angle %= 360
@@ -331,7 +332,8 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():  # Si la touche actuelle est differente de la precedente
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.ccrubs_text = elem.get_window().get_ccrubs()
+                        self.parent.do([elem, 0, 0, 0, "", elem.get_window().get_ccrubs()])
                         elem.get_window().add_track(elem)
 
                     self.dist += speed
@@ -339,13 +341,16 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                                                 + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
 
-                    self.parent.updo([elem, 0, -self.dist, 0, elem.get_window().get_sequence_text()])
+                    self.parent.updo([elem, 0, -self.dist, 0, elem.get_window().get_sequence_text(),
+                                      elem.get_window().get_ccrubs()])
                     break
 
     def _go_down(self, event, elem, mvt: tuple, speed: int):
@@ -376,7 +381,8 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.ccrubs_text = elem.get_window().get_ccrubs()
+                        self.parent.do([elem, 0, 0, 0, "", elem.get_window().get_ccrubs()])
                         elem.get_window().add_track(elem)
 
                     self.dist += speed
@@ -384,13 +390,16 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(-speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                                                 + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
 
-                    self.parent.updo([elem, 0, self.dist, 0, elem.get_window().get_sequence_text()])
+                    self.parent.updo([elem, 0, self.dist, 0, elem.get_window().get_sequence_text(),
+                                      elem.get_window().get_ccrubs()])
                     break
 
     def _go_left(self, event, elem, mvt: tuple, speed: int):
@@ -421,7 +430,8 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.ccrubs_text = elem.get_window().get_ccrubs()
+                        self.parent.do([elem, 0, 0, 0, "", elem.get_window().get_ccrubs()])
                         elem.get_window().add_track(elem)
 
                     self.dist += speed
@@ -429,12 +439,15 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(-speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                                                 + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
-                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text()])
+                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text(),
+                                      elem.get_window().get_ccrubs()])
                     break
 
     def _go_right(self, event, elem, mvt: tuple, speed: int):
@@ -465,7 +478,8 @@ class ViewWidget(gl.GLViewWidget):
                     if elem.get_key() != event.key():
                         self.dist = 0
                         self.sequence_text = elem.get_window().get_sequence_text()
-                        self.parent.do([elem, 0, 0, 0, ""])
+                        self.ccrubs_text = elem.get_window().get_ccrubs()
+                        self.parent.do([elem, 0, 0, 0, "", elem.get_window().get_ccrubs()])
                         elem.get_window().add_track(elem)
 
                     self.dist += speed
@@ -473,13 +487,16 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                                                 + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
                             self.save_data.get_gcrubs('cmd_name').get(key).format(dist=self.dist))
                     except KeyError:
                         elem.get_window().add_sequence_text(self.save_data.get_gcrubs('cmd_name').get(key))
 
-                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text()])
+                    self.parent.updo([elem, self.dist, 0, 0, elem.get_window().get_sequence_text(),
+                                      elem.get_window().get_ccrubs()])
                     break
 
     def mouseReleaseEvent(self, ev):

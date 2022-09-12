@@ -1014,6 +1014,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.undoing[-1][3] == 0:  # Si pas de rotation
                     self.undoing[-1][0].get_window().remove_last_track()
 
+                if self.undoing[-1][5] is not None:
+                    self.undoing[-1][0].get_window().set_ccrubs('\n'.join(self.undoing[-1][5].split('\n')[:-1]))
+
     def redo(self):
         """
         Slot pour refaire.
@@ -1037,6 +1040,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         x=round(self.doing[-1][0].get_coord()[0]),
                         y=round(self.doing[-1][0].get_coord()[1]),
                         angle=round(self.doing[-1][0].get_angle())))
+
+                self.doing[-1][0].get_window().set_ccrubs(self.doing[-1][5])
 
     def do(self, action):
         """

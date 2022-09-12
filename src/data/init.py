@@ -375,7 +375,12 @@ class Init:
             'sequence_origin_btn_cursor': QtCore.Qt.PointingHandCursor,
 
             'track_width': 20,  # mm
-            'out_limits': (2000, 1500)  # mm avant de considerer hors du plateau
+            'out_limits': (2000, 1500),  # mm avant de considerer hors du plateau
+
+            # Les fichiers ccrubs sont des fichiers qui contiennent les coordonnees ou doit se rendre le robot
+            # alors que le fichier gcrubs indique les deplacements a effectuer par le robot
+            'convert_gcrubs_cb_name': "Convertir le gcrubs en ccrubs",
+            'convert_gcrubs_checked': True
         }  # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
@@ -553,6 +558,7 @@ class Init:
             'board': ".crb",
             'robot': ".crr",
             'sequence': ".gcrubs",
+            'coord_file': ".ccrubs",
             '3d_file': (".stl", ".obj", ".3mf"),
             'vinyl': (".png", ".pdf", ".jpg", ".jpeg")
         }  # End self.extensions

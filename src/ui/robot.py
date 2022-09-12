@@ -62,6 +62,8 @@ class Robot:
         self.init_data = self.save_data.get_init_data()
         self.time = 0.
         self.track = list()
+        self.convert = True
+        self.ccrubs = ""
 
         self.window = QtWidgets.QDialog(self.parent)
         self.color_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('color_name'), self.window)
@@ -107,6 +109,8 @@ class Robot:
         self.sequence_origin_lbl = QtWidgets.QLabel(self.init_data.get_main_robot('sequence_origin_lbl_text'))
         self.sequence_origin_btn = QtWidgets.QPushButton(self.init_data.get_main_robot('sequence_origin_btn_name'))
 
+        self.convert_gcrubs_cb = QtWidgets.QCheckBox(self.init_data.get_main_robot('convert_gcrubs_cb_name'))
+
     def properties_window(self):
         """
         Cree la fenetre des proprietes
@@ -146,6 +150,8 @@ class Robot:
         self.offset_sb.setMinimum(self.init_data.get_main_robot('offset_sb_min'))
         self.offset_sb.setMaximum(self.init_data.get_main_robot('offset_sb_max'))
         self.offset_sb.setValue(self.robot.get_offset())
+
+        self.convert_gcrubs_cb.setChecked(self.init_data.get_main_robot('convert_gcrubs_checked'))
 
         self.track_visible_cb.setChecked(
             self.track[0].visible() if len(self.track) != 0
@@ -207,6 +213,7 @@ class Robot:
         self.layout.addWidget(self.speed_gb)
         self.layout.addWidget(self.group_box)
         self.layout.addWidget(self.track_visible_cb)
+        self.layout.addWidget(self.convert_gcrubs_cb)
         self.layout.addWidget(self.close_btn)
         self.layout.addWidget(self.reset_btn)
         self.layout.addWidget(self.remove_btn)
@@ -241,6 +248,30 @@ class Robot:
         self.sequence_cancel_btn.clicked.connect(self._cancel_sequence)
         self.sequence_origin_btn.clicked.connect(self._set_origin)
         self.sequence_new_btn.clicked.connect(self._new_sequence)
+
+        self.convert_gcrubs_cb.clicked.connect(self.convert_gcrubs)
+
+    def convert_gcrubs(self):
+        """
+        Slot pour indiquer si la conversion du fichier gcrubs en ccrubs doit se faire.
+        :return: None
+        """
+        self.convert = self.convert_gcrubs_cb.isChecked()
+
+    def set_ccrubs(self, text: str):
+        """
+        Definit le contenu du ccrubs.
+        :param text: str: Texte
+        :return: None
+        """
+        self.ccrubs = text
+
+    def get_ccrubs(self) -> str:
+        """
+        Renvoie le contenu du ccrubs.
+        :return: str: contenu
+        """
+        return self.ccrubs
 
     def is_visible(self) -> bool:
         """
@@ -815,6 +846,13 @@ class Robot:
                 else self.robot.set_sequence(self.sequence_text.document().toPlainText())
 
             self.robot.set_gcrubs_file(filename)
+
+            if self.convert:
+                filename = filename.split('.')[0] + self.init_data.get_extension('coord_file')
+                with open(filename, 'w') as file:
+                    file.write(self.ccrubs)
+                    file.write('\n')
+
         self.time = time()
 
     def _set_sequence(self):
@@ -889,6 +927,8 @@ class Robot:
                         x=round(self.robot.get_coord()[0]),
                         y=round(self.robot.get_coord()[1]),
                         angle=round(self.robot.get_angle())))
+
+                    self.ccrubs = str(round(self.robot.get_coord()[0])) + ';;' + str(round(self.robot.get_coord()[1]))
                 else:
                     self.sequence_text.setText(self.robot.get_sequence())
                     for line in self.robot.get_sequence().split('\n'):
@@ -909,6 +949,7 @@ class Robot:
                         x=round(self.robot.get_coord()[0]),
                         y=round(self.robot.get_coord()[1]),
                         angle=round(self.robot.get_angle())))
+                    self.ccrubs = str(round(self.robot.get_coord()[0])) + ';;' + str(round(self.robot.get_coord()[1]))
                 else:
                     self.sequence_text.setText(self.robot.get_sequence())
                     for line in self.robot.get_sequence().split('\n'):
