@@ -928,7 +928,8 @@ class Robot:
                         y=round(self.robot.get_coord()[1]),
                         angle=round(self.robot.get_angle())))
 
-                    self.ccrubs = str(round(self.robot.get_coord()[0])) + ';;' + str(round(self.robot.get_coord()[1]))
+                    self.ccrubs = str(round(self.robot.get_coord()[0])) + self.init_data.get_main_robot(
+                        'ccrubs_separator') + str(round(self.robot.get_coord()[1]))
                 else:
                     self.sequence_text.setText(self.robot.get_sequence())
                     for line in self.robot.get_sequence().split('\n'):

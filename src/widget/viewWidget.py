@@ -341,7 +341,8 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0]))
+                                                 + self.init_data.get_main_robot('ccrubs_separator')
                                                  + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
@@ -390,7 +391,8 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(-speed, 0, self.dist)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0]))
+                                                 + self.init_data.get_main_robot('ccrubs_separator')
                                                  + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
@@ -439,7 +441,8 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(-speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0]))
+                                                 + self.init_data.get_main_robot('ccrubs_separator')
                                                  + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(
@@ -487,7 +490,8 @@ class ViewWidget(gl.GLViewWidget):
                         elem.get_window().update_last_track(speed, self.dist, 0)
 
                     elem.get_window().set_sequence_text(self.sequence_text)
-                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0])) + ';;'
+                    elem.get_window().set_ccrubs(self.ccrubs_text + '\n' + str(round(elem.get_coord()[0]))
+                                                 + self.init_data.get_main_robot('ccrubs_separator')
                                                  + str(round(elem.get_coord()[1])))
                     try:
                         elem.get_window().add_sequence_text(

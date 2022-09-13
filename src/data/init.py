@@ -380,7 +380,8 @@ class Init:
             # Les fichiers ccrubs sont des fichiers qui contiennent les coordonnees ou doit se rendre le robot
             # alors que le fichier gcrubs indique les deplacements a effectuer par le robot
             'convert_gcrubs_cb_name': "Convertir le gcrubs en ccrubs",
-            'convert_gcrubs_checked': True
+            'convert_gcrubs_checked': True,
+            'ccrubs_separator': ';;'
         }  # End self.main_robot
 
         self.second_robot = {  # Contient les donnees pour le robot secondaire
