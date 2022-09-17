@@ -35,11 +35,6 @@ from platform import system
 
 from src import widget
 
-if system() == 'Windows':
-    COEF = -1
-else:
-    COEF = 1
-
 
 class ViewWidget(gl.GLViewWidget):
     """
@@ -134,30 +129,30 @@ class ViewWidget(gl.GLViewWidget):
         if ev.buttons() == self.init_data.get_view('rotation_view_key'):
             if ev.modifiers() & self.init_data.get_view('moving_view1'):
                 if self.panable():
-                    self.pan(diff.x(), diff.y() * COEF, 0, relative='view')  # Deplace la vue
+                    self.pan(diff.x(), diff.y(), 0, relative='view')  # Deplace la vue
                     self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y() * COEF
+                    self.view_position[1] += diff.y()
             else:
                 self.setCursor(self.init_data.get_view('orbit_cursor'))
-                self.orbit(-diff.x(), diff.y() * COEF)  # Tourne la vue
+                self.orbit(-diff.x(), diff.y())  # Tourne la vue
 
         elif ev.buttons() == self.init_data.get_view('moving_view_middle_button'):
             if ev.modifiers() & self.init_data.get_view('moving_view_middle_button1'):
                 if self.panable():
-                    self.pan(diff.x(), 0, diff.y() * COEF, relative='view-upright')
+                    self.pan(diff.x(), 0, diff.y(), relative='view-upright')
                     self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y() * COEF
+                    self.view_position[1] += diff.y()
             else:
                 if self.panable():
-                    self.pan(diff.x(), diff.y() * COEF, 0, relative='view-upright')
+                    self.pan(diff.x(), diff.y(), 0, relative='view-upright')
                     self.view_position[0] += diff.x()
-                    self.view_position[1] += diff.y() * COEF
+                    self.view_position[1] += diff.y()
 
         elif ev.buttons() == self.init_data.get_view('moving_view2'):
             if self.panable():
-                self.pan(diff.x(), diff.y() * COEF, 0, relative='view')
+                self.pan(diff.x(), diff.y(), 0, relative='view')
                 self.view_position[0] += diff.x()
-                self.view_position[1] += diff.y() * COEF
+                self.view_position[1] += diff.y()
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """

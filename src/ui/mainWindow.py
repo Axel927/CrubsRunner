@@ -40,12 +40,6 @@ from src import data
 from src import widget
 from src import simulation
 
-if system() == 'Windows':
-    # Coefficient de correction pour l'affichage sur Windows
-    COEF = -1
-else:
-    COEF = 1
-
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -390,7 +384,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.viewer.addItem(self.z_coord_sys)
 
         self.y_coord_sys.rotate(90, 0, 0, 1)
-        self.z_coord_sys.rotate(-90 * COEF, 0, 1, 0)
+        self.z_coord_sys.rotate(-90, 0, 1, 0)
 
     def new_project(self):
         """
@@ -533,7 +527,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.viewer.addItem(self.main_robot)
                     self.list_widget.add_content(self.main_robot)
                     self.main_robot.set_offset(-self.main_robot.get_min_max()[2][0])
-                    self.main_robot.translate(0, 0, self.main_robot.get_offset() * COEF)
+                    self.main_robot.translate(0, 0, self.main_robot.get_offset())
                     self.save_data.set_main_robot('offset', self.main_robot.get_offset())
                     self.main_robot.setColor(self.init_data.get_main_robot('color'))
                     self.main_robot.set_edge_color(self.init_data.get_main_robot('edge_color'))
@@ -583,7 +577,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.viewer.addItem(self.second_robot)
                     self.list_widget.add_content(self.second_robot)
                     self.second_robot.set_offset(-self.second_robot.get_min_max()[2][0])
-                    self.second_robot.translate(0, 0, self.second_robot.get_offset() * COEF)
+                    self.second_robot.translate(0, 0, self.second_robot.get_offset())
                     self.save_data.set_second_robot('offset', self.second_robot.get_offset())
                     self.second_robot.setColor(self.init_data.get_second_robot('color'))
                     self.second_robot.set_edge_color(self.init_data.get_second_robot('edge_color'))
@@ -1084,8 +1078,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewer.setCameraPosition(rotation=self.init_data.get_view('start_view_position_rotation'),
                                       distance=self.init_data.get_view('start_view_position_distance'),
                                       pos=self.init_data.get_view('start_view_position_pos'))
-        if system() == 'Windows':
-            self.viewer.setCameraPosition(elevation=-45)
 
         self.viewer.pan(*(self.viewer.get_view_position() * -1), 0, relative='view-upright')
 

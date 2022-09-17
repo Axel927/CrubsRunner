@@ -32,11 +32,6 @@ from PyQt5 import QtWidgets, QtGui
 from time import time
 from platform import system
 
-if system() == 'Windows':
-    COEF = -1
-else:
-    COEF = 1
-
 
 class Board:
     """
@@ -364,6 +359,6 @@ class Board:
         Slot pour deplacer le robot selon la valeur de l'offset
         :return: None
         """
-        self.board.translate(0, 0, (self.offset_sb.value() - self.board.get_offset()) * COEF)
+        self.board.translate(0, 0, (self.offset_sb.value() - self.board.get_offset()))
         self.board.set_offset(self.offset_sb.value())
         self.save_data.set_board('offset', self.board.get_offset())
