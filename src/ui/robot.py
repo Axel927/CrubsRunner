@@ -73,6 +73,7 @@ class Robot:
         self.group_box = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_name'))
         self.speed_gb = QtWidgets.QGroupBox(self.init_data.get_main_robot('gb_speed_name'))
         self.speed_layout = QtWidgets.QGridLayout()
+        self.scroll_area = QtWidgets.QScrollArea(self.window)
 
         self.axis_rotation_rb_x = QtWidgets.QRadioButton(self.init_data.get_main_robot('axis_rotation_x_name'),
                                                          self.window)
@@ -191,8 +192,8 @@ class Robot:
         self.gb_layout.addWidget(self.angle_rotation_sb, 0, 1)
         self.gb_layout.addWidget(self.axis_lbl, 1, 0)
         self.gb_layout.addWidget(self.axis_rotation_rb_x, 1, 1)
-        self.gb_layout.addWidget(self.axis_rotation_rb_y, 2, 1)
-        self.gb_layout.addWidget(self.axis_rotation_rb_z, 3, 1)
+        self.gb_layout.addWidget(self.axis_rotation_rb_y, 1, 2)
+        self.gb_layout.addWidget(self.axis_rotation_rb_z, 1, 3)
         self.gb_layout.addWidget(self.offset_lbl, 4, 0)
         self.gb_layout.addWidget(self.offset_sb, 4, 1)
         self.group_box.setLayout(self.gb_layout)
@@ -210,10 +211,18 @@ class Robot:
         self.layout.addWidget(self.track_visible_cb)
         self.layout.addWidget(self.convert_gcrubs_cb)
         self.layout.addWidget(self.close_btn)
-        self.layout.addWidget(self.reset_btn)
-        self.layout.addWidget(self.remove_btn)
+        btn_layout = QtWidgets.QHBoxLayout()
+        btn_layout.addWidget(self.reset_btn)
+        btn_layout.addWidget(self.remove_btn)
+        self.layout.addLayout(btn_layout)
         self.layout.addWidget(self.import_gcrubs_btn)
         self.layout.addWidget(self.create_sequence_btn)
+        
+
+        widget = QtWidgets.QWidget(self.window)
+        widget.setLayout(self.layout)
+        self.scroll_area.setWidget(widget)
+        self.scroll_area.setMinimumSize(self.parent.sizeHint())
 
         self._connections()
         self.window.show()
@@ -573,22 +582,22 @@ class Robot:
         self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
 
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
 
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
             elif self.save_data.get_second_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
 
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])
@@ -606,22 +615,22 @@ class Robot:
         self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
 
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
 
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
             elif self.save_data.get_second_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
 
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])
@@ -639,22 +648,22 @@ class Robot:
         self.robot.set_axis_angle(0)
         if self.robot.is_main_robot():
             if self.save_data.get_main_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
 
             self.save_data.set_main_robot('angle_rotation', 0)
             self.save_data.set_main_robot('offset', -self.robot.get_min_max()[2][0])
 
         else:
             if self.save_data.get_second_robot('axis_rotation') == 'y':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+                self.robot.rotate(0, 0, 1, 0, local=True)
             elif self.save_data.get_second_robot('axis_rotation') == 'x':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+                self.robot.rotate(0, 1, 0, 0, local=True)
             elif self.save_data.get_main_robot('axis_rotation') == 'z':
-                self.robot.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+                self.robot.rotate(0, 0, 0, 1, local=True)
 
             self.save_data.set_second_robot('angle_rotation', 0)
             self.save_data.set_second_robot('offset', -self.robot.get_min_max()[2][0])

@@ -313,11 +313,11 @@ class Board:
         """
         self.board.set_axis_angle(0)
         if self.save_data.get_board('axis_rotation') == 'y':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+            self.board.rotate(0, 0, 1, 0, local=True)
         elif self.save_data.get_board('axis_rotation') == 'z':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+            self.board.rotate(0, 0, 0, 1, local=True)
         elif self.save_data.get_board('axis_rotation') == 'x':
-            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+            self.board.rotate(0, 1, 0, 0, local=True)
 
         self.save_data.set_board('angle_rotation', 0)
         self.angle_rotation_sb.setValue(0)
@@ -329,11 +329,11 @@ class Board:
         """
         self.board.set_axis_angle(0)
         if self.save_data.get_board('axis_rotation') == 'x':
-            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+            self.board.rotate(0, 1, 0, 0, local=True)
         elif self.save_data.get_board('axis_rotation') == 'z':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+            self.board.rotate(0, 0, 0, 1, local=True)
         elif self.save_data.get_board('axis_rotation') == 'y':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+            self.board.rotate(0, 0, 1, 0, local=True)
 
         self.save_data.set_board('angle_rotation', 0)
         self.angle_rotation_sb.setValue(0)
@@ -345,11 +345,11 @@ class Board:
         """
         self.board.set_axis_angle(0)
         if self.save_data.get_board('axis_rotation') == 'y':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 1, 0, local=True)
+            self.board.rotate(0, 0, 1, 0, local=True)
         elif self.save_data.get_board('axis_rotation') == 'x':
-            self.board.rotate(-self.angle_rotation_sb.value(), 1, 0, 0, local=True)
+            self.board.rotate(0, 1, 0, 0, local=True)
         elif self.save_data.get_board('axis_rotation') == 'z':
-            self.board.rotate(-self.angle_rotation_sb.value(), 0, 0, 1, local=True)
+            self.board.rotate(0, 0, 0, 1, local=True)
 
         self.save_data.set_board('angle_rotation', 0)
         self.angle_rotation_sb.setValue(0)
